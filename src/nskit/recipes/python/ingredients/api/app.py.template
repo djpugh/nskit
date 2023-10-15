@@ -1,0 +1,36 @@
+"""FastAPI app object containing paths and routing.
+
+This file shouldn't contain any business logic
+
+The business logic should be in a separate sub-module and be imported/called in the api submodule if just api calls
+other routing can occur here
+
+The default deployment is to run this multi-threaded (this can be configured in the dockerfile) so care may need to be
+taken handling state.
+
+fastapi_aad_auth can be used to provide authentication handling through Azure Active Directory.
+"""
+from fastapi import FastAPI
+
+from {{repo.py_name}} import __version__
+from {{repo.py_name}}.api import API_VERSION, base_api_router
+from {{repo.py_name}}.auth import auth_provider
+
+
+app = FastAPI(title='{{repo.name}}',
+              description='{{repo.description}}',
+              version=__version__,
+              openapi_url=f"/api/v{API_VERSION}/openapi.json",
+              docs_url='/api/docs',
+              redoc_url='/api/redoc')
+
+
+app.include_router(base_api_router)
+
+
+# You can add other apis to the api submodule and include them here
+# app.include_router(<other_api>, prefix='/<prefix>', tags=['<tags>'])
+
+# Configure authentication on the application
+# Comment this out if you are not using Azure Active Directory
+auth_provider.configure_app(app)

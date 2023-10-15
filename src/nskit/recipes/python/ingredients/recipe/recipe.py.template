@@ -1,0 +1,8 @@
+"""Provide a cookiemix folder structure ingredient."""
+from nskit.mixer import File, Folder
+
+
+example = Folder(name='example', contents=[
+                File(name='__init__.py', contents=""),
+                File(name='ingredient.py', content='{{repo.py_name}}:ingredient.py.template'))
+            ])

@@ -1,0 +1,25 @@
+import logging
+
+from fastapi import APIRouter, Depends
+
+from {{repo.py_name}}.auth import auth_provider
+
+logger = logging.get_logger('{{repo.py_name}}')
+router = APIRouter()
+
+
+@router.get('/health')
+async def health_check():
+    """Check service health."""
+    logger.debug('Health status OK')
+    return {'status': 'ok'}
+
+
+# This has an auth implementation through the Depends logic, remove if you are not using fastapi_aad_auth
+@router.get('/version')
+async def get_version(auth_state: AuthenticationState = Depends(auth_provider.auth_backend.requires_auth(allow_session=True)):
+    """Get the service version.
+
+    This has authentication enabled if auth is enabled in auth.py
+    """
+    return __version__
