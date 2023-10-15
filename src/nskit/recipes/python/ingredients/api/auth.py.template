@@ -1,0 +1,9 @@
+"""Authentication handlers.
+
+fastapi_aad_auth is used to provide authentication handling through Azure Active Directory.
+
+See djpugh.github.io/fastapi_aad_auth for documentation on configuration.
+"""
+from fastapi_aad_auth import Authenticator, AuthenticationState
+
+auth_provider = Authenticator()

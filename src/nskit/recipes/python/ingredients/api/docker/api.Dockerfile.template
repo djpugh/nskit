@@ -1,0 +1,29 @@
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
+
+ARG COPY_REQUIREMENTS_FILE=requirements.txt
+COPY docker/prestart.sh /app/prestart.sh
+
+# Set the extra index url PAT here
+ARG PIP_EXTRA_INDEX_URL
+ENV PIP_EXTRA_INDEX_URL = ${PIP_EXTRA_INDEX_URL}
+
+
+CMD ["/start.sh"]
+
+
+ENV APP_MODULE={{repo.py_name}}.app:app
+
+COPY $COPY_REQUIREMENTS_FILE /app/requirements.txt
+
+RUN pip install -r /app/requirements.txt
+
+RUN  apt-get update && apt-get -y upgrade \
+    && apt-get -y install openssh-server \
+     && echo "root:Docker!" | chpasswd
+
+COPY docker/sshd_config /etc/ssh/
+
+COPY docker-build/ /dist
+# pip install the latest created file in dist folder. this should be the wheel file.
+RUN pip install $(ls -t /dist/*.whl | head -n1)
+EXPOSE 80 2222
