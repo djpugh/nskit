@@ -1,0 +1,12 @@
+{% extends "nskit.recipes.python.ingredients:readme.md.template" %}
+
+{% block Introduction %}
+This repo is configured for nskit recipes using ``nskit.mixer`` to build them.
+{% endblock Introduction %}
+
+{% block Development %}
+{{super()}}
+
+When you create a recipe, it should be added to the ``[project.entry_points."{{recipe.entrypoint}}"]`` section in ``pyproject.toml``.
+
+{% endblock Development %}

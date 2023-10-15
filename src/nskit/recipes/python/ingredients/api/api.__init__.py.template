@@ -1,0 +1,10 @@
+from packaging import version
+
+from {{repo.py_name}} import __version__
+from {{repo.py_name}}.api.base import router as base_api_router
+
+
+if 'untagged' in __version__ or 'unknown':
+    API_VERSION = 0
+else:
+    API_VERSION = version.parse(__version__).base_version.split('.')[0]

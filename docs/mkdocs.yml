@@ -1,0 +1,41 @@
+site_name: NSKit
+repo_url: https://github.com/djpugh/nskit/
+edit_uri: blob/main/docs/
+docs_dir: .
+site_dir: ../build/docs
+nav:
+ - index.md
+ - usage.md
+ - developing.md
+ - 'API':
+    - 'nskit.common': api/nskit.common.md
+    - 'nskit.mixer': api/nskit.mixer.md
+    - 'nskit.recipes': api/nskit.recipes.md
+    - 'nskit.vcs': api/nskit.vcs.md
+ - 'Issue Tracker': https://github.com/djpugh/nskit/issues
+ - 'Changelog': https://github.com/djpugh/nskit/releases
+exclude_docs: |
+  mkdocs.yml
+theme:
+  name: material
+plugins:
+  - search
+  - autorefs
+  # - def_list
+  # - mkdocs-gen-files
+  - mkdocstrings:
+      default_handler: python
+      enable_inventory: true
+      handlers:
+        python:
+          import:
+            - https://jinja.palletsprojects.com/en/3.1.x/objects.inv
+  # https://github.com/jimporter/mike
+  - mike
+  # https://github.com/pawamoy/mkdocs-coverage
+  - coverage:
+      page_name: coverage  # default
+      html_report_dir: htmlcov  # default
+  # https://github.com/timvink/mkdocs-git-revision-date-localized-plugin
+  # - git-revision-date-localized
+# https://mkdocstrings.github.io/recipes/#automatic-code-reference-pages

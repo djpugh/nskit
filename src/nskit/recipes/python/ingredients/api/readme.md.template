@@ -1,0 +1,5 @@
+{% extends "nskit.recipes.python.ingredients:readme.md.template" %}
+
+{% block Introduction %}
+This repo is configured to provide a ``fastapi`` (+ ``fastapi_aad_auth`` based Azure Active Directory authentication) service (and dockerfile).
+{% endblock Introduction %}
