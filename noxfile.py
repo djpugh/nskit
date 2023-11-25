@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import sys
+
 if sys.version_info.major >=3 and sys.version_info.minor >= 11:
     import tomllib
 else:
@@ -79,12 +80,12 @@ def test(session):
 @nox.session(reuse_venv=True, tags=['docs'])
 def docs(session):
     session.install('.[dev,dev-docs]')
-    session.run('mkdocs', 'build', '-f', 'docs/mkdocs.yml')
+    session.run('mkdocs', 'build', '-f', 'mkdocs.yml')
 
 @nox.session(name='docs-serve', reuse_venv=True, tags=[])
 def docs_serve(session):
     session.install('.[dev,dev-docs]')
-    session.run('mkdocs', 'serve', '-f', 'docs/mkdocs.yml')
+    session.run('mkdocs', 'serve', '-f', 'mkdocs.yml')
 
 
 

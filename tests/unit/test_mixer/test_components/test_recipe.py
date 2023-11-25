@@ -265,6 +265,49 @@ class RecipeTestCase(unittest.TestCase):
                     }
                 }
             )
+    def test_load_recipe_missing(self):
+        with TestExtension('test_recipe', 'nskit.recipes', self._complex_recipe_cls):
+            with self.assertRaises(ValueError):
+                Recipe.load('test_recipe123456', name='abacus', x={'a': 3})
+
+    def test_inspect_found_no_include(self):
+        with TestExtension('test_recipe', 'nskit.recipes', self._complex_recipe_cls):
+            sig = Recipe.inspect('test_recipe')
+            self.assertEqual(['name', 'x'], list(sig.parameters.keys()))
+
+    def test_inspect_found_include_recipe(self):
+        with TestExtension('test_recipe', 'nskit.recipes', self._complex_recipe_cls):
+            sig = Recipe.inspect('test_recipe', include_base=True)
+            self.assertIn('name', sig.parameters.keys())
+            self.assertIn('x', sig.parameters.keys())
+            self.assertIn('pre_hooks', sig.parameters.keys())
+            self.assertIn('post_hooks', sig.parameters.keys())
+
+    def test_inspect_found_include_folder(self):
+        with TestExtension('test_recipe', 'nskit.recipes', self._complex_recipe_cls):
+            sig = Recipe.inspect('test_recipe', include_folder=True, include_base=True)
+            self.assertIn('name', sig.parameters.keys())
+            self.assertIn('x', sig.parameters.keys())
+            self.assertIn('pre_hooks', sig.parameters.keys())
+            self.assertIn('post_hooks', sig.parameters.keys())
+            self.assertIn('id_', sig.parameters.keys())
+            self.assertIn('contents', sig.parameters.keys())
+
+    def test_inspect_found_include_recipe(self):
+        with TestExtension('test_recipe', 'nskit.recipes', self._complex_recipe_cls):
+            sig = Recipe.inspect('test_recipe', include_private=True, include_folder=True, include_base=True)
+            self.assertIn('x', sig.parameters.keys())
+            self.assertIn('name', sig.parameters.keys())
+            self.assertIn('pre_hooks', sig.parameters.keys())
+            self.assertIn('post_hooks', sig.parameters.keys())
+            self.assertIn('id_', sig.parameters.keys())
+            self.assertIn('contents', sig.parameters.keys())
+            self.assertIn('_env_file', sig.parameters.keys())
+
+    def test_inspect_missing(self):
+        with TestExtension('test_recipe', 'nskit.recipes', self._complex_recipe_cls):
+            with self.assertRaises(ValueError):
+                Recipe.inspect('test_recipe123456')
 
     def test_repr(self):
         out = repr(self._complex_recipe)

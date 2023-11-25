@@ -19,7 +19,7 @@ Make sure you have the prerequisites installed (for adding code):
 
 Create and activate a virtual environment.
 
-Install [``nskit``][index]:
+Install ``nskit``:
 
 ```
 # Install nskit as an editable install with the dev dependencies
