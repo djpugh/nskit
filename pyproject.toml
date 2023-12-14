@@ -115,6 +115,9 @@ recipe = "nskit.recipes.recipe:RecipeRecipe"
 azure_devops = "nskit.vcs.providers.azure_devops:AzureDevOpsSettings"
 github = "nskit.vcs.providers.github:GithubSettings"
 
+[project.entry-points."nskit.vcs.installers"]
+python = "nskit.vcs.installer:PythonInstaller"
+
 # Tools
 [tool.setuptools.packages.find]
 where = ["src"]

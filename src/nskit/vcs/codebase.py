@@ -18,10 +18,7 @@ class Codebase(BaseConfiguration):
     root_dir: Path = Field(default_factory=Path.cwd)
     settings: Annotated[CodebaseSettings, Field(validate_default=True)] = None
     namespaces_dir: Path = Path('.namespaces')
-    virtualenv_dir: Path = Path('.venv')
     namespace_validation_repo: Optional[NamespaceValidationRepo] = None
-    # Include Azure DevOps seeder
-    virtualenv_args: List[str] = ['--seeder', 'azdo-pip']
 
     @field_validator('settings', mode='before')
     @classmethod
@@ -34,7 +31,10 @@ class Codebase(BaseConfiguration):
     @classmethod
     def _validate_namespace_validation_repo_from_settings(cls, value, info: ValidationInfo):
         if value is None:
-            value = info.data.get('settings').namespace_validation_repo
+            try:
+                value = info.data.get('settings').namespace_validation_repo
+            except AttributeError as e:
+                raise ValueError(e) from None
         return value
 
     @field_validator('namespace_validation_repo', mode='after')
@@ -48,10 +48,6 @@ class Codebase(BaseConfiguration):
         """Set the settings namespace validation repo to the same as the codebase."""
         super().model_post_init(*args, **kwargs)
         self.settings.namespace_validation_repo = self.namespace_validation_repo
-
-    @property
-    def _full_virtualenv_dir(self):
-        return self.root_dir/self.virtualenv_dir
 
     @property
     def namespace_validator(self):
@@ -71,20 +67,6 @@ class Codebase(BaseConfiguration):
                 sdk_repos.append(repo)
         return sdk_repos
 
-    @property
-    def virtualenv(self):
-        """Get the virtualenv executable.
-
-        Create's it if it doesn't exist.
-        """
-        if not self._full_virtualenv_dir.exists():
-            virtualenv.cli_run([str(self._full_virtualenv_dir)]+self.virtualenv_args)
-        if sys.platform.startswith('win'):
-            executable = self._full_virtualenv_dir/'Scripts'/'python.exe'
-        else:
-            executable = self._full_virtualenv_dir/'bin'/'python'
-        return executable.absolute()
-
     def clone(self):
         """Clone all repos that match the codebase to a local (nested) directory."""
         # List repos
@@ -103,11 +85,11 @@ class Codebase(BaseConfiguration):
                 provider_client=self.settings.provider_settings.repo_client)
             if not r.exists_locally:
                 r.clone()
-            r.install(executable=self.virtualenv, deps=False)
+            r.install(codebase=self, deps=False)
             cloned.append(r)
         # Once installed all with no deps, install deps again
         for repo in cloned:
-            repo.install(executable=self.virtualenv, deps=True)
+            repo.install(codebase=self, deps=True)
         return cloned
 
     def create_repo(self, name, with_recipe: Optional[str] = None, **recipe_kwargs):
@@ -141,7 +123,7 @@ class Codebase(BaseConfiguration):
             )
             r.commit('Initial commit', hooks=False)
             r.push()
-            r.install(executable=self.virtualenv, deps=True)
+            r.install(codebase=self, deps=True)
             return created
 
     def delete_repo(self, name):
