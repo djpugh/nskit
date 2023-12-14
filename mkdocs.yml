@@ -1,8 +1,8 @@
 site_name: NSKit
 repo_url: https://github.com/djpugh/nskit/
 edit_uri: blob/main/docs/
-docs_dir: .
-site_dir: ../build/docs
+docs_dir: ./docs
+site_dir: ./docs/html
 nav:
  - index.md
  - usage.md
@@ -30,6 +30,7 @@ plugins:
         python:
           import:
             - https://jinja.palletsprojects.com/en/3.1.x/objects.inv
+          paths: [src]
   # https://github.com/jimporter/mike
   - mike
   # https://github.com/pawamoy/mkdocs-coverage

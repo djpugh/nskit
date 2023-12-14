@@ -39,7 +39,7 @@ class Resource(str):
     def load(self):
         """Load the resource using importlib.resources."""
         path, filename = self.split(':')
-        with importlib.resources.path(path, filename) as p:
+        with importlib.resources.files(path).joinpath(filename) as p:
             return p.open().read()
 
     @classmethod
