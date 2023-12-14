@@ -1,9 +1,10 @@
 """The base recipe object."""
 import datetime as dt
+import inspect
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from nskit import __version__
 from nskit.common.extensions import get_extension_names, load_extension
@@ -157,3 +158,34 @@ class Recipe(Folder):
         recipe = recipe_klass(**kwargs)
         recipe.extension_name = recipe_name
         return recipe
+
+    @staticmethod
+    def inspect(recipe_name: str, include_private: bool = False, include_folder: bool = False, include_base: bool = False):
+        """Get the fields on a recipe as an extension."""
+        recipe_klass = load_extension(RECIPE_ENTRYPOINT, recipe_name)
+        if recipe_klass is None:
+            raise ValueError(f'Recipe {recipe_name} not found, it may be mis-spelt or not installed. Available recipes: {get_extension_names(RECIPE_ENTRYPOINT)}')
+        sig = Recipe._inspect_basemodel(recipe_klass, include_private=include_private)
+        if not include_folder:
+            folder_sig = inspect.signature(Folder)
+            params = [v for u, v in sig.parameters.items() if u not in folder_sig.parameters.keys() or u == 'name']
+            sig = sig.replace(parameters=params)
+        if not include_base:
+            recipe_sig = inspect.signature(Recipe)
+            params = [v for u, v in sig.parameters.items() if u not in recipe_sig.parameters.keys() or u == 'name']
+            sig = sig.replace(parameters=params)
+        return sig
+
+    @staticmethod
+    def _inspect_basemodel(kls, include_private: bool = False):
+        sig = inspect.signature(kls)
+        # we need to drop the private params
+        params = []
+        for u, v in sig.parameters.items():
+            if not include_private and u.startswith('_'):
+                continue
+            if isinstance(v.annotation, type) and issubclass(v.annotation, BaseModel):
+                params.append(v.replace(default=Recipe._inspect_basemodel(v.annotation, include_private=include_private)))
+            else:
+                params.append(v)
+        return sig.replace(parameters=params, return_annotation=kls)

@@ -51,12 +51,13 @@ class _DummyDistribution(Distribution):
     @property
     def entry_points(self):
         return [self._entrypoint]
-    
-    def read_text(self, filename: str) -> str | None:
+
+    def read_text(self, filename: str) -> str | None:  # noqa: U100
         return None
 
-    def locate_file(self, path: Path) -> None:
+    def locate_file(self, path: Path) -> None:  # noqa: U100
         return None
+
 
 class _TestExtensionFinder(MetadataPathFinder):
 

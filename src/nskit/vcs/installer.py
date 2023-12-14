@@ -1,17 +1,19 @@
 """Repository installers."""
 from abc import ABC, abstractmethod
 from pathlib import Path
-import subprocess
+import subprocess  # nosec B404
 import sys
 from typing import List, Optional
 
 from pydantic_settings import SettingsConfigDict
 import virtualenv
 
+from nskit._logging import logger_factory
 from nskit.common.configuration import BaseConfiguration
 from nskit.common.contextmanagers import ChDir
 from nskit.common.extensions import ExtensionsEnum
 
+logger = logger_factory.get_logger(__name__)
 
 ENTRYPOINT = 'nskit.vcs.installers'
 InstallersEnum = ExtensionsEnum.from_entrypoint('InstallersEnum', ENTRYPOINT)
@@ -19,7 +21,7 @@ InstallersEnum = ExtensionsEnum.from_entrypoint('InstallersEnum', ENTRYPOINT)
 
 class Installer(ABC, BaseConfiguration):
     """Abstract class for language installer.
-    
+
     Can be enabled or disabled using the boolean flag and environment variables.
     """
 
@@ -31,16 +33,18 @@ class Installer(ABC, BaseConfiguration):
 
     @abstractmethod
     def check_repo(self, path: Path, **kwargs):
+        """Check if the repo matches the installer language."""
         raise NotImplementedError('Implement in a language specific installer. It should check for appropriate files to signal that it is a repo of that type')
-    
+
     @abstractmethod
-    def install(self, path: Path, *, codebase: Optional['Codebase'] = None, deps: bool = True, **kwargs):
+    def install(self, path: Path, *, codebase: Optional['Codebase'] = None, deps: bool = True, **kwargs):  # noqa: F821
+        """Install the repo into the appropriate environment."""
         raise NotImplementedError('Implement in language specific installer. It should take in any language specific environment/executables')
 
 
 class PythonInstaller(Installer):
     """Python language installer.
-    
+
     Can be enabled or disabled using the boolean flag and environment variables. The virtualenv config can be updated (to a custom dir/path relative to the codebase root)
     """
 
@@ -51,15 +55,19 @@ class PythonInstaller(Installer):
 
     def check_repo(self, path: Path):
         """Check if this is a python repo."""
-        return (path/'setup.py').exists() or (path/'pyproject.toml').exists() or (path/'requirements.txt').exists()
-        
-    def install(self, path: Path, *, codebase: Optional['Codebase'] = None, executable: str = 'venv', deps: bool = True):
+        logger.debug(f'{self.__class__} enabled, checking for match.')
+        result = (path/'setup.py').exists() or (path/'pyproject.toml').exists() or (path/'requirements.txt').exists()
+        logger.info(f'Matched repo to {self.__class__}.')
+        return result
+
+    def install(self, path: Path, *, codebase: Optional['Codebase'] = None, executable: str = 'venv', deps: bool = True):  # noqa: F821
         """Install the repo.
 
         executable can override the executable to use (e.g. a virtualenv)
         deps controls whether dependencies are installed or not.
         """
         executable = self._get_executable(path, codebase, executable)
+        logger.info(f'Installing using {executable}.')
         args = []
         if not deps:
             args.append('--no-deps')
@@ -82,7 +90,7 @@ class PythonInstaller(Installer):
             executable = full_virtualenv_dir/'bin'/'python'
         return executable.absolute()
 
-    def _get_executable(self, path: Path, codebase: Optional['Codebase'] = None, executable: Optional[str] = 'venv'):
+    def _get_executable(self, path: Path, codebase: Optional['Codebase'] = None, executable: Optional[str] = 'venv'):  # noqa: F821
         # Install in the current environment
         if self.virtualenv_dir.is_absolute():
             full_virtualenv_dir = self.virtualenv_dir

@@ -306,6 +306,7 @@ class _RepoTestCase(unittest.TestCase):
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_no_content(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.install()
             sp.check_call.assert_not_called()
@@ -314,6 +315,7 @@ class _RepoTestCase(unittest.TestCase):
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_pyproject_toml(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.local_dir.mkdir(exist_ok=True, parents=True)
             with open(r.local_dir/'pyproject.toml', 'w') as f:
@@ -326,6 +328,7 @@ class _RepoTestCase(unittest.TestCase):
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_setup_py(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.local_dir.mkdir(exist_ok=True, parents=True)
             with open(r.local_dir/'setup.py', 'w') as f:
@@ -338,6 +341,7 @@ class _RepoTestCase(unittest.TestCase):
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_no_deps_requirements(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.local_dir.mkdir(exist_ok=True, parents=True)
             with open(r.local_dir/'requirements.txt', 'w') as f:
@@ -349,6 +353,7 @@ class _RepoTestCase(unittest.TestCase):
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_deps_requirements(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.local_dir.mkdir(exist_ok=True, parents=True)
             with open(r.local_dir/'requirements.txt', 'w') as f:
@@ -361,6 +366,7 @@ class _RepoTestCase(unittest.TestCase):
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_deps_pyproject_requirements(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.local_dir.mkdir(exist_ok=True, parents=True)
             with open(r.local_dir/'pyproject.toml', 'w') as f:

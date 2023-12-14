@@ -432,3 +432,34 @@ class CodebaseTestCase(unittest.TestCase):
             validation_level=c.settings.validation_level,
             provider_client=self._mocked_repo_client
         ).delete.assert_called_once_with()
+
+    @patch.object(codebase, 'NamespaceValidationRepo', autospec=True)
+    def test_create_namespace_repo_name(self, nsv_rp):
+        # Check that namespacevalidation repo is initialised and create is called
+        with ChDir():  # Make sure theres no .env file when running tests
+            with self.extension():
+                with self.env():
+                    c = Codebase(namespace_validation_repo=None)
+
+        self.assertIsNone(c.namespace_validation_repo)
+        options = [{'a': ['b', 'c']}, 'd']
+        c.create_namespace_repo(name='test-namespaces', namespace_options=options)
+        self.assertIsNotNone(c.namespace_validation_repo)
+        nsv_rp.assert_called_once_with(name='test-namespaces', namespaces_filename='namespaces.yaml', local_dir=Path('.namespaces'))
+        c.namespace_validation_repo.create.assert_called_once_with(namespace_options=options, delimiters=None, repo_separator=None)
+
+    @patch.object(codebase, 'NamespaceValidationRepo', autospec=True)
+    def test_create_namespace_repo_no_name(self, nsv_rp):
+        # Check that namespacevalidation repo is initialised and create is called
+        with ChDir():  # Make sure theres no .env file when running tests
+            with self.extension():
+                with self.env():
+                    c = Codebase(namespace_validation_repo=None, namespaces_dir=Path('.namespaces2'))
+
+        self.assertIsNone(c.namespace_validation_repo)
+        options = [{'a': ['b', 'c']}, 'd']
+        c.create_namespace_repo(namespace_options=options)
+        self.assertIsNotNone(c.namespace_validation_repo)
+        nsv_rp.assert_called_once_with(name='.namespaces2', namespaces_filename='namespaces.yaml', local_dir=Path('.namespaces2'))
+        c.namespace_validation_repo.create.assert_called_once_with(namespace_options=options, delimiters=None, repo_separator=None)
+

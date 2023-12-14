@@ -11,8 +11,8 @@ from nskit.vcs.codebase import Codebase
 import nskit.vcs.installer as installer
 from nskit.vcs.installer import ENTRYPOINT, Installer, PythonInstaller
 from nskit.vcs.namespace_validator import NamespaceValidator
-from nskit.vcs.codebase import Codebase
-from nskit.vcs.providers import ENTRYPOINT as PROVIDER_ENTRYPOINT, VCSProviderSettings
+from nskit.vcs.providers import ENTRYPOINT as PROVIDER_ENTRYPOINT
+from nskit.vcs.providers import VCSProviderSettings
 from nskit.vcs.repo import NamespaceValidationRepo, RepoClient
 from nskit.vcs.settings import CodebaseSettings
 
