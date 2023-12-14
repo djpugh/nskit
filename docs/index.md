@@ -1,6 +1,6 @@
 # nskit
 
-``nskit`` is a python package that provides useful utilities and implementations for creating and managing a namespaced codebase.
+``nskit`` is a python package that provides useful utilities and implementations for creating and managing a namespaced codebase for python and other programming languages.
 
 It includes:
 

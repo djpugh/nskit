@@ -6,6 +6,13 @@
             - NamespaceOptionsType
             - NamespaceValidator
 
+## Installers
+### ::: nskit.vcs.installer
+    options:
+        members:
+            - Installer
+            - PythonInstaller
+
 ## Providers
 ### ::: nskit.vcs.providers
 

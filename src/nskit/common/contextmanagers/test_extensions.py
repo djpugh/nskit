@@ -1,6 +1,7 @@
 """Context manager for running a test with an extension."""
 from contextlib import ContextDecorator
 from importlib.metadata import Distribution, EntryPoint, MetadataPathFinder
+from pathlib import Path
 import sys
 from typing import Any
 
@@ -50,6 +51,12 @@ class _DummyDistribution(Distribution):
     @property
     def entry_points(self):
         return [self._entrypoint]
+
+    def read_text(self, filename: str) -> str | None:  # noqa: U100
+        return None
+
+    def locate_file(self, path: Path) -> None:  # noqa: U100
+        return None
 
 
 class _TestExtensionFinder(MetadataPathFinder):

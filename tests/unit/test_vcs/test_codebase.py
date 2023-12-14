@@ -105,17 +105,6 @@ class CodebaseTestCase(unittest.TestCase):
                     self.assertEqual(c.namespace_validation_repo.name, 'abc')
                     self.assertEqual(c.namespace_validation_repo.local_dir, Path.cwd()/'a'/'.namespaces2')
 
-    def test_full_virtualenv_dir(self):
-
-        with ChDir():  # Make sure theres no .env file when running tests
-            with self.extension():
-                with self.env():
-                    settings.ProviderEnum._patch()
-                    c = Codebase(root_dir=Path.cwd()/'a')
-                    self.assertEqual(c._full_virtualenv_dir, Path.cwd()/'a'/'.venv')
-                    c = Codebase(virtualenv_dir='.virtualenv')
-                    self.assertEqual(c._full_virtualenv_dir, Path.cwd()/'.virtualenv')
-
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_namespace_validator_provided(self):
         r = NamespaceValidationRepo(name='abc', provider_client=RepoClient())
@@ -182,53 +171,8 @@ class CodebaseTestCase(unittest.TestCase):
                     c = Codebase(settings=s)
                     self.assertEqual(c.list_repos(), ['a.b', 'a-c', 'd.e'])
 
-    def test_virtualenv_exists(self):
-        with ChDir():  # Make sure theres no .env file when running tests
-            with self.extension():
-                with self.env():
-                    settings.ProviderEnum._patch()
-                    c = Codebase()
-                    c._full_virtualenv_dir.mkdir(parents=True, exist_ok=True)
-                    self.assertTrue(c._full_virtualenv_dir.exists())
-                    if sys.platform.startswith('win'):
-                        expected = c._full_virtualenv_dir/'Scripts'/'python.exe'
-                    else:
-                        expected = c._full_virtualenv_dir/'bin'/'python'
-                    self.assertEqual(c.virtualenv, expected.absolute())
-
-    @patch.object(codebase, 'virtualenv')
-    def test_virtualenv_new(self, venv):
-        with ChDir():  # Make sure theres no .env file when running tests
-            with self.extension():
-                with self.env():
-                    settings.ProviderEnum._patch()
-                    c = Codebase()
-                    self.assertFalse(c._full_virtualenv_dir.exists())
-                    if sys.platform.startswith('win'):
-                        expected = c._full_virtualenv_dir/'Scripts'/'python.exe'
-                    else:
-                        expected = c._full_virtualenv_dir/'bin'/'python'
-                    self.assertEqual(c.virtualenv, expected.absolute())
-                    venv.cli_run.assert_called_once_with([str(c._full_virtualenv_dir)]+c.virtualenv_args)
-
-    @patch.object(codebase, 'virtualenv')
-    def test_virtualenv_new_args(self, venv):
-        with ChDir():  # Make sure theres no .env file when running tests
-            with self.extension():
-                with self.env():
-                    settings.ProviderEnum._patch()
-                    c = Codebase(virtualenv_args=['a', 'b'])
-                    self.assertFalse(c._full_virtualenv_dir.exists())
-                    if sys.platform.startswith('win'):
-                        expected = c._full_virtualenv_dir/'Scripts'/'python.exe'
-                    else:
-                        expected = c._full_virtualenv_dir/'bin'/'python'
-                    self.assertEqual(c.virtualenv, expected.absolute())
-                    venv.cli_run.assert_called_once_with([str(c._full_virtualenv_dir), 'a', 'b'])
-
     @patch.object(codebase, 'Repo', autospec=True)
-    @patch.object(codebase, 'virtualenv')
-    def test_clone(self, venv, rp):
+    def test_clone(self, rp):
         rp().exists_locally = False
         # We need to patch things
         # We also need the client to return a differing url based on the name
@@ -243,8 +187,8 @@ class CodebaseTestCase(unittest.TestCase):
                     c = Codebase(namespace_validation_repo=r)
                     cloned = c.clone()
         rp().clone.assert_has_calls([call(), call(), call(), call()])
-        rp().install.assert_has_calls([call(executable=c.virtualenv, deps=False)]*4+
-                                      [call(executable=c.virtualenv, deps=True)]*4)
+        rp().install.assert_has_calls([call(codebase=c, deps=False)]*4+
+                                      [call(codebase=c, deps=True)]*4)
         for name in names:
             rp_kwargs = dict(
                 name=name,
@@ -254,8 +198,6 @@ class CodebaseTestCase(unittest.TestCase):
                 provider_client=self._mocked_repo_client
             )
             rp.assert_any_call(**rp_kwargs)
-
-        venv.cli_run.assert_has_calls([call([str(c._full_virtualenv_dir)]+c.virtualenv_args) for _ in range(8)])
         self.assertEqual(len(cloned), len(names))
 
     @patch.object(codebase, 'Repo', autospec=True)
@@ -332,8 +274,7 @@ class CodebaseTestCase(unittest.TestCase):
 
     @patch.object(codebase, 'Repo', autospec=True)
     @patch.object(codebase, 'Recipe', autospec=True)
-    @patch.object(codebase, 'virtualenv')
-    def test_create_repo_with_recipe(self, venv, recipe, rp):
+    def test_create_repo_with_recipe(self, recipe, rp):
         rp().exists_locally = False
         rp().exists = False
         rp().name = 'xyz'
@@ -375,12 +316,11 @@ class CodebaseTestCase(unittest.TestCase):
         )
         rp().commit.assert_called_once_with('Initial commit', hooks=False)
         rp().push.assert_called_once_with()
-        rp().install.assert_called_once_with(executable=c.virtualenv, deps=True)
+        rp().install.assert_called_once_with(codebase=c, deps=True)
 
     @patch.object(codebase, 'Repo', autospec=True)
     @patch.object(codebase, 'Recipe', autospec=True)
-    @patch.object(codebase, 'virtualenv')
-    def test_create_repo_with_recipe_override_url(self, venv, recipe, rp):
+    def test_create_repo_with_recipe_override_url(self, recipe, rp):
         rp().exists_locally = False
         rp().exists = False
         rp().name = 'xyz'
@@ -402,8 +342,7 @@ class CodebaseTestCase(unittest.TestCase):
 
     @patch.object(codebase, 'Repo', autospec=True)
     @patch.object(codebase, 'Recipe', autospec=True)
-    @patch.object(codebase, 'virtualenv')
-    def test_create_repo_with_namespace(self, venv, recipe, rp):
+    def test_create_repo_with_namespace(self, recipe, rp):
         rp().exists_locally = False
         rp().exists = False
         rp().name = 'a.b'

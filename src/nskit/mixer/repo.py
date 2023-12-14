@@ -45,6 +45,7 @@ class CodeRecipe(Recipe):
         description='Hooks that can be used to modify a recipe path and context after writing'
     )
     git: GitConfig = GitConfig()
+    language: str = 'python'
 
     def get_pipeline_filenames(self):
         """Get CICD Pipeline filenames."""

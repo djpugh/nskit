@@ -32,6 +32,7 @@ wheelhouse/*
 
 # Env files
 *.envrc/*
+.envrc
 .env
 env/**
 
@@ -58,3 +59,6 @@ Pipfile.lock
 .mypy_cache/*
 mypy
 .nox/*
+
+# DS Files
+**/.DS_store

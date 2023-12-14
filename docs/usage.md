@@ -223,7 +223,7 @@ my_folder['example'] = my_new_file
 
 !!! warning
 
-    names and ids are nt enorced to be unique, so the first response that matches either id or name is returned. If you anticipate making use of this, please make sure files and ids do not clash
+    names and ids are not enorced to be unique, so the first response that matches either id or name is returned. If you anticipate making use of this, please make sure files and ids do not clash
 
 #### Hooks
 
@@ -290,6 +290,39 @@ my_recipe = "my_package.my_recipe:MyRecipe"
 
 and, when installed in the environment with nskit, will be available as ``my_recipe`` using the commands described in [Creating a repo from a recipe][]
 
+### Recipes in other languages
+
+It is possible to create additional installation handlers for other languages. This uses the ``nskit.vcs.installers`` entrypoint, and should inherit from [nskit.vcs.installer.Installer][].
+
+This has two abstract methods that should be implemented for a specific language:
+
+* ``check_repo`` - check if the repo is of the language/installer type
+* ``install`` - takes the repo path, current codebase (optional), and whether to install dependencies (``deps``) and gets the appropriate installation environment from the codebase or elsewhere.
+
+An example of this is the [nskit.vcs.installer.PythonInstaller][].
+
+This implements editable python package installation into a ``virtualenv`` in the codebase root. It has some specific configuration variables (that can be set using environment variables:
+
+* ``NSKIT_PYTHON_INSTALLER_ENABLED`` - set to false to disable
+* ``NSKIT_PYTHON_INSTALLER_VIRTUALENV_DIR`` - set a specific directory path, or directory name for the virtualenv dir to use
+*  ``NSKIT_PYTHON_INSTALLER_VIRTUALENV_ARGS`` - specify any specific args for virtualenv.
+
+And provides the two methods mentioned above:
+* ``check_repo`` - checks if there is a ``setup.py``, ``pyproject.toml``, or ``requirements.txt`` file in the repo root
+* ``install`` - gets the virtualenv/other executable to use and installs with/without dependencies as configured.
+
+A similar installer can be implemented for other languages (using e.g. ``subprocess`` for running the installation).
+
+!!! note
+    To set the environment variable names, use the ``model_config`` variable:
+    ```
+        model_config = SettingsConfigDic(env_prefix='<MY_ENV_PREFIX_>', env_file='.env')
+
+    ```
+
+!!! warning
+
+    All installers will be tried, and if they are enabled (using environment variables), and the repo passes the ``check_repo`` call, the install method will be called. This could cause issues for multi-language repos. For complex cases like that, we suggest using a custom installer and disabling the others.
 
 ### Using namespaces
 

@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from nskit.common.contextmanagers import ChDir, Env, TestExtension
 from nskit.common.io import yaml
-from nskit.vcs import repo, settings
+from nskit.vcs import installer, repo, settings
 from nskit.vcs.namespace_validator import (
     _DELIMITERS,
     NamespaceValidator,
@@ -24,6 +24,13 @@ class _RepoTestCase(unittest.TestCase):
     def setUp(self):
         self._MockedRepoClientKls = create_autospec(RepoClient)
         self._MockedGitRepoKls = create_autospec(git.Repo)
+
+    def _get_executable_path(self, venv_path):
+        if sys.platform.startswith('win'):
+            expected = venv_path/'Scripts'/'python.exe'
+        else:
+            expected = venv_path/'bin'/'python'
+        return expected
 
     def test_init_no_client(self):
         with self.assertRaises(ValidationError):
@@ -295,81 +302,80 @@ class _RepoTestCase(unittest.TestCase):
         r._git_repo.heads.abc.checkout.assert_called_once_with()
         r._git_repo.create_head.assert_not_called()
 
-    @patch.object(repo, 'subprocess', autospec=True)
+    @patch.object(installer, 'subprocess', autospec=True)
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_no_content(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.install()
             sp.check_call.assert_not_called()
 
-    @patch.object(repo, 'subprocess', autospec=True)
+    @patch.object(installer, 'subprocess', autospec=True)
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_pyproject_toml(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.local_dir.mkdir(exist_ok=True, parents=True)
             with open(r.local_dir/'pyproject.toml', 'w') as f:
                 f.write('')
             r.install()
-            sp.check_call.assert_called_once_with([str(sys.executable), '-m', 'pip', 'install', '-e', '.[dev]'])
+            expected = self._get_executable_path((Path.cwd()/'.venv').absolute())
+            sp.check_call.assert_called_once_with([str(expected), '-m', 'pip', 'install', '-e', '.[dev]'])
 
-    @patch.object(repo, 'subprocess', autospec=True)
+    @patch.object(installer, 'subprocess', autospec=True)
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_setup_py(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.local_dir.mkdir(exist_ok=True, parents=True)
             with open(r.local_dir/'setup.py', 'w') as f:
                 f.write('')
             r.install()
-            sp.check_call.assert_called_once_with([str(sys.executable), '-m', 'pip', 'install', '-e', '.[dev]'])
+            expected = self._get_executable_path((Path.cwd()/'.venv').absolute())
+            sp.check_call.assert_called_once_with([str(expected), '-m', 'pip', 'install', '-e', '.[dev]'])
 
-    @patch.object(repo, 'subprocess', autospec=True)
-    @patch.object(RepoClient, '__abstractmethods__', set())
-    def test_install_no_deps_custom_ex(self, sp):
-        with ChDir():
-            r = _Repo(name='test', provider_client=RepoClient())
-            r.local_dir.mkdir(exist_ok=True, parents=True)
-            with open(r.local_dir/'pyproject.toml', 'w') as f:
-                f.write('')
-            r.install(executable='ab', deps=False)
-            sp.check_call.assert_called_once_with(['ab', '-m', 'pip', 'install', '-e', '.[dev]', '--no-deps'])
-
-    @patch.object(repo, 'subprocess', autospec=True)
+    @patch.object(installer, 'subprocess', autospec=True)
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_no_deps_requirements(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.local_dir.mkdir(exist_ok=True, parents=True)
             with open(r.local_dir/'requirements.txt', 'w') as f:
                 f.write('')
-            r.install(executable='ab', deps=False)
+            r.install(deps=False)
             sp.check_call.assert_not_called()
 
-    @patch.object(repo, 'subprocess', autospec=True)
+    @patch.object(installer, 'subprocess', autospec=True)
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_deps_requirements(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.local_dir.mkdir(exist_ok=True, parents=True)
             with open(r.local_dir/'requirements.txt', 'w') as f:
                 f.write('')
-            r.install(executable='ab', deps=True)
-            sp.check_call.assert_called_once_with(['ab', '-m', 'pip', 'install', 'requirements.txt'])
+            r.install(deps=True)
+            expected = self._get_executable_path((Path.cwd()/'.venv').absolute())
+            sp.check_call.assert_called_once_with([str(expected), '-m', 'pip', 'install', '-r', 'requirements.txt'])
 
-    @patch.object(repo, 'subprocess', autospec=True)
+    @patch.object(installer, 'subprocess', autospec=True)
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_install_deps_pyproject_requirements(self, sp):
         with ChDir():
+            Path('.venv').mkdir()
             r = _Repo(name='test', provider_client=RepoClient())
             r.local_dir.mkdir(exist_ok=True, parents=True)
             with open(r.local_dir/'pyproject.toml', 'w') as f:
                 f.write('')
             with open(r.local_dir/'requirements.txt', 'w') as f:
                 f.write('')
-            r.install(executable='ab', deps=True)
-            sp.check_call.assert_called_once_with(['ab', '-m', 'pip', 'install', '-e', '.[dev]'])
+            r.install(deps=True)
+            expected = self._get_executable_path((Path.cwd()/'.venv').absolute())
+            sp.check_call.assert_called_once_with([str(expected), '-m', 'pip', 'install', '-e', '.[dev]'])
 
 
 class NamespaceValidationRepoTestCase(unittest.TestCase):
