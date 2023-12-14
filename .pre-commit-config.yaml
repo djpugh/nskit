@@ -13,7 +13,7 @@ repos:
     rev: v2.31.0
     hooks:
     - id: pyupgrade
-      args: [--py36-plus]
+      args: [--py36-plus, --keep-runtime-typing]
 
   - repo: local
     hooks:

@@ -4,9 +4,15 @@ from __future__ import annotations
 from pathlib import Path
 import shutil
 import subprocess  # nosec B404
+import sys
 import tempfile
-from typing import Annotated, Any
+from typing import Any, Optional, Union
 import warnings
+
+if sys.version_info.major <= 3 and sys.version_info.minor <= 9:
+    from typing_extensions import Annotated
+else:
+    from typing import Annotated
 
 import git
 from pydantic import Field, field_validator, model_validator, ValidationInfo
@@ -215,7 +221,7 @@ class _Repo(BaseConfiguration):
 class NamespaceValidationRepo(_Repo):
     """Repo for managing namespace validation."""
     name: str = '.namespaces'
-    namespaces_filename: str | Path = 'namespaces.yaml'
+    namespaces_filename: Union[str, Path] = 'namespaces.yaml'
     local_dir: Annotated[Path, Field(validate_default=True)] = None
 
     _validator: NamespaceValidator = None
@@ -290,7 +296,7 @@ class NamespaceValidationRepo(_Repo):
 class Repo(_Repo):
     """Repo with namespace validator."""
 
-    namespace_validation_repo: NamespaceValidationRepo | None = None
+    namespace_validation_repo: Optional[NamespaceValidationRepo] = None
     validation_level: ValidationEnum = ValidationEnum.none
     name: str
 

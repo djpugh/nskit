@@ -76,8 +76,11 @@ class CodeBaseTestCase(unittest.TestCase):
 
     def tearDown(self):
         self._extension.__exit__()
-        self._env.__exit__()
-        self._tempdir.__exit__(None, None, None)
+        self._env.__exit__
+        try:
+            self._tempdir.__exit__(None, None, None)
+        except (PermissionError, RecursionError, OSError, FileNotFoundError):
+            os.chdir(self._tempdir.cwd)
 
     def test_create_delete_package_repo_namespace(self):
         ns_repo = repo.NamespaceValidationRepo(local_dir=Path.cwd()/'.namespaces')

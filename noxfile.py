@@ -62,7 +62,7 @@ def types(session):
         except nox.command.CommandFailed:
             session.warn('mypy failed, but warn-only set')
 
-@nox.session(reuse_venv=True, tags=['test'])
+@nox.session(reuse_venv=True, tags=['test'], python=None if ON_CI else ['3.8', '3.9', '3.10', '3.11', '3.12'])
 def test(session):
     Path('reports').mkdir(exist_ok=True)
     if session.posargs:
@@ -82,11 +82,11 @@ def docs(session):
     session.install('.[dev,dev-docs]')
     session.run('mkdocs', 'build', '-f', 'mkdocs.yml')
 
+
 @nox.session(name='docs-serve', reuse_venv=True, tags=[])
 def docs_serve(session):
     session.install('.[dev,dev-docs]')
     session.run('mkdocs', 'serve', '-f', 'mkdocs.yml')
-
 
 
 @nox.session(reuse_venv=True, tags=['build'])

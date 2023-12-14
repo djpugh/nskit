@@ -1,4 +1,6 @@
 """Context manager for running a test with an extension."""
+from __future__ import annotations
+
 from contextlib import ContextDecorator
 from importlib.metadata import Distribution, EntryPoint, MetadataPathFinder
 from pathlib import Path

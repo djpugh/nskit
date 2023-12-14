@@ -42,6 +42,7 @@ dependencies = [
     "ruamel.yaml",
     "tomlkit",
     'typing-extensions; python_version < "3.12"',
+    'backports.entry-points-selectable; python_version < "3.10"',
     "virtualenv",
 ]
 dynamic = ["version"]
