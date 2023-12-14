@@ -6,8 +6,8 @@
             - NamespaceOptionsType
             - NamespaceValidator
 
-
 ## Providers
+### ::: nskit.vcs.providers
 
 ### Abstract Client
 

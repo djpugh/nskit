@@ -9,7 +9,7 @@ import virtualenv
 from nskit.common.configuration import BaseConfiguration
 from nskit.mixer import Recipe
 from nskit.vcs.namespace_validator import NamespaceValidator
-from nskit.vcs.repo import NamespaceValidationRepo, Repo
+from nskit.vcs.repo import NamespaceOptionsType, NamespaceValidationRepo, Repo
 from nskit.vcs.settings import CodebaseSettings
 
 
@@ -154,3 +154,25 @@ class Codebase(BaseConfiguration):
             validation_level=self.settings.validation_level,
             provider_client=self.settings.provider_settings.repo_client)
         r.delete()
+
+    def create_namespace_repo(
+            self,
+            name: str | None = None,
+            *,
+            namespace_options: NamespaceOptionsType | NamespaceValidator,
+            delimiters: List[str] | None = None,
+            repo_separator: str | None = None,
+            namespaces_filename: str | Path = 'namespaces.yaml'):
+        """Create and populate the validator repo."""
+        if name is None:
+            name = self.namespaces_dir.name
+        self.namespace_validation_repo = NamespaceValidationRepo(
+            name=name,
+            namespaces_filename=namespaces_filename,
+            local_dir=self.namespaces_dir
+        )
+        self.namespace_validation_repo.create(
+            namespace_options=namespace_options,
+            delimiters=delimiters,
+            repo_separator=repo_separator
+        )
