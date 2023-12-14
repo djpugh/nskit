@@ -4,7 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 import shutil
 import subprocess  # nosec B404
-import sys
 import tempfile
 from typing import Annotated, Any
 import warnings
@@ -12,15 +11,20 @@ import warnings
 import git
 from pydantic import Field, field_validator, model_validator, ValidationInfo
 
+from nskit._logging import logger_factory
 from nskit.common.configuration import BaseConfiguration
 from nskit.common.contextmanagers import ChDir
 from nskit.common.io import yaml
+from nskit.vcs.installer import InstallersEnum
 from nskit.vcs.namespace_validator import (
     NamespaceOptionsType,
     NamespaceValidator,
     ValidationEnum,
 )
 from nskit.vcs.providers import RepoClient
+
+logger = logger_factory.get_logger(__name__)
+
 
 DEFAULT_REMOTE = 'origin'
 # We should set the default dir in some form of env var/other logic in the cli
@@ -188,23 +192,24 @@ class _Repo(BaseConfiguration):
         """Check if the repo exists on the remote."""
         return self.provider_client.check_exists(self.name)
 
-    def install(self, executable=None, deps=True):
-        """Install the repo.
+    def install(self, codebase: Codebase | None = None, deps: bool = True):  # noqa: F821
+        """Install the repo into a codebase.
 
-        executable can override the executable to use (e.g. a virtualenv)
-        deps controls whether dependencies are installed or not.
+        To make it easy to extend to new languages/installation methods, this uses an entrypoint to handle it.
+
+        The default installer is for python (uses a virtualenv), but can be disabled using NSKIT_PYTHON_INSTALLER_ENABLED=False if you
+        want to provide a custom Python Installer (e.g. using poetry or hatch).
+
+        Other installers can be added through the nskit.vcs.installers entry_point.
         """
-        # Install in the current environment
-        if executable is None:
-            executable = sys.executable
-        args = []
-        if not deps:
-            args.append('--no-deps')
-        with ChDir(self.local_dir):
-            if (self.local_dir/'setup.py').exists() or (self.local_dir/'pyproject.toml').exists():
-                subprocess.check_call([str(executable), '-m', 'pip', 'install', '-e', '.[dev]']+args)  # nosec B603, B607
-            elif deps and (self.local_dir/'requirements.txt').exists():
-                subprocess.check_call([str(executable), '-m', 'pip', 'install', 'requirements.txt'])  # nosec B603, B607
+        # Loop through available installers and check - if they check True, then install them
+        for installer in InstallersEnum:
+            logger.info(f'Trying {installer.value}, all matching languages will be installed.')
+            if installer.extension:
+                language_installer = installer.extension()
+                if language_installer.check(self.local_dir):
+                    logger.info(f'Matched {installer.value}, installing.')
+                    language_installer.install(path=self.local_dir, codebase=codebase, deps=deps)
 
 
 class NamespaceValidationRepo(_Repo):
