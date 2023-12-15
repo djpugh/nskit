@@ -8,7 +8,7 @@ from pydantic import field_validator, ValidationInfo
 
 from nskit.common.configuration import BaseConfiguration
 
-if sys.version_info.major <= 3 and sys.version_info.minor <= 12:
+if sys.version_info.major <= 3 and sys.version_info.minor <= 11:
     from typing_extensions import TypeAliasType
 else:
     from typing import TypeAliasType

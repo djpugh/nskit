@@ -9,7 +9,7 @@ import tempfile
 from typing import Any, Optional, Union
 import warnings
 
-if sys.version_info.major <= 3 and sys.version_info.minor <= 9:
+if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
     from typing_extensions import Annotated
 else:
     from typing import Annotated
@@ -118,8 +118,10 @@ class _Repo(BaseConfiguration):
             def on_exc(function, path, exc_info):  # noqa: U100
                 """Log errors when deleting."""
                 errors.append((path, exc_info))
-
-            shutil.rmtree(self.local_dir, onexc=on_exc)
+            if sys.version_info.major <= 3 and sys.version_info.minor < 12:
+                shutil.rmtree(self.local_dir, onerror=on_exc)
+            else:
+                shutil.rmtree(self.local_dir, onexc=on_exc)
             if errors:
                 error_info = "\n".join([str(u) for u in errors])
                 warnings.warn(f'Unable to delete some paths due to errors:\n{error_info}', stacklevel=2)

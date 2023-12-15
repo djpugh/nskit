@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 from typing import List, Optional
 
-if sys.version_info.major <= 3 and sys.version_info.minor <= 9:
+if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
     from typing_extensions import Annotated
 else:
     from typing import Annotated

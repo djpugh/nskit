@@ -62,7 +62,7 @@ class PythonInstaller(Installer):
         logger.info(f'Matched repo to {self.__class__}.')
         return result
 
-    def install(self, path: Path, *, codebase: Codebase | None, executable: str = 'venv', deps: bool = True):  # noqa: F821
+    def install(self, path: Path, *, codebase: Codebase | None = None, executable: str = 'venv', deps: bool = True):  # noqa: F821
         """Install the repo.
 
         executable can override the executable to use (e.g. a virtualenv)
