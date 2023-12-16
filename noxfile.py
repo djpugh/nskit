@@ -2,10 +2,10 @@ import os
 from pathlib import Path
 import sys
 
-if sys.version_info.major >=3 and sys.version_info.minor >= 11:
-    import tomllib
+if sys.version_info.major <=3 and sys.version_info.minor < 11:
+    import tomli as tomllib  # pyright: ignore [reportMissingImports]
 else:
-    import tomli as tomllib
+    import tomllib
 
 import nox
 
