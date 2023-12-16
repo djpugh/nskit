@@ -8,6 +8,7 @@ nav:
  - usage.md
  - 'Developing':
     - developing/index.md
+    - developing/license.md
     - 'Test Coverage': coverage.md
  - 'API':
     - 'nskit.common': api/nskit.common.md
@@ -20,6 +21,9 @@ exclude_docs: |
   mkdocs.yml
 theme:
   name: material
+  icon:
+    logo: material/family-tree
+
   features:
     - navigation.instant
     - navigation.prefetch
@@ -60,7 +64,11 @@ plugins:
       exclude:
         - coverage.md
       type: iso_date
+  - include-markdown
+  # https://github.com/mondeja/mkdocs-include-markdown-plugin
+
 # https://mkdocstrings.github.io/recipes/#automatic-code-reference-pages
+
 extra:
   version:
     provider: mike

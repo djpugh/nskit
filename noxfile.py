@@ -115,9 +115,18 @@ def docs(session):
         if not ON_CI:
             session.run('git', 'branch', '-D', branch_name, external=True)
         else:
-            print(f'branch_name={branch_name} >> $GITHUB_OUTPUT')
+            with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+                print(f'branch_name={branch_name}', file=fh)
+
 
 @nox.session(reuse_venv=True, tags=['build'])
 def build(session):
     install_dependencies(session, required=False, optional=['dev','dev-build'])
     session.run('python', '-m', 'build')
+
+
+@nox.session(reuse_venv=True, tags=['license'])
+def licenses(session):
+    session.run('licensecheck', '--using', 'PEP631:github;azure_devops;dev;dev-test;dev-lint;dev-types;dev-security;dev-docs;dev-build', '--format', 'json', '--file', 'licenses-dev.json')
+    session.run('licensecheck', '--using', 'PEP631:github;azure_devops', '--format', 'json', '--file', 'licenses.json')
+    session.run('licensecheck', '--using', 'PEP631:github;azure_devops', '--format', 'ansi')

@@ -95,9 +95,13 @@ dev-docs = [
     "mkdocs-material",
     "mkdocs-git-authors-plugin",
     "mkdocs-coverage",
+    "mkdocs-include-markdown-plugin",
     # "mkdocs-gen-files",
     # "mkdocs-literate-nav",
     "mike"
+]
+dev-licenses = [
+    "licensecheck"
 ]
 dev-build = [
     "build"

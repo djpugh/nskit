@@ -8,9 +8,9 @@ Please see the documentation at https://djpugh.github.io/nskit for more informat
 
 # ToDo:
 
-- [ ] Testspace configuration
+- [*] Testspace configuration
 - [*] future annotations?
-- [ ] Sonar coverage
-- [ ] FOSSA API
-- [ ] CodeQL
+- [*] Sonar coverage
+- [*] FOSSA API
+- [*] CodeQL
 - [*] Build docs
