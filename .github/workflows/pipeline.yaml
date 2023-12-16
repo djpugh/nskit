@@ -325,8 +325,6 @@ jobs:
 
       - name: Build docs
         run: nox -t docs
-        env:
-          SPHINX_GITHUB_CHANGELOG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Store build artifact
         uses: actions/upload-artifact@v4

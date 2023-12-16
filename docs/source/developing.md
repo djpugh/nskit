@@ -26,7 +26,7 @@ Install ``nskit``:
 pip install -e ".[dev]"
 ```
 
-The codebase uses ``pre-commit``, so please use ``pre-commit install`` and ``pre-commit install-hooks`` to make sure the pre-commit hook is installed correctly.
+The codebase uses ``pre-commit``, so please use ``pre-commit install`` and ``pre-commit install-hooks`` to make sure the pre-commit hooks are installed correctly.
 
 #### Checkout a branch and make changes
 

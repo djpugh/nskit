@@ -1,8 +1,8 @@
 site_name: NSKit
 repo_url: https://github.com/djpugh/nskit/
-edit_uri: blob/main/docs/
-docs_dir: ./docs
-site_dir: ./docs/html
+edit_uri: blob/main/docs/source/
+docs_dir: ./source
+site_dir: ./html
 nav:
  - index.md
  - usage.md
@@ -38,9 +38,9 @@ plugins:
   # https://github.com/jimporter/mike
   - mike
   # https://github.com/pawamoy/mkdocs-coverage
-  - coverage:
-      page_name: coverage  # default
-      html_report_dir: htmlcov  # default
+  # - coverage:
+  #     page_name: coverage  # default
+  #     html_report_dir: htmlcov  # default
   # https://github.com/timvink/mkdocs-git-revision-date-localized-plugin
   # - git-revision-date-localized
 # https://mkdocstrings.github.io/recipes/#automatic-code-reference-pages

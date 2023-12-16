@@ -81,13 +81,13 @@ def test(session):
 @nox.session(reuse_venv=True, tags=['docs'])
 def docs(session):
     session.install('.[dev,dev-docs]')
-    session.run('mkdocs', 'build', '-f', 'mkdocs.yml')
+    session.run('mkdocs', 'build', '-f', 'docs/mkdocs.yml')
 
 
 @nox.session(name='docs-serve', reuse_venv=True, tags=[])
 def docs_serve(session):
     session.install('.[dev,dev-docs]')
-    session.run('mkdocs', 'serve', '-f', 'mkdocs.yml')
+    session.run('mkdocs', 'serve', '-f', 'docs/mkdocs.yml')
 
 
 @nox.session(reuse_venv=True, tags=['build'])
