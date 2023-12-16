@@ -113,7 +113,9 @@ def docs(session):
 
     finally:
         if not ON_CI:
-            session.run('git', 'branch', '-D', branch_name, external=True)
+
+            # session.run('git', 'branch', '-D', branch_name, external=True)
+            pass
         else:
             with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
                 print(f'branch_name={branch_name}', file=fh)
