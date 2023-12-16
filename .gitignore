@@ -39,6 +39,7 @@ env/**
 # Reports
 reports/*-py*
 .coverage
+.coverage*
 reports/*
 test-reports/*
 

@@ -74,6 +74,7 @@ def test(session):
         args = []
         args.append('-rs')
         args.append(folder)
+        print(f'Test session: {folder}')
         session.run('pytest', '-n', 'logical', '--dist', 'loadscope', '--log-level=WARNING', '--cov=nskit', '--cov-report', 'xml:reports/coverage.xml', *args)
 
 

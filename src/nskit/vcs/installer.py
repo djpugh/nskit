@@ -53,7 +53,8 @@ class PythonInstaller(Installer):
     model_config = SettingsConfigDict(env_prefix='NSKIT_PYTHON_INSTALLER_', env_file='.env')
     virtualenv_dir: Path = Path('.venv')
     # Include Azure DevOps seeder
-    virtualenv_args: List[str] = ['--seeder', 'azdo-pip']
+    virtualenv_args: List[str] = []
+    # For Azure Devops could set this to something like: ['--seeder', 'azdo-pip']
 
     def check_repo(self, path: Path):
         """Check if this is a python repo."""

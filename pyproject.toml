@@ -30,7 +30,6 @@ classifiers = [
 ]
 dependencies = [
     "aenum",
-    "azure_devops_artifacts_helpers",
     "gitpython",
     "jinja2",
     "logzero",
@@ -51,7 +50,8 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 azure_devops = [
-    "azure-cli"
+    "azure-cli",
+    "azure_devops_artifacts_helpers",
 ]
 github = [
     "PyGithub"
