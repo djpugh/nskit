@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 import subprocess  # nosec B404
 import sys
-from typing import List
+from typing import List, TYPE_CHECKING
 
 from pydantic_settings import SettingsConfigDict
 import virtualenv
@@ -14,6 +14,10 @@ from nskit._logging import logger_factory
 from nskit.common.configuration import BaseConfiguration
 from nskit.common.contextmanagers import ChDir
 from nskit.common.extensions import ExtensionsEnum
+
+if TYPE_CHECKING:
+    from nskit.vcs.codebase import Codebase
+
 
 logger = logger_factory.get_logger(__name__)
 
@@ -39,7 +43,7 @@ class Installer(ABC, BaseConfiguration):
         raise NotImplementedError('Implement in a language specific installer. It should check for appropriate files to signal that it is a repo of that type')
 
     @abstractmethod
-    def install(self, path: Path, *, codebase: Codebase | None = None, deps: bool = True, **kwargs):  # noqa: F821
+    def install(self, path: Path, *, codebase: Codebase | None = None, deps: bool = True, **kwargs):
         """Install the repo into the appropriate environment."""
         raise NotImplementedError('Implement in language specific installer. It should take in any language specific environment/executables')
 
@@ -63,7 +67,7 @@ class PythonInstaller(Installer):
         logger.info(f'Matched repo to {self.__class__}.')
         return result
 
-    def install(self, path: Path, *, codebase: Codebase | None = None, executable: str = 'venv', deps: bool = True):  # noqa: F821
+    def install(self, path: Path, *, codebase: Codebase | None = None, executable: str = 'venv', deps: bool = True):
         """Install the repo.
 
         executable can override the executable to use (e.g. a virtualenv)
@@ -93,7 +97,7 @@ class PythonInstaller(Installer):
             executable = full_virtualenv_dir/'bin'/'python'
         return executable.absolute()
 
-    def _get_executable(self, path: Path, codebase: Codebase | None = None, executable: str | None = 'venv'):  # noqa: F821
+    def _get_executable(self, path: Path, codebase: Codebase | None = None, executable: str | None = 'venv'):
         # Install in the current environment
         if self.virtualenv_dir.is_absolute():
             full_virtualenv_dir = self.virtualenv_dir

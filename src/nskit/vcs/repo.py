@@ -6,7 +6,7 @@ import shutil
 import subprocess  # nosec B404
 import sys
 import tempfile
-from typing import Any, Optional, Union
+from typing import Any, Optional, TYPE_CHECKING, Union
 import warnings
 
 if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
@@ -28,6 +28,10 @@ from nskit.vcs.namespace_validator import (
     ValidationEnum,
 )
 from nskit.vcs.providers import RepoClient
+
+if TYPE_CHECKING:
+    from nskit.vcs.codebase import Codebase
+
 
 logger = logger_factory.get_logger(__name__)
 
@@ -200,7 +204,7 @@ class _Repo(BaseConfiguration):
         """Check if the repo exists on the remote."""
         return self.provider_client.check_exists(self.name)
 
-    def install(self, codebase: Codebase | None = None, deps: bool = True):  # noqa: F821
+    def install(self, codebase: Codebase | None = None, deps: bool = True):
         """Install the repo into a codebase.
 
         To make it easy to extend to new languages/installation methods, this uses an entrypoint to handle it.
