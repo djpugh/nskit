@@ -13,4 +13,4 @@ Please see the documentation at https://djpugh.github.io/nskit for more informat
 - [ ] Sonar coverage
 - [ ] FOSSA API
 - [ ] CodeQL
-- [ ] Build docs
+- [*] Build docs

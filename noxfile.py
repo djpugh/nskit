@@ -92,14 +92,30 @@ def test(session):
 @nox.session(reuse_venv=True, tags=['docs'])
 def docs(session):
     session.install('.[dev,dev-docs]')
-    session.run('mkdocs', 'build', '-f', 'docs/mkdocs.yml')
+    # We need to do some git wrangling for branches etc.
+    # We are going to:
+    #   * fetch all,
+    #   * checkout gh-pages,
+    #   * branch to gh-pages-dev-{HOSTNAME},
+    #   * use that for the mike build and serve,
+    #   * Delete the branch after serving complete
+    session.run('git', 'fetch', '--all', external=True)
+    branch_name = f'gh-pages-dev-{os.uname().nodename}'
+    version = 'dev'
+    session.run('git', 'branch', '-D', branch_name, external=True, success_codes=[0, 1])
+    session.run('git', 'branch', '-f', branch_name, 'gh-pages', external=True)
+    try:
+        session.run('mike', 'deploy', '-u', version, 'latest', '--config-file', 'docs/mkdocs.yml', '-b', branch_name)
+        session.run('mike', 'set-default', 'latest', '--config-file', 'docs/mkdocs.yml', '-b', branch_name)
+        if not ON_CI:
+            # We want to put the whole branch as an artifact so we output it here
+            session.run('mike', 'serve', '--config-file', 'docs/mkdocs.yml', '-b', branch_name)
 
-
-@nox.session(name='docs-serve', reuse_venv=True, tags=[])
-def docs_serve(session):
-    session.install('.[dev,dev-docs]')
-    session.run('mkdocs', 'serve', '-f', 'docs/mkdocs.yml')
-
+    finally:
+        if not ON_CI:
+            session.run('git', 'branch', '-D', branch_name, external=True)
+        else:
+            session.run('echo', f'branch_name={branch_name}', '>>', '$GITHUB_OUTPUT')
 
 @nox.session(reuse_venv=True, tags=['build'])
 def build(session):
