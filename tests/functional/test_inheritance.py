@@ -20,7 +20,9 @@ class CodeBaseInheritanceTestCase(unittest.TestCase):
 
         self._tempdir = ChDir()
         self._tempdir.__enter__()
-        self._env = Env(override={'TEST_PARAMETER_ABACUS': 'A'})
+        env_vars = self.git_env()
+        env_vars.update({'TEST_PARAMETER_ABACUS': 'A'})
+        self._env = Env(override=env_vars)
         self._env.__enter__()
 
         calls = {'create': [], 'get_remote_url': [], 'delete': [], 'list': [], 'check_exists': []}
@@ -83,6 +85,16 @@ class CodeBaseInheritanceTestCase(unittest.TestCase):
             'description': 'Test email',
             'url': 'https://www.test.com'
         }
+
+    def git_env(self):
+        git_envs = {
+            'GIT_AUTHOR_NAME': 'Tester',
+            'GIT_AUTHOR_EMAIL': 'test@test.com',
+            'GIT_COMMITTER_NAME': 'Tester',
+            'GIT_COMMITTER_EMAIL': 'test@test.com'
+        }
+        return git_envs
+        # Configure Git
 
     def tearDown(self):
         self._extension.__exit__()

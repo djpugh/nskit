@@ -64,7 +64,9 @@ class CodeBaseTestCase(unittest.TestCase):
         self._provider_settings_cls = DummyVCSProviderSettings
         self._extension = TestExtension('dummy', ENTRYPOINT, self._provider_settings_cls)
         self._extension.__enter__()
-        self._env = Env(override={'TEST_PARAMETER_ABACUS': 'A'})
+        env_vars = self.git_env()
+        env_vars.update({'TEST_PARAMETER_ABACUS': 'A'})
+        self._env = Env(override=env_vars)
         self._env.__enter__()
         settings.ProviderEnum._patch()
         self._repo_info = {
@@ -73,6 +75,16 @@ class CodeBaseTestCase(unittest.TestCase):
             'description': 'Test email',
             'url': 'https://www.test.com'
         }
+
+    def git_env(self):
+        git_envs = {
+            'GIT_AUTHOR_NAME': 'Tester',
+            'GIT_AUTHOR_EMAIL': 'test@test.com',
+            'GIT_COMMITTER_NAME': 'Tester',
+            'GIT_COMMITTER_EMAIL': 'test@test.com'
+        }
+        return git_envs
+        # Configure Git
 
     def tearDown(self):
         self._extension.__exit__()
