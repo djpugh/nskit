@@ -39,7 +39,7 @@ class Codebase(BaseConfiguration):
         if value is None:
             try:
                 value = info.data.get('settings').namespace_validation_repo
-            except AttributeError as e:
+            except (AttributeError) as e:
                 raise ValueError(e) from None
         return value
 
