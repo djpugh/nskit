@@ -315,6 +315,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
@@ -324,12 +326,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install nox
 
+
+      - name: Configure Git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
       - name: Build docs
         id: build_docs
         run: nox -t docs
 
       - name: Select Branch
-        run: git checkout $ {{ steps.build_docs.outputs.branch_name}}
+        run: git checkout ${{ steps.build_docs.outputs.branch_name}}
 
       - name: Store Docs Artifact
         uses: actions/upload-artifact@v4
@@ -337,11 +345,6 @@ jobs:
           name: docs
           path: |
             .
-
-      - name: Cleanup Branch
-        run: |
-          git checkout ${{ github.ref }}
-          git branch -D ${{ steps.build_docs.outputs.branch_name}}
 
   test-build:
     name: Test Build Python ${{ matrix.py }} - ${{ matrix.os }} (${{ github.event_name }})
@@ -463,6 +466,8 @@ jobs:
           fi
       - name: Deploy
         run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           mike set-default latest --config-file docs/mkdocs.yml
           mike deploy -u "${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor}}" latest --config-file docs/mkdocs.yml -p
           git checkout gh-pages

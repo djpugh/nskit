@@ -103,7 +103,7 @@ def docs(session):
     branch_name = f'gh-pages-dev-{os.uname().nodename}'
     version = 'dev'
     session.run('git', 'branch', '-D', branch_name, external=True, success_codes=[0, 1])
-    session.run('git', 'branch', '-f', branch_name, 'gh-pages', external=True)
+    session.run('git', 'branch', '--no-track', '-f', branch_name, 'origin/gh-pages', external=True)
     try:
         session.run('mike', 'deploy', '-u', version, 'latest', '--config-file', 'docs/mkdocs.yml', '-b', branch_name)
         session.run('mike', 'set-default', 'latest', '--config-file', 'docs/mkdocs.yml', '-b', branch_name)
@@ -115,7 +115,7 @@ def docs(session):
         if not ON_CI:
             session.run('git', 'branch', '-D', branch_name, external=True)
         else:
-            session.run('echo', f'branch_name={branch_name}', '>>', '$GITHUB_OUTPUT')
+            print(f'branch_name={branch_name} >> $GITHUB_OUTPUT')
 
 @nox.session(reuse_venv=True, tags=['build'])
 def build(session):
