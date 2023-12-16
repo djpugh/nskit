@@ -445,10 +445,14 @@ jobs:
             echo "tag_exists=false" >> $GITHUB_OUTPUT
           fi
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        if: steps.check_tag.outputs.tag_exists == false
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/html
-          tag_name: docs-${{ steps.get_version.outputs.tag_name }}
-          tag_message: 'Docs ${{ steps.get_version.outputs.tag_name }}'
+        run: |
+          mike deploy -u ${major}.{minor} latest
+      # - name: Deploy
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   if: steps.check_tag.outputs.tag_exists == false
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./docs/html
+      #     tag_name: docs-${{ steps.get_version.outputs.tag_name }}
+      #     tag_message: 'Docs ${{ steps.get_version.outputs.tag_name }}'
+      # Instead of using

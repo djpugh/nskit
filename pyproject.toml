@@ -97,8 +97,7 @@ dev-docs = [
     "mkdocs-coverage",
     # "mkdocs-gen-files",
     # "mkdocs-literate-nav",
-    "mike",
-    "sphinx_github_changelog"
+    "mike"
 ]
 dev-build = [
     "build"

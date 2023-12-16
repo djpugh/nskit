@@ -75,7 +75,18 @@ def test(session):
         args.append('-rs')
         args.append(folder)
         print(f'Test session: {folder}')
-        session.run('pytest', '-n', 'logical', '--dist', 'loadscope', '--log-level=WARNING', '--cov=nskit', '--cov-report', 'xml:reports/coverage.xml', *args)
+        session.run('pytest',
+            '-n',
+            'logical',
+            '--dist',
+            'loadscope',
+            '--log-level=WARNING',
+            '--cov=nskit',
+            '--cov-report',
+            'xml:reports/coverage.xml',
+            '--cov-report',
+            'html:reports/htmlcov',
+             *args)
 
 
 @nox.session(reuse_venv=True, tags=['docs'])
