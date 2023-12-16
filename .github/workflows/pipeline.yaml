@@ -133,7 +133,7 @@ jobs:
         run: nox -t lint
 
   test:
-    name: Test Python ${{ matrix.py }} - ${{ matrix.os }}(${{ github.event_name }})
+    name: Test Python ${{ matrix.py }} - ${{ matrix.os }} (${{ github.event_name }})
     runs-on: ${{ matrix.os }}-latest
     needs:
       - changes
