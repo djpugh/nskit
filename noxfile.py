@@ -102,17 +102,18 @@ def docs(session):
     #   * branch to gh-pages-dev-{HOSTNAME},
     #   * use that for the mike build and serve,
     #   * Delete the branch after serving complete
+    docs_file = 'docs/mkdocs.yml'
     session.run('git', 'fetch', '--all', external=True)
     branch_name = f'gh-pages-dev-{os.uname().nodename}'
     version = 'dev'
     session.run('git', 'branch', '-D', branch_name, external=True, success_codes=[0, 1])
     session.run('git', 'branch', '--no-track', '-f', branch_name, 'origin/gh-pages', external=True)
     try:
-        session.run('mike', 'deploy', '-u', version, 'latest', '--config-file', 'docs/mkdocs.yml', '-b', branch_name)
-        session.run('mike', 'set-default', 'latest', '--config-file', 'docs/mkdocs.yml', '-b', branch_name)
+        session.run('mike', 'deploy', '-u', version, 'latest', '--config-file', docs_file, '-b', branch_name)
+        session.run('mike', 'set-default', 'latest', '--config-file', docs_file, '-b', branch_name)
         if not ON_CI:
             # We want to put the whole branch as an artifact so we output it here
-            session.run('mike', 'serve', '--config-file', 'docs/mkdocs.yml', '-b', branch_name)
+            session.run('mike', 'serve', '--config-file', docs_file, '-b', branch_name)
 
     finally:
         if not ON_CI:

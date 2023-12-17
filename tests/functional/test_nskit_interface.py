@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import List
 import unittest
@@ -91,7 +92,7 @@ class CodeBaseTestCase(unittest.TestCase):
         self._env.__exit__
         try:
             self._tempdir.__exit__(None, None, None)
-        except (PermissionError, RecursionError, OSError, FileNotFoundError):
+        except (RecursionError, OSError):
             os.chdir(self._tempdir.cwd)
 
     def test_create_delete_package_repo_namespace(self):
