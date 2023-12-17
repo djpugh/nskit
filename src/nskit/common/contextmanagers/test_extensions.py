@@ -1,9 +1,16 @@
 """Context manager for running a test with an extension."""
+from __future__ import annotations
+
 from contextlib import ContextDecorator
-from importlib.metadata import Distribution, EntryPoint, MetadataPathFinder
+from importlib.metadata import Distribution, MetadataPathFinder
 from pathlib import Path
 import sys
 from typing import Any
+
+if sys.version_info.major <= 3 and sys.version_info.minor < 11:
+    from importlib_metadata import EntryPoint
+else:
+    from importlib.metadata import EntryPoint
 
 from nskit._logging import logger_factory
 

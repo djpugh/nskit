@@ -39,6 +39,7 @@ env/**
 # Reports
 reports/*-py*
 .coverage
+.coverage*
 reports/*
 test-reports/*
 
@@ -62,3 +63,6 @@ mypy
 
 # DS Files
 **/.DS_store
+
+# SBOM FIles
+licenses*.json

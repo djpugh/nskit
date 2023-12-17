@@ -1,7 +1,12 @@
 """Utilities for interacting with systems etc."""
-import importlib.resources
 from pathlib import Path
+import sys
 from typing import Any
+
+if sys.version_info.major <= 3 and sys.version_info.minor < 9:
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 from jinja2 import BaseLoader, ChoiceLoader, Environment, TemplateNotFound
 from pydantic import GetCoreSchemaHandler, TypeAdapter, ValidationError
@@ -39,7 +44,7 @@ class Resource(str):
     def load(self):
         """Load the resource using importlib.resources."""
         path, filename = self.split(':')
-        with importlib.resources.files(path).joinpath(filename) as p:
+        with files(path).joinpath(filename) as p:
             return p.open().read()
 
     @classmethod

@@ -4,9 +4,15 @@ from __future__ import annotations
 from pathlib import Path
 import shutil
 import subprocess  # nosec B404
+import sys
 import tempfile
-from typing import Annotated, Any
+from typing import Any, Optional, TYPE_CHECKING, Union
 import warnings
+
+if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
+    from typing_extensions import Annotated
+else:
+    from typing import Annotated
 
 import git
 from pydantic import Field, field_validator, model_validator, ValidationInfo
@@ -22,6 +28,10 @@ from nskit.vcs.namespace_validator import (
     ValidationEnum,
 )
 from nskit.vcs.providers import RepoClient
+
+if TYPE_CHECKING:
+    from nskit.vcs.codebase import Codebase
+
 
 logger = logger_factory.get_logger(__name__)
 
@@ -112,8 +122,10 @@ class _Repo(BaseConfiguration):
             def on_exc(function, path, exc_info):  # noqa: U100
                 """Log errors when deleting."""
                 errors.append((path, exc_info))
-
-            shutil.rmtree(self.local_dir, onexc=on_exc)
+            if sys.version_info.major <= 3 and sys.version_info.minor < 12:
+                shutil.rmtree(self.local_dir, onerror=on_exc)
+            else:
+                shutil.rmtree(self.local_dir, onexc=on_exc)
             if errors:
                 error_info = "\n".join([str(u) for u in errors])
                 warnings.warn(f'Unable to delete some paths due to errors:\n{error_info}', stacklevel=2)
@@ -192,7 +204,7 @@ class _Repo(BaseConfiguration):
         """Check if the repo exists on the remote."""
         return self.provider_client.check_exists(self.name)
 
-    def install(self, codebase: Codebase | None = None, deps: bool = True):  # noqa: F821
+    def install(self, codebase: Codebase | None = None, deps: bool = True):
         """Install the repo into a codebase.
 
         To make it easy to extend to new languages/installation methods, this uses an entrypoint to handle it.
@@ -215,7 +227,7 @@ class _Repo(BaseConfiguration):
 class NamespaceValidationRepo(_Repo):
     """Repo for managing namespace validation."""
     name: str = '.namespaces'
-    namespaces_filename: str | Path = 'namespaces.yaml'
+    namespaces_filename: Union[str, Path] = 'namespaces.yaml'
     local_dir: Annotated[Path, Field(validate_default=True)] = None
 
     _validator: NamespaceValidator = None
@@ -290,7 +302,7 @@ class NamespaceValidationRepo(_Repo):
 class Repo(_Repo):
     """Repo with namespace validator."""
 
-    namespace_validation_repo: NamespaceValidationRepo | None = None
+    namespace_validation_repo: Optional[NamespaceValidationRepo] = None
     validation_level: ValidationEnum = ValidationEnum.none
     name: str
 

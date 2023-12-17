@@ -1,6 +1,12 @@
 from io import StringIO
-import tomllib as py_toml
+import sys
 import unittest
+
+if sys.version_info.major <= 3 and sys.version_info.minor < 11:
+    import tomlkit as py_toml
+else:
+    import tomllib as py_toml
+
 
 from nskit.common.io import toml
 
@@ -33,4 +39,7 @@ class TOMLTestCase(unittest.TestCase):
         self.assertEqual(toml.load(s2), {'a': 1})
 
     def test_py_toml_loads(self):
-        self.assertEqual(py_toml.loads(toml.dumps({"a":1})), {'a': 1})
+        if sys.version_info.major <=3 and sys.version_info.minor <= 10:
+            self.assertEqual(py_toml.parse(toml.dumps({"a":1})), {'a': 1})
+        else:
+            self.assertEqual(py_toml.loads(toml.dumps({"a":1})), {'a': 1})

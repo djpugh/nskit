@@ -18,7 +18,7 @@ from nskit.vcs.settings import CodebaseSettings
 
 
 class InstallerTestCase(unittest.TestCase):
-    
+
     @patch.object(Installer, '__abstractmethods__', set())
     def test_check_not_enabled(self):
 
@@ -46,6 +46,16 @@ class PythonInstallerTestCase(unittest.TestCase):
             expected = venv_path/'bin'/'python'
         return expected
 
+    def test_init_env_vars(self):
+        with Env(override={
+                    'NSKIT_PYTHON_INSTALLER_VIRTUALENV_DIR': '.virtualenv',
+                    'NSKIT_PYTHON_INSTALLER_VIRTUALENV_ARGS': '["--seeder","azdo-pip"]'
+                    }):
+            with ChDir():
+                installer = PythonInstaller()
+                self.assertEqual(installer.virtualenv_dir, Path('.virtualenv'))
+                self.assertEqual(installer.virtualenv_args, ['--seeder', 'azdo-pip'])
+
     def test_check_repo_setup(self):
         with ChDir():
             setup = Path('test')/'setup.py'
@@ -69,7 +79,7 @@ class PythonInstallerTestCase(unittest.TestCase):
                 f.write('\n')
             self.assertTrue(pyproject.exists())
             self.assertTrue(installer.check_repo(Path.cwd()/'test'))
-    
+
     def test_check_repo_requirements(self):
         with ChDir():
             requirements = Path('test')/'requirements.txt'
@@ -81,7 +91,7 @@ class PythonInstallerTestCase(unittest.TestCase):
                 f.write('\n')
             self.assertTrue(requirements.exists())
             self.assertTrue(installer.check_repo(Path.cwd()/'test'))
-    
+
     def test_check_not_python(self):
         with ChDir():
             readme = Path('test')/'readme.txt'
@@ -93,7 +103,7 @@ class PythonInstallerTestCase(unittest.TestCase):
                 f.write('\n')
             self.assertTrue(readme.exists())
             self.assertFalse(installer.check_repo(Path.cwd()/'test'))
-        
+
     def test_get_virtualenv_exists(self):
         with ChDir():  # Make sure theres no .env file when running tests
             installer = PythonInstaller()
@@ -207,7 +217,7 @@ class PythonInstallerTestCase(unittest.TestCase):
             installer.install(Path.cwd(), executable='abc', deps=True)
             sp.check_call.assert_called_once_with(['abc', '-m', 'pip', 'install', '-r', 'requirements.txt'])
 
-class PythonInstallerWithCodebaseTestCase(unittest.TestCase):  
+class PythonInstallerWithCodebaseTestCase(unittest.TestCase):
     # Codebase Tests
 
     def setUp(self):
@@ -229,7 +239,7 @@ class PythonInstallerWithCodebaseTestCase(unittest.TestCase):
 
     def env(self):
         return Env(override={'TEST_ABACUS': 'A'})
-    
+
     def _get_executable_path(self, venv_path):
         if sys.platform.startswith('win'):
             expected = venv_path/'Scripts'/'python.exe'
@@ -240,7 +250,7 @@ class PythonInstallerWithCodebaseTestCase(unittest.TestCase):
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_get_executable_codebase_root_dir(self):
         with ChDir():
-            with self.extension():                
+            with self.extension():
                 with self.env():
                     settings.ProviderEnum._patch()
                     c = Codebase()

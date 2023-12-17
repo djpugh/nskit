@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import List
 import unittest
@@ -64,7 +65,9 @@ class CodeBaseTestCase(unittest.TestCase):
         self._provider_settings_cls = DummyVCSProviderSettings
         self._extension = TestExtension('dummy', ENTRYPOINT, self._provider_settings_cls)
         self._extension.__enter__()
-        self._env = Env(override={'TEST_PARAMETER_ABACUS': 'A'})
+        env_vars = self.git_env()
+        env_vars.update({'TEST_PARAMETER_ABACUS': 'A'})
+        self._env = Env(override=env_vars)
         self._env.__enter__()
         settings.ProviderEnum._patch()
         self._repo_info = {
@@ -74,10 +77,23 @@ class CodeBaseTestCase(unittest.TestCase):
             'url': 'https://www.test.com'
         }
 
+    def git_env(self):
+        git_envs = {
+            'GIT_AUTHOR_NAME': 'Tester',
+            'GIT_AUTHOR_EMAIL': 'test@test.com',
+            'GIT_COMMITTER_NAME': 'Tester',
+            'GIT_COMMITTER_EMAIL': 'test@test.com'
+        }
+        return git_envs
+        # Configure Git
+
     def tearDown(self):
         self._extension.__exit__()
-        self._env.__exit__()
-        self._tempdir.__exit__(None, None, None)
+        self._env.__exit__
+        try:
+            self._tempdir.__exit__(None, None, None)
+        except (RecursionError, OSError):
+            os.chdir(self._tempdir.cwd)
 
     def test_create_delete_package_repo_namespace(self):
         ns_repo = repo.NamespaceValidationRepo(local_dir=Path.cwd()/'.namespaces')
