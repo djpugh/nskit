@@ -30,18 +30,19 @@ classifiers = [
 ]
 dependencies = [
     "aenum",
-    "azure_devops_artifacts_helpers",
     "gitpython",
     "jinja2",
     "logzero",
     "orjson",
     "pydantic[email]",
     "pydantic-settings",
-    "pygithub",
     "python-dotenv",
     "ruamel.yaml",
     "tomlkit",
     'typing-extensions; python_version < "3.12"',
+    'backports.entry-points-selectable; python_version < "3.10"',
+    'importlib_metadata; python_version < "3.11"',
+    'importlib_resources; python_version < "3.9"',
     "virtualenv",
 ]
 dynamic = ["version"]
@@ -49,7 +50,8 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 azure_devops = [
-    "azure-cli"
+    "azure-cli",
+    "azure_devops_artifacts_helpers",
 ]
 github = [
     "PyGithub"
@@ -83,7 +85,8 @@ dev-types = [
 dev-test= [
     "pytest>=7.3.1",
     "pytest-cov>=4",
-    "pytest-subtests"
+    "pytest-subtests",
+    "pytest-xdist"
     ]
 dev-docs = [
     "mkdocs",
@@ -92,10 +95,13 @@ dev-docs = [
     "mkdocs-material",
     "mkdocs-git-authors-plugin",
     "mkdocs-coverage",
+    "mkdocs-include-markdown-plugin",
     # "mkdocs-gen-files",
     # "mkdocs-literate-nav",
-    "mike",
-    "sphinx_github_changelog"
+    "mike"
+]
+dev-licenses = [
+    "licensecheck"
 ]
 dev-build = [
     "build"

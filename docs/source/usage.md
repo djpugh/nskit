@@ -127,6 +127,12 @@ The azure devops url can also be overwritten for e.g private servers, although t
 
 These can be set using the following environment variables ``AZURE_DEVOPS_ORGANISATION``, and ``AZURE_DEVOPS_PROJECT``.
 
+You may also want to set the ``NSKIT_PYTHON_INSTALLER_VIRTUALENV_ARGS`` environment variable to ``["--seeder","azdo-pip"]`` to make the created virtualenvironment be seeded with the azure devops authentication helpers. This is using pydantic settings handling, which parses environment variables for complex parameters as a JSON string.
+
+!!! info
+
+    This uses the [``azure_devops_artifacts_helpers``](https://djpugh.github.io/azure_devops_artifacts_helpers) library.
+
 ##### For Github - [nskit.vcs.providers.github.GithubSettings][]:
 
 * ``organisation`` - the Github organisation/user to use

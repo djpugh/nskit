@@ -1,5 +1,13 @@
 """Codebase Settings."""
-from typing import Annotated, Optional
+from __future__ import annotations
+
+import sys
+from typing import Optional
+
+if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
+    from typing_extensions import Annotated
+else:
+    from typing import Annotated
 
 from pydantic import Field, field_validator, ValidationError
 from pydantic_settings import SettingsConfigDict

@@ -5,7 +5,9 @@ Includes:
     - file based config loading (json/toml/yaml)
     - model dumping to toml & yaml
 """
-from typing import Any, Tuple, Type
+from __future__ import annotations
+
+from typing import Any
 
 from pydantic_settings import BaseSettings as _BaseSettings
 from pydantic_settings import PydanticBaseSettingsSource as _PydanticBaseSettingsSource
@@ -24,12 +26,12 @@ class BaseConfiguration(PropertyDumpMixin, _BaseSettings):
     @classmethod
     def settings_customise_sources(
         cls,
-        settings_cls: Type[_BaseSettings],
+        settings_cls: type[_BaseSettings],
         init_settings: _PydanticBaseSettingsSource,
         env_settings: _PydanticBaseSettingsSource,
         dotenv_settings: _PydanticBaseSettingsSource,
         file_secret_settings: _PydanticBaseSettingsSource,
-    ) -> Tuple[_PydanticBaseSettingsSource, ...]:
+    ) -> tuple[_PydanticBaseSettingsSource, ...]:
         """Create settings loading, including the FileConfigSettingsSource."""
         # TODO This probably needs a tweak to handle complex structures.
         return (

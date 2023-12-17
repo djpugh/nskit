@@ -440,7 +440,6 @@ class CodebaseTestCase(unittest.TestCase):
             with self.extension():
                 with self.env():
                     c = Codebase(namespace_validation_repo=None)
-
         self.assertIsNone(c.namespace_validation_repo)
         options = [{'a': ['b', 'c']}, 'd']
         c.create_namespace_repo(name='test-namespaces', namespace_options=options)

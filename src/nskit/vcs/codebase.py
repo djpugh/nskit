@@ -1,6 +1,14 @@
 """Manage a codebase."""
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Annotated, List, Optional
+import sys
+from typing import List, Optional
+
+if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
+    from typing_extensions import Annotated
+else:
+    from typing import Annotated
 
 from pydantic import Field, field_validator, ValidationInfo
 
@@ -31,7 +39,7 @@ class Codebase(BaseConfiguration):
         if value is None:
             try:
                 value = info.data.get('settings').namespace_validation_repo
-            except AttributeError as e:
+            except (AttributeError) as e:
                 raise ValueError(e) from None
         return value
 

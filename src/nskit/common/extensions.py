@@ -1,6 +1,11 @@
 """Common extension helpers."""
 from enum import Enum
-from importlib.metadata import entry_points
+import sys
+
+if sys.version_info.major >= 3 and sys.version_info.minor >= 10:
+    from importlib.metadata import entry_points
+else:
+    from backports.entry_points_selectable import entry_points
 
 from aenum import extend_enum
 

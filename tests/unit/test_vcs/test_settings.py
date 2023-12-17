@@ -1,6 +1,13 @@
-from typing import Annotated
+from __future__ import annotations
+
+import sys
 import unittest
 import uuid
+
+if sys.version_info.major >= 3 and sys.version_info.minor >= 9:
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from pydantic import Field, ValidationError
 from pydantic_settings import SettingsConfigDict

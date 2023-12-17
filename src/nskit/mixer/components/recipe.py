@@ -2,6 +2,7 @@
 import datetime as dt
 import inspect
 from pathlib import Path
+import sys
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
@@ -85,9 +86,13 @@ class Recipe(Folder):
     @property
     def recipe_batch(self):
         """Get information about the specific info of this recipe."""
+        if sys.version_info.major <= 3 and sys.version_info.minor < 11:
+            creation_time = dt.datetime.now().astimezone()
+        else:
+            creation_time = dt.datetime.now(dt.UTC).isoformat()
         return {'context': self.__dump_context(ser=True),
                 'nskit_version': __version__,
-                'creation_time': dt.datetime.now(dt.UTC).isoformat(),
+                'creation_time': creation_time,
                 'recipe': self.recipe}
 
     @property

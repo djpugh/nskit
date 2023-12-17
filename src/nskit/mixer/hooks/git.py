@@ -29,7 +29,7 @@ class GitInit(Hook):
             # Check git version - new versions have --initial-branch arg on init
             version = subprocess.check_output(['git', 'version']).decode()  # nosec B607, B603
             version = version.replace('git version', '').lstrip()
-            semver = parse('.'.join(version.split('.')[:3]))
+            semver = parse('.'.join(version.split(' ')[0].split('.')[:3]))
             if semver >= parse('2.28.0'):
                 subprocess.check_call(['git', 'init', '--initial-branch', initial_branch_name])  # nosec B607, B603
             else:
