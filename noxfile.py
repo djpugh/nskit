@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from platform import platform, python_version
 import sys
 
 if sys.version_info.major <=3 and sys.version_info.minor < 11:
@@ -75,6 +76,7 @@ def test(session):
         args.append('-rs')
         args.append(folder)
         print(f'Test session: {folder}')
+        env_name = f'py-{python_version()}-os-{platform()}'
         session.run('pytest',
             '-n',
             'logical',
@@ -86,8 +88,9 @@ def test(session):
             'xml:reports/coverage.xml',
             '--cov-report',
             'html:reports/htmlcov',
+            '--junitxml',
+            f'reports/{env_name}-test.xml',
              *args)
-
 
 @nox.session(reuse_venv=True, tags=['docs'])
 def docs(session):
