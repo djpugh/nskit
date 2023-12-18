@@ -1,12 +1,14 @@
-"""Github provider using PyGithub."""
+"""Github provider using ghapi."""
+from enum import Enum
 from typing import List, Optional
 
 try:
-    from github import Github, UnknownObjectException
-    from github.Auth import Token
+    from fastcore.net import HTTP404NotFoundError
+    from ghapi.all import GhApi, GhDeviceAuth, paged, Scope
+    from ghapi.auth import _def_clientid
 except ImportError:
-    raise ImportError('Github Provider requires installing extra dependencies, use pip install nskit[github]')
-from pydantic import Field, HttpUrl, SecretStr
+    raise ImportError('Github Provider requires installing extra dependencies (ghapi), use pip install nskit[github]')
+from pydantic import Field, field_validator, HttpUrl, SecretStr
 from pydantic_settings import SettingsConfigDict
 
 from nskit.common.configuration import BaseConfiguration
@@ -35,13 +37,29 @@ class GithubSettings(VCSProviderSettings):
     model_config = SettingsConfigDict(env_prefix='GITHUB_', env_file='.env')
     url: HttpUrl = "https://github.com"
     organisation: Optional[str] = Field(None, description='Organisation to work in, otherwise uses the user for the token')
-    token: SecretStr
+    token: SecretStr = Field(None, validate_default=True, description='Token to use for authentication, falls back to interactive device authentication if not provided')
     repo: GithubRepoSettings = GithubRepoSettings()
 
     @property
     def repo_client(self) -> 'GithubRepoClient':
         """Get the instantiated repo client."""
         return GithubRepoClient(self)
+
+    @field_validator('token', mode='before')
+    @classmethod
+    def _validate_token(cls, value):
+        if value is None:
+            ghauth = GhDeviceAuth(_def_clientid, Scope.repo, Scope.delete_repo)
+            print(ghauth.url_docs())
+            ghauth.open_browser()
+            value = ghauth.wait()
+        return value
+
+
+class GithubOrgType(Enum):
+    """Org type, user or org."""
+    user = 'User'
+    org = 'Org'
 
 
 class GithubRepoClient(RepoClient):
@@ -50,20 +68,24 @@ class GithubRepoClient(RepoClient):
     def __init__(self, config: GithubSettings):
         """Initialise the client."""
         self._config = config
-        self._github = Github(
-            auth=Token(self._config.token.get_secret_value()),
-            base_url=self._config.url
-            )
+        self._github = GhApi(token=self._config.token.get_secret_value(), gh_host=self._config.url)
         # If the organisation is set, we get it, and assume that the token is valid
         # Otherwise default to the user
         if self._config.organisation:
-            self._org = self._github.get_organization(self._config.organisation)
+            try:
+                self._github.orgs.get(self._config.organisation)
+                self._org_type = GithubOrgType.org
+            except HTTP404NotFoundError:
+                self._github.user.get_by_username(self._config.organisation)
+                self._org_type = GithubOrgType.user
         else:
-            self._org = self._github.get_user()
+            self._config.organisation = self._github.get_authenticated()['login']
+            self._org_type = GithubOrgType.user
 
     def create(self, repo_name: str):
         """Create the repo in the user/organisation."""
-        return self._org.create_repo(
+        return self._github.repos.create_in_org(
+            self._config.organisation,
             name=repo_name,
             private=self._config.repo.private,
             has_issues=self._config.repo.has_issues,
@@ -80,21 +102,28 @@ class GithubRepoClient(RepoClient):
     def get_remote_url(self, repo_name: str) -> HttpUrl:
         """Get the remote url for the repo."""
         if self.check_exists(repo_name):
-            return self._org.get_repo(repo_name).clone_url
+            return self._github.repos.get(self._config.organisation, repo_name)['clone_url']
 
     def delete(self, repo_name: str):
         """Delete the repo if it exists in the organisation/user."""
         if self.check_exists(repo_name):
-            return self._org.get_repo(repo_name).delete()
+            return self._github.repos.delete(self._config.organisation, repo_name)
 
     def check_exists(self, repo_name: str) -> bool:
         """Check if the repo exists in the organisation/user."""
         try:
-            self._org.get_repo(repo_name)
+            self._github.repos.get(self._config.organisation, repo_name)
             return True
-        except UnknownObjectException:
+        except HTTP404NotFoundError:
             return False
 
     def list(self) -> List[str]:
         """List the repos in the project."""
-        return [u.name for u in self._org.get_repos()]
+        repos = []
+        if self._org_type == GithubOrgType.org:
+            get_method = self._github.repos.list_for_org
+        else:
+            get_method = self._github.repos.list_for_user
+        for u in paged(get_method, self._config.organisation, per_page=100):
+            repos += [x['name'] for x in u]
+        return repos

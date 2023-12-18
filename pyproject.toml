@@ -54,7 +54,7 @@ azure_devops = [
     "azure_devops_artifacts_helpers",
 ]
 github = [
-    "PyGithub"
+    "ghapi"
 ]
 dev = [
     "setuptools_scm[toml]",
