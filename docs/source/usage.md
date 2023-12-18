@@ -11,7 +11,7 @@ It requires a Python version after 3.8+
 
 nskit has optional dependencies for different VCS systems:
 
-* [Github](https://github.com) - add ``PyGithub`` or use ``pip install nskit[github]``
+* [Github](https://github.com) - add ``ghapi`` or use ``pip install nskit[github]``
 * [Azure Devops](https://dev.azure.com) - add ``azure-cli`` or use ``pip install nskit[azure_devops]``
 
 ## Simple Usage
