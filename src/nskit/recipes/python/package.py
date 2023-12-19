@@ -19,6 +19,7 @@ class PackageRecipe(PyRecipe):
             ingredients.readme_md,
             ingredients.test_dir,
             ingredients.src_dir,
+            ingredients.docs_dir,
             LicenseFile()
         ],
         description='The folder contents')

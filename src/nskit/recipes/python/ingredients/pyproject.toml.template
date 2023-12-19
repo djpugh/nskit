@@ -64,11 +64,19 @@ dev-types = [
 dev-test= [
     "pytest>=7.3.1",
     "pytest-cov>=4",
+    "pytest-subtests",
+    # Run tests in parallel
+    # "pytest-xdist"
     ]
 dev-docs = [
-    "sphinx",
-    "sphinx_material",
-    "sphinx_github_changelog"
+    "mkdocs",
+    "mkdocstrings[python]",
+    "mkdocs-git-revision-date-localized-plugin",
+    "mkdocs-material",
+    "mkdocs-git-authors-plugin",
+    "mkdocs-coverage",
+    "mkdocs-include-markdown-plugin",
+    "mike"
 ]
 dev-build = [
     "build"

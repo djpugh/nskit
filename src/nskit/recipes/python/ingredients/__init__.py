@@ -1,5 +1,6 @@
 """Ingredients for repos."""
 from nskit.mixer import File, Folder
+from nskit.recipes.python.ingredients.docs import docs_dir  # noqa: F401
 
 gitignore = File(
     name='.gitignore',

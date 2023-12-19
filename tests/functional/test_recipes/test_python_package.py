@@ -139,7 +139,19 @@ class PackageRecipeTestCase(unittest.TestCase):
                 root/'README.md': None,
                 root/'.gitignore': None,
                 root/'noxfile.py': None,
-                root/'.pre-commit-config.yaml': None
+                root/'.pre-commit-config.yaml': None,
+
+                root/'docs':{
+                    root/'docs'/'mkdocs.yml': None,
+                    root/'docs'/'source':{
+                        root/'docs'/'source'/'index.md': None,
+                        root/'docs'/'source'/'usage.md': None,
+                        root/'docs'/'source'/'developing':{
+                            root/'docs'/'source'/'developing'/'index.md': None,
+                            root/'docs'/'source'/'developing'/'license.md': ''
+                        }
+                    }
+                }
             }
         }
         return expected
