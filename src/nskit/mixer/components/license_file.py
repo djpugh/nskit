@@ -3,6 +3,7 @@ from datetime import date
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
+import sys
 from typing import Any, Callable, Dict, Optional, Union
 
 from ghapi.all import GhApi
@@ -32,10 +33,30 @@ class LicenseOptionsEnum(Enum):
     MPL_2_0 = 'mpl-2.0'
     Unlicense = 'unlicense'
 
+    @classmethod
+    def contains(cls, value):
+        """Return True if `value` is in `cls`.
+
+        BACKPORT FROM PYTHON 3.12
+
+        `value` is in `cls` if:
+        1) `value` is a member of `cls`, or
+        2) `value` is the value of one of the `cls`'s members.
+        """
+        if sys.version_info.major <= 3 and sys.version_info.minor < 12:
+            if isinstance(value, cls):
+                return True
+            try:
+                return value in cls._value2member_map_
+            except TypeError:
+                return value in cls._unhashable_values_
+        return value in cls
+
 
 def get_license_filename(context: Optional[Dict[str, Any]] = None):
     """Callable to set the default license file name."""
-    if context.get('license', None) in LicenseOptionsEnum:
+    # Can't do in LicenseOptionsEnum pre 3.12
+    if LicenseOptionsEnum.contains(context.get('license', None)):
         # Handle naming
         license_name = LicenseOptionsEnum(context.get('license', None))
         # COPYING
@@ -79,7 +100,8 @@ def _get_license_content(license: LicenseOptionsEnum):
 def get_license_content(context: Dict[str, Any]):
     """Render the content of the license."""
     # We implement some specifics based on the implementation instructions in Github licenses api get
-    if context.get('license', None) in LicenseOptionsEnum:
+    # Can't do in LicenseOptionsEnum pre 3.12
+    if LicenseOptionsEnum.contains(context.get('license', None)):
         license_name = LicenseOptionsEnum(context.get('license', None))
         license_content = _get_license_content(license_name)
         content = license_content.body

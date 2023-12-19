@@ -29,7 +29,7 @@ def mock_gh_api(func):
         def get(license_name):
             if license_name in ['mit', 'bsd-2-clause', 'bsd-3-clause']:
                 return license_content_mit
-            elif license_name in LicenseOptionsEnum:
+            elif LicenseOptionsEnum.contains(license_name):
                 return license_content_other
             else:
                 raise HTTP404NotFoundError(None, None, None)
