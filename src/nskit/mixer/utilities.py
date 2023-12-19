@@ -108,8 +108,12 @@ class _EnvironmentFactory():
             selected_method = 'default'
         # We need to validate against the options
         NskitMixerEnvironmentOptions = ExtensionsEnum.from_entrypoint('NskitMixerEnvironmentOptions', 'nskit.mixer.environment.factory')
-        if selected_method not in NskitMixerEnvironmentOptions:
-            raise ValueError(f'NSKIT_MIXER_ENVIRONMENT_FACTORY value {selected_method} not installed - available options are {list(NskitMixerEnvironmentOptions)}')
+        if sys.version_info.major <= 3 and sys.version_info.minor < 12:
+            if selected_method not in NskitMixerEnvironmentOptions.__members__.keys():
+                raise ValueError(f'NSKIT_MIXER_ENVIRONMENT_FACTORY value {selected_method} not installed - available options are {list(NskitMixerEnvironmentOptions)}')
+        else:
+            if selected_method not in NskitMixerEnvironmentOptions:
+                raise ValueError(f'NSKIT_MIXER_ENVIRONMENT_FACTORY value {selected_method} not installed - available options are {list(NskitMixerEnvironmentOptions)}')
         return NskitMixerEnvironmentOptions(selected_method).extension()
 
     @staticmethod
