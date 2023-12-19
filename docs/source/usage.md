@@ -412,8 +412,38 @@ which make it easy for people to refer to that (and add customisation, and e.g. 
 
 ``nskit`` is designed around a few key entrypoints to make it easily accessible, including
 
-``[project.entry-points."nskit.recipes"]`` for code recipes
-``[project.entry-points."nskit.vcs.providers"]`` for other VCS providers
+- ``[project.entry-points."nskit.recipes"]`` for code recipes
+- ``[project.entry-points."nskit.vcs.providers"]`` for other VCS providers
+- ``[project.entry-points."nskit.mixer.environment.extensions"]`` for the mixer ``jinja2`` [Environment][jinja2.Environment] extensions
+- ``[project.entry-points."nskit.mixer.environment.factory"]`` for the mixer ``jinja2`` [Environment][jinja2.Environment] initialisation
 
 Additionally, key methods and behaviours can be overwritten or extended using inheritance.
 
+#### Customising the ``nskit.mixer`` ``jinja2`` ``Environment``
+
+There are 2 entrypoints to enable customising the Jinja Environment used for the template rendering.
+
+- ``[project.entry-points."nskit.mixer.environment.extensions"]`` for the mixer ``jinja2`` [Environment][jinja2.Environment] extensions
+- ``[project.entry-points."nskit.mixer.environment.factory"]`` for the mixer ``jinja2`` [Environment][jinja2.Environment] initialisation
+
+The first allows extension recipes to define a list of extensions to add to the environment (must be installed as dependencies of the recipe)
+
+An example might be:
+```
+def recipe_jinja_extensions():
+    return ['jinja2.ext.debug', 'jinja2.ext.i8n']
+```
+
+This could be implemented as a staticmethod on the recipe object or similar, but it needs to be defined to the ``nskit.mixer.environment.extensions`` entrypoint in the ``pyproject.toml``.
+
+!!! warning
+
+    All requested extensions for installed recipes are added to the environment so it could be possible for clashes/issues to occur there, however given the maturity of the jinja ecosystem, we are not loading them recipe by recipe due to the added complexity/issues.
+
+You can also customise the environment initialisation if you need to override specifics of the configuration however this is not recommended as it can cause complex issues with the templates/handling.
+
+The default implementation defines the loader to use ``_PkgResourcesTemplateLoader`` to allow for package resources type loading on the environment (see examples above), but other parameters could be configured/changed
+
+!!! warning
+
+    The default configurations are the expected one, so changing this could break e.g. inherited ingredients, so proceed with caution.

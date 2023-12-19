@@ -7,7 +7,7 @@ from pydantic import Field, GetCoreSchemaHandler
 from pydantic_core import core_schema, CoreSchema
 
 from nskit.common.configuration import BaseConfiguration
-from nskit.mixer.utilities import JINJA_ENVIRONMENT
+from nskit.mixer.utilities import JINJA_ENVIRONMENT_FACTORY
 
 
 class TemplateStr(str):
@@ -31,7 +31,7 @@ class TemplateStr(str):
         """Render the template."""
         if context is None:
             context = {}
-        return JINJA_ENVIRONMENT.from_string(self).render(context)
+        return JINJA_ENVIRONMENT_FACTORY.environment.from_string(self).render(context)
 
 
 class FileSystemObject(ABC, BaseConfiguration):

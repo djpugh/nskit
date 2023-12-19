@@ -1,4 +1,5 @@
 """Utilities for interacting with systems etc."""
+import os
 from pathlib import Path
 import sys
 from typing import Any
@@ -11,6 +12,8 @@ else:
 from jinja2 import BaseLoader, ChoiceLoader, Environment, TemplateNotFound
 from pydantic import GetCoreSchemaHandler, TypeAdapter, ValidationError
 from pydantic_core import core_schema, CoreSchema
+
+from nskit.common.extensions import ExtensionsEnum
 
 
 class Resource(str):
@@ -72,5 +75,48 @@ class _PkgResourcesTemplateLoader(BaseLoader):
         return source, None, lambda: True
 
 
-# TODO: Make this patchable for e.g. other environment extensions etc.
-JINJA_ENVIRONMENT = Environment(loader=ChoiceLoader([_PkgResourcesTemplateLoader()]))  # nosec B701
+class _EnvironmentFactory():
+    """Jinja2 Environment Factory to allow for extension/customisation."""
+
+    def __init__(self):
+        """Initialise the factory."""
+        self._environment = None
+
+    @property
+    def environment(self) -> Environment:
+        """Handle caching the environment object so it is lazily initialised."""
+        if self._environment is None:
+            self._environment = self.get_environment()
+            self.add_extensions(self._environment)
+        return self._environment
+
+    def add_extensions(self, environment: Environment):
+        """Add Extensions to the environment object."""
+        NskitMixerExtensionOptions = ExtensionsEnum.from_entrypoint('NskitMixerExtensionOptions', 'nskit.mixer.environment.extensions')
+        # Assuming no risk of extension clash
+        extensions = []
+        for ext in NskitMixerExtensionOptions:
+            extensions += ext.extension()
+        for extension in list(set(extensions)):
+            environment.add_extension(extension)
+
+    def get_environment(self) -> Environment:
+        """Get the environment object based on the env var."""
+        selected_method = os.environ.get('NSKIT_MIXER_ENVIRONMENT_FACTORY', None)
+        if selected_method is None or selected_method.lower() == 'default':
+            # This is our simple implementation
+            selected_method = 'default'
+        # We need to validate against the options
+        NskitMixerEnvironmentOptions = ExtensionsEnum.from_entrypoint('NskitMixerEnvironmentOptions', 'nskit.mixer.environment.factory')
+        if sys.version_info.major <= 3 and sys.version_info.minor < 12:
+            if selected_method not in NskitMixerEnvironmentOptions.__members__.keys():
+                raise ValueError(f'NSKIT_MIXER_ENVIRONMENT_FACTORY value {selected_method} not installed - available options are {list(NskitMixerEnvironmentOptions)}')
+        else:
+            if selected_method not in NskitMixerEnvironmentOptions:
+                raise ValueError(f'NSKIT_MIXER_ENVIRONMENT_FACTORY value {selected_method} not installed - available options are {list(NskitMixerEnvironmentOptions)}')
+        return NskitMixerEnvironmentOptions(selected_method).extension()
+
+    @staticmethod
+    def default_environment():
+        """Get the default environment object."""
+        return Environment(loader=ChoiceLoader([_PkgResourcesTemplateLoader()]))  # nosec B701

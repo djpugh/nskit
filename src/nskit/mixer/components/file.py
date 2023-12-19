@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, Optional, Union
 from pydantic import Field
 
 from nskit.mixer.components.filesystem_object import FileSystemObject
-from nskit.mixer.utilities import JINJA_ENVIRONMENT, Resource
+from nskit.mixer.utilities import JINJA_ENVIRONMENT_FACTORY, Resource
 
 
 class File(FileSystemObject):
@@ -28,7 +28,7 @@ class File(FileSystemObject):
             content = self.content
         if isinstance(content, str):
             # If it is a string, we render the content
-            content = JINJA_ENVIRONMENT.from_string(content).render(**context)
+            content = JINJA_ENVIRONMENT_FACTORY.environment.from_string(content).render(**context)
         return content
 
     def write(self, base_path: Path, context: Dict[str, Any], override_path: Optional[Path] = None):

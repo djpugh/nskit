@@ -8,7 +8,7 @@ try:
     from ghapi.auth import _def_clientid
 except ImportError:
     raise ImportError('Github Provider requires installing extra dependencies (ghapi), use pip install nskit[github]')
-from pydantic import Field, field_validator, HttpUrl, SecretStr
+from pydantic import Field, field_validator, HttpUrl, SecretStr, ValidationInfo
 from pydantic_settings import SettingsConfigDict
 
 from nskit.common.configuration import BaseConfiguration
@@ -35,6 +35,7 @@ class GithubSettings(VCSProviderSettings):
     Uses PAT token for auth (set in environment variables as GITHUB_TOKEN)
     """
     model_config = SettingsConfigDict(env_prefix='GITHUB_', env_file='.env')
+    interactive: bool = Field(False, description='Use Interactive Validation for token')
     url: HttpUrl = "https://github.com"
     organisation: Optional[str] = Field(None, description='Organisation to work in, otherwise uses the user for the token')
     token: SecretStr = Field(None, validate_default=True, description='Token to use for authentication, falls back to interactive device authentication if not provided')
@@ -47,8 +48,8 @@ class GithubSettings(VCSProviderSettings):
 
     @field_validator('token', mode='before')
     @classmethod
-    def _validate_token(cls, value):
-        if value is None:
+    def _validate_token(cls, value, info: ValidationInfo):
+        if value is None and info.data.get('interactive', False):
             ghauth = GhDeviceAuth(_def_clientid, Scope.repo, Scope.delete_repo)
             print(ghauth.url_docs())
             ghauth.open_browser()
