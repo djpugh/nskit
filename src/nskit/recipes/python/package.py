@@ -3,7 +3,7 @@ from typing import List, Union
 
 from pydantic import Field
 
-from nskit.mixer import File, Folder
+from nskit.mixer import File, Folder, LicenseFile
 from nskit.recipes.python import ingredients, PyRecipe
 
 
@@ -19,6 +19,7 @@ class PackageRecipe(PyRecipe):
             ingredients.readme_md,
             ingredients.test_dir,
             ingredients.src_dir,
-            ingredients.docs_dir
+            ingredients.docs_dir,
+            LicenseFile()
         ],
         description='The folder contents')

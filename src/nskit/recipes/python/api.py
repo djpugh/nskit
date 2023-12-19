@@ -3,7 +3,7 @@ from typing import List, Union
 
 from pydantic import Field
 
-from nskit.mixer import File, Folder
+from nskit.mixer import File, Folder, LicenseFile
 from nskit.recipes.python import ingredients, PyRecipe
 from nskit.recipes.python.ingredients import api as api_ingredients
 
@@ -22,6 +22,7 @@ class APIRecipe(PyRecipe):
             api_ingredients.src_dir,
             api_ingredients.docker.dockerignore,
             api_ingredients.docker.api_dockerfile,
-            ingredients.docs_dir
+            ingredients.docs_dir,
+            LicenseFile()
         ],
         description='The folder contents')

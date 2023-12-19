@@ -78,10 +78,13 @@ class FileSystemObject(ABC, BaseConfiguration):
 
     def get_path(self, base_path: Path, context: Dict[str, Union[str, int]], override_path: Optional[Path] = None):
         """Get the object path. Can be overriden with the override_path (relative to the base path)."""
+        path = None
         if override_path:
             path = Path(base_path)/Path(override_path)
         else:
-            path = Path(base_path) / self.render_name(context)
+            rendered_name = self.render_name(context)
+            if rendered_name is not None:
+                path = Path(base_path) / rendered_name
         return path
 
     @abstractmethod

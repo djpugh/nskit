@@ -12,7 +12,17 @@
             - File
             - Folder
             - Hook
+            - LicenseFile
+            - LicenseOptionsEnum
             - Recipe
+
+### nskit.mixer.components.license_file
+#### ::: nskit.mixer.components.license_file
+    options:
+        show_root_heading: False
+        members:
+            - get_license_filename
+            - get_license_content
 
 ## nskit.mixer.repo
 ### ::: nskit.mixer.repo
