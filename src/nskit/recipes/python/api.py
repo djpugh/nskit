@@ -22,5 +22,6 @@ class APIRecipe(PyRecipe):
             api_ingredients.src_dir,
             api_ingredients.docker.dockerignore,
             api_ingredients.docker.api_dockerfile,
+            ingredients.docs_dir
         ],
         description='The folder contents')

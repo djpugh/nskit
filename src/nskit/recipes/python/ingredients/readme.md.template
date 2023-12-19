@@ -7,6 +7,10 @@
 ## Introduction
 {% block Introduction %}{% endblock Introduction %}
 
+## Contributing
+
+To see the contribution guidelines, see [docs/source/developing/index.md](docs/source/developing/index.md).
+
 ## Setting up for development
 
 Create a virtual environment.

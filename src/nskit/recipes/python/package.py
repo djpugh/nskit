@@ -18,6 +18,7 @@ class PackageRecipe(PyRecipe):
             ingredients.pyproject_toml,
             ingredients.readme_md,
             ingredients.test_dir,
-            ingredients.src_dir
+            ingredients.src_dir,
+            ingredients.docs_dir
         ],
         description='The folder contents')

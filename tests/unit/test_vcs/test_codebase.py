@@ -40,12 +40,13 @@ class CodebaseTestCase(unittest.TestCase):
     def test_init_no_settings_error(self):
 
         with ChDir():  # Make sure theres no .env file when running tests
-            with self.assertRaises(ValidationError):
-                Codebase()
-            with self.extension():
-                with Env(remove=['TEST_ABACUS']):
-                    with self.assertRaises(ValidationError):
-                        Codebase()
+            with Env(remove=['GITHUB_TOKEN', 'GITHUB_JWT_TOKEN']):
+                with self.assertRaises(ValidationError):
+                    Codebase()
+                with self.extension():
+                    with Env(remove=['TEST_ABACUS']):
+                        with self.assertRaises(ValidationError):
+                            Codebase()
 
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_init_no_settings_ok(self):

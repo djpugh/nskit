@@ -92,6 +92,7 @@ def test(session):
             f'reports/{env_name}-test.xml',
              *args)
 
+
 @nox.session(reuse_venv=True, tags=['docs'])
 def docs(session):
     session.install('.[dev,dev-docs]')
@@ -117,9 +118,7 @@ def docs(session):
 
     finally:
         if not ON_CI:
-
-            # session.run('git', 'branch', '-D', branch_name, external=True)
-            pass
+            session.run('git', 'branch', '-D', branch_name, external=True)
         else:
             with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
                 print(f'branch_name={branch_name}', file=fh)
@@ -133,6 +132,7 @@ def build(session):
 
 @nox.session(reuse_venv=True, tags=['license'])
 def licenses(session):
+    session.install('licensecheck')
     session.run('licensecheck', '--using', 'PEP631:github;azure_devops;dev;dev-test;dev-lint;dev-types;dev-security;dev-docs;dev-build', '--format', 'json', '--file', 'licenses-dev.json')
     session.run('licensecheck', '--using', 'PEP631:github;azure_devops', '--format', 'json', '--file', 'licenses.json')
     session.run('licensecheck', '--using', 'PEP631:github;azure_devops', '--format', 'ansi')
