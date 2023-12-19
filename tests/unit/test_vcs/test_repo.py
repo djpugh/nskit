@@ -34,7 +34,8 @@ class _RepoTestCase(unittest.TestCase):
 
     def test_init_no_client(self):
         with self.assertRaises(ValidationError):
-            _Repo(name='test')
+            with Env(override={'TEST_ABACUS': 'A', 'NSKIT_VCS_CODEBASE_VCS_PROVIDER': 'dummy'}):
+                _Repo(name='test')
 
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_init_with_client(self):
@@ -57,7 +58,7 @@ class _RepoTestCase(unittest.TestCase):
         entrypoint = 'nskit.vcs.providers'
         with ChDir():  # Make sure theres no .env file when running tests
             with TestExtension('dummy', entrypoint, DummyVCSProviderSettings):
-                with Env(override={'TEST_ABACUS': 'A'}):
+                with Env(override={'TEST_ABACUS': 'A', 'NSKIT_VCS_CODEBASE_VCS_PROVIDER': 'dummy'}):
                     settings.ProviderEnum._patch()
 
                     r = _Repo(name='test')
