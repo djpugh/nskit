@@ -124,6 +124,11 @@ github = "nskit.vcs.providers.github:GithubSettings"
 [project.entry-points."nskit.vcs.installers"]
 python = "nskit.vcs.installer:PythonInstaller"
 
+[project.entry-points."nskit.mixer.environment.factory"]
+default = "nskit.mixer.utilities:_EnvironmentFactory.default_environment"
+
+# [project.entry-points."nskit.mixer.environment.extensions"]
+
 # Tools
 [tool.setuptools.packages.find]
 where = ["src"]

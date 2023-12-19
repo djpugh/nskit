@@ -24,7 +24,7 @@ logger = logger_factory.get_logger(__name__)
 
 class CodebaseSettings(BaseConfiguration):
     """Codebase settings object."""
-    model_config = SettingsConfigDict(env_file='.env')
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='NSKIT_VCS_CODEBASE_')
 
     default_branch: str = 'main'
     vcs_provider: Annotated[ProviderEnum, Field(validate_default=True)] = None
@@ -49,6 +49,8 @@ class CodebaseSettings(BaseConfiguration):
                 except (ImportError, ValueError, ValidationError):
                     # This provider didn't work
                     logger.info(f'{provider.value} Not Configured.')
+        if cls.model_fields['vcs_provider'].annotation(value).extension is None:
+            raise ValueError('Extension Not Found')
         return value
 
     @property
