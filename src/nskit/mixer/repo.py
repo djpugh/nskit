@@ -5,7 +5,7 @@ from pydantic import EmailStr, Field, HttpUrl
 
 from nskit.common.configuration import BaseConfiguration
 from nskit.mixer import hooks
-from nskit.mixer.components import Recipe
+from nskit.mixer.components import LicenseOptionsEnum, Recipe
 
 
 class GitConfig(BaseConfiguration):
@@ -46,6 +46,7 @@ class CodeRecipe(Recipe):
     )
     git: GitConfig = GitConfig()
     language: str = 'python'
+    license: Optional[LicenseOptionsEnum] = None
 
     def get_pipeline_filenames(self):
         """Get CICD Pipeline filenames."""

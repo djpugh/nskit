@@ -95,6 +95,14 @@ class FileSystemObjectTestCase(unittest.TestCase):
         self.assertEqual(f2.get_path(Path.cwd(), {}), Path.cwd()/'a')
         self.assertEqual(f2.get_path(Path.cwd(), {'b': 'c'}), Path.cwd()/'ac')
 
+    def test_get_path_no_name(self):
+
+        def test_callable(context):
+            return None
+
+        f = FileSystemObject(name=test_callable)
+        self.assertIsNone(f.get_path(Path.cwd(), {}))
+
     def test_write(self):
         with self.assertRaises(NotImplementedError):
             FileSystemObject(name='a').write(None, {})

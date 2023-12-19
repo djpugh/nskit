@@ -168,6 +168,8 @@ jobs:
         pip install -U nox "tomli;python_version<'3.11'"
     - name: Run Test Suite
       run: nox -t test -- unit functional
+      env:
+        GITHUB_TOKEN: ${{ github.token}}
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
@@ -390,6 +392,8 @@ jobs:
         run: pytest ./repo/tests/unit
       - shell: bash
         run: pytest ./repo/tests/functional
+        env:
+          GITHUB_TOKEN: ${{ github.token}}
 
   publish-package:
     name: Publish Package

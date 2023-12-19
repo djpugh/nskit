@@ -8,5 +8,5 @@ Please see the documentation at https://djpugh.github.io/nskit for more informat
 
 # ToDo:
 
-- [ ] Add Github source for licenses
 - [ ] Add mkdocs templates
+- [ ] make Jinja2 environment extensible.
