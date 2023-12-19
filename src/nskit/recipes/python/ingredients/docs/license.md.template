@@ -1,0 +1,13 @@
+{% if license %}
+# License
+
+``{{repo.name}}`` is licensed under the {{license | upper }} License
+{% raw %}
+```
+{%
+   include-markdown "../../../LICENSE"
+   comments=false
+%}
+```
+{% endraw %}
+{% endif %}

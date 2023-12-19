@@ -1,0 +1,70 @@
+site_name: {{repo.name}}
+repo_url: {{repo.url}}
+{% if "github.com" in "" ~ repo.url %}
+edit_uri: blob/main/docs/source/
+{% endif %}
+docs_dir: ./source
+site_dir: ./html
+nav:
+ - index.md
+ - usage.md
+ - 'Developing':
+    - developing/index.md
+    {% if license %}
+    - developing/license.md
+    {% endif %}
+    - 'Test Coverage': coverage.md
+{% if "github.com" in "" ~ repo.url %}
+ - 'Issue Tracker': {{repo.url}}/issues
+{% endif %}
+exclude_docs: |
+  mkdocs.yml
+theme:
+  name: material
+  # icon:
+  #  logo: material/family-tree
+  # favicon: assets/images/favicon.ico
+  features:
+    - navigation.instant
+    - navigation.prefetch
+    - navigation.progress
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.path
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - search.share
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      default_handler: python
+      enable_inventory: true
+      handlers:
+        python:
+          paths: [src]
+  # https://github.com/jimporter/mike
+  - mike:
+      canonical_version: latest
+  # https://github.com/pawamoy/mkdocs-coverage
+  - coverage:
+      page_name: coverage  # default
+      html_report_dir: reports/htmlcov
+  # https://github.com/timvink/mkdocs-git-revision-date-localized-plugin
+  - git-revision-date-localized:
+      exclude:
+        - coverage.md
+      type: iso_date
+  - include-markdown
+  # https://github.com/mondeja/mkdocs-include-markdown-plugin
+
+# https://mkdocstrings.github.io/recipes/#automatic-code-reference-pages
+
+extra:
+  version:
+    provider: mike

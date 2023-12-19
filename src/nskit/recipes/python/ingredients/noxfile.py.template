@@ -1,6 +1,11 @@
 import os
 from pathlib import Path
-import tomllib
+from platform import platform, python_version
+
+if sys.version_info.major <=3 and sys.version_info.minor < 11:
+    import tomli as tomllib  # pyright: ignore [reportMissingImports]
+else:
+    import tomllib
 
 import nox
 
@@ -58,7 +63,6 @@ def types(session):
             session.warn('mypy failed, but warn-only set')
 
 
-
 @nox.session(reuse_venv=True, tags=['test'])
 def test(session):
     Path('reports').mkdir(exist_ok=True)
@@ -71,17 +75,66 @@ def test(session):
     for folder in test_folder:
         args.append('-rs')
         args.append(folder)
-    session.run('pytest', '--log-level=WARNING', '--cov={{repo.py_name}}', '--cov-report', 'xml:reports/coverage.xml', *args)
+        print(f'Test session: {folder}')
+        env_name = f'py-{python_version()}-os-{platform()}'
+        session.run(
+            'pytest',
+            # These args are for running pytest in parallel using pytest-xdist
+            # '-n',
+            # 'logical',
+            '--log-level=WARNING',
+            '--cov={{repo.py_name}}',
+            '--cov-report',
+            'xml:reports/coverage.xml',
+            '--cov-report',
+            'html:reports/htmlcov',
+            '--junitxml',
+            f'reports/{env_name}-test.xml',
+            *args)
 
 
 @nox.session(reuse_venv=True, tags=['docs'])
 def docs(session):
     session.install('.[dev,dev-docs]')
-    session.run('pipenv', 'check')
+    # We need to do some git wrangling for branches etc.
+    # We are going to:
+    #   * fetch all,
+    #   * checkout gh-pages,
+    #   * branch to gh-pages-dev-{HOSTNAME},
+    #   * use that for the mike build and serve,
+    #   * Delete the branch after serving complete
+    docs_file = 'docs/mkdocs.yml'
+    session.run('git', 'fetch', '--all', external=True)
+    branch_name = f'gh-pages-dev-{os.uname().nodename}'
+    version = 'dev'
+    session.run('git', 'branch', '-D', branch_name, external=True, success_codes=[0, 1])
+    session.run('git', 'branch', '--no-track', '-f', branch_name, 'origin/gh-pages', external=True)
+    try:
+        session.run('mike', 'deploy', '-u', version, 'latest', '--config-file', docs_file, '-b', branch_name)
+        session.run('mike', 'set-default', 'latest', '--config-file', docs_file, '-b', branch_name)
+        if not ON_CI:
+            # We want to put the whole branch as an artifact so we output it here
+            session.run('mike', 'serve', '--config-file', docs_file, '-b', branch_name)
 
+    finally:
+        if not ON_CI:
+            # Delete the branch once complete when testing locally
+            session.run('git', 'branch', '-D', branch_name, external=True)
+        # You might want to output this to your CI/CD tool to e.g. capture the artifacts.
+        # elif 'GITHUB_OUTPUT' in os.environ:
+        #    with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+        #        print(f'branch_name={branch_name}', file=fh)
 
 
 @nox.session(reuse_venv=True, tags=['build'])
 def build(session):
     install_dependencies(session, required=False, optional=['dev','dev-build'])
     session.run('python', '-m', 'build')
+
+
+@nox.session(reuse_venv=True, tags=['license'])
+def licenses(session):
+    session.install('licensecheck')
+    session.run('licensecheck', '--using', 'PEP631:github;azure_devops;dev;dev-test;dev-lint;dev-types;dev-security;dev-docs;dev-build', '--format', 'json', '--file', 'licenses-dev.json')
+    session.run('licensecheck', '--using', 'PEP631:github;azure_devops', '--format', 'json', '--file', 'licenses.json')
+    session.run('licensecheck', '--using', 'PEP631:github;azure_devops', '--format', 'ansi')
