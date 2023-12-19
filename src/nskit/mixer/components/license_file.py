@@ -37,21 +37,21 @@ def get_license_filename(context: Optional[Dict[str, Any]] = None):
     """Callable to set the default license file name."""
     if context.get('license', None) in LicenseOptionsEnum:
         # Handle naming
-        license = LicenseOptionsEnum(context.get('license', None))
+        license_name = LicenseOptionsEnum(context.get('license', None))
         # COPYING
-        if license in [
+        if license_name in [
             LicenseOptionsEnum.AGPL_3_0,
             LicenseOptionsEnum.GPL_2_0,
             LicenseOptionsEnum.GPL_3_0,
         ]:
             name = 'COPYING'
         # COPYING.LESSER
-        elif license in [
+        elif license_name in [
             LicenseOptionsEnum.LGPL_2_1,
         ]:
             name = 'COPYING.LESSER'
         # LICENSE
-        elif license in [
+        elif license_name in [
             LicenseOptionsEnum.MIT,
             LicenseOptionsEnum.Apache_2_0,
             LicenseOptionsEnum.BSD_2_Clause,
@@ -64,7 +64,7 @@ def get_license_filename(context: Optional[Dict[str, Any]] = None):
         ]:
             name = "LICENSE"
         # UNLICENSE
-        elif license in [LicenseOptionsEnum.Unlicense]:
+        elif license_name in [LicenseOptionsEnum.Unlicense]:
             name = 'UNLICENSE'
         return name
 
@@ -80,11 +80,11 @@ def get_license_content(context: Dict[str, Any]):
     """Render the content of the license."""
     # We implement some specifics based on the implementation instructions in Github licenses api get
     if context.get('license', None) in LicenseOptionsEnum:
-        license = LicenseOptionsEnum(context.get('license', None))
-        license_content = _get_license_content(license)
+        license_name = LicenseOptionsEnum(context.get('license', None))
+        license_content = _get_license_content(license_name)
         content = license_content.body
         # [year] [fullname] to be replaced
-        if license in [
+        if license_name in [
             LicenseOptionsEnum.BSD_2_Clause,
             LicenseOptionsEnum.BSD_3_Clause,
             LicenseOptionsEnum.MIT,

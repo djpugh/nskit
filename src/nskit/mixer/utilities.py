@@ -120,3 +120,6 @@ class _EnvironmentFactory():
     def default_environment():
         """Get the default environment object."""
         return Environment(loader=ChoiceLoader([_PkgResourcesTemplateLoader()]))  # nosec B701
+
+
+JINJA_ENVIRONMENT_FACTORY = _EnvironmentFactory()

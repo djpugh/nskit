@@ -101,7 +101,7 @@ class FileSystemObjectTestCase(unittest.TestCase):
             return None
 
         f = FileSystemObject(name=test_callable)
-        self.assertEqual(f.get_path(Path.cwd(), {}), None)
+        self.assertIsNone(f.get_path(Path.cwd(), {}))
 
     def test_write(self):
         with self.assertRaises(NotImplementedError):
