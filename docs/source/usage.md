@@ -48,7 +48,8 @@ from nskit.mixer import Recipe
     url: ...) -> nskit.recipes.python.PyRepoMetadata>,
   git: nskit.mixer.repo.GitConfig = <Signature (*,
     initial_branch_name: str = 'main',
-    git_flow: bool = True) -> nskit.mixer.repo.GitConfig>
+    git_flow: bool = True) -> nskit.mixer.repo.GitConfig>,
+  license: Optional[nskit.mixer.components.license_file.LicenseOptionsEnum] = None
 ) -> nskit.recipes.pythong.package.PackageRecipe>
 # So to load it you have to specify the following fields
 kwargs = {
@@ -76,6 +77,12 @@ my_package.create(base_path=‘/path/to/my/root/folder’, override_path=‘xyz�
 # Creates the template at /path/to/my/root/folder/xyz instead of <cwd>/my_package
 # You could also specifically override context parameters at create time as additional kwargs
 ```
+
+#### License Files
+
+The 3 example templates have a license file option, using the [nskit.mixer.components.LicenseFile][] class, which calls the github API to get the license file definitions available on Github. These files will only be created if an appropriate ``license`` context variable is passed in (the default is None), so you can override the license with your own specific license in a template as required.
+
+The license options are defined in [nskit.mixer.components.LicenseOptionsEnum][].
 
 ### Creating a codebase
 
@@ -200,8 +207,10 @@ These are the recipe building blocks, intended to be template files and folders 
 
 These use [jinja2](https://jinja.palletsprojects.com/en/3.1.x/) to provide the template information, and are built with two main python classes:
 
-* [File][nskit.mixer.components.File] - has ``content`` which is either a ``jinja2`` template or just text, and a ``name``, which is again either a ``jinja2`` template or text.
-* [Folder][nskit.mixer.components.Folder] - has ``contents`` which is either [Files][nskit.mixer.components.File], or [Folders][nskit.mixer.components.Folder] and a ``name``, which is again either a ``jinja2`` template or text.
+* [File][nskit.mixer.components.File] - has ``content`` which is either a ``jinja2`` template, callable, or just text, and a ``name``, which is again either a ``jinja2`` template, callable or text.
+* [Folder][nskit.mixer.components.Folder] - has ``contents`` which is either [Files][nskit.mixer.components.File], or [Folders][nskit.mixer.components.Folder] and a ``name``, which is again either a ``jinja2`` template, callable, or text.
+
+The callable options for ``content`` and ``name`` need to have the signature: ``def <func>(context: Dict[str, Any]):``. An example of these is the methods in [nskit.mixer.components.LicenseFile][] for the name and content ([get_license_filename][nskit.mixer.components.license_file.get_license_filename], and [get_license_content][nskit.mixer.components.license_file.get_license_content]).
 
 These allow the different template blocks to be reused, and adapted.
 

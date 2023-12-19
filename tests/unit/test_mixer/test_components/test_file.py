@@ -38,6 +38,17 @@ class FileTestCase(unittest.TestCase):
         self.assertEqual(f.render_content({}), 'Dryrun')
         self.assertEqual(f.render_content({'a': 1}), 'Dryrun1')
 
+    def test_render_content_callable(self):
+
+        def test_callable(context):
+            if context.get('a', None):
+                return 'Dryrun {{a}}'
+            return 'Dryrun'
+
+        f = File(name='test.txt', content=test_callable)
+        self.assertEqual(f.render_content({}), 'Dryrun')
+        self.assertEqual(f.render_content({'a': 1}), 'Dryrun 1')
+
     def test_write_no_override(self):
         with ChDir():
             f = File(name='test.txt', content='Dryrun{{a}}')
@@ -57,6 +68,17 @@ class FileTestCase(unittest.TestCase):
             with open('test2.txt') as fp:
                 self.assertEqual(fp.read(), 'Dryrun')
 
+    def test_write_no_content(self):
+
+        def test_callable(context):
+            return None
+
+        with ChDir():
+            self.assertFalse(Path('test.txt').exists())
+            f = File(name='test.txt', content=test_callable)
+            f.write(Path.cwd(), {}, Path('test2.txt'))
+            self.assertFalse(Path('test.txt').exists())
+
     def test_dryrun_no_override(self):
         f = File(name='test.txt', content='Dryrun')
         self.assertEqual(f.dryrun(Path('test_folder'), {}), {Path('test_folder/test.txt'): "Dryrun"})
@@ -64,6 +86,15 @@ class FileTestCase(unittest.TestCase):
     def test_dryrun_override(self):
         f = File(name='test.txt', content='Dryrun')
         self.assertEqual(f.dryrun(Path('test_folder'), {}, Path('test2.txt')), {Path('test_folder/test2.txt'): "Dryrun"})
+
+    def test_dryrun_no_content(self):
+
+        def test_callable(context):
+            return None
+
+        f = File(name='test.txt', content=test_callable)
+        resp = f.dryrun(Path.cwd(), {}, Path('test2.txt'))
+        self.assertEqual(resp, {})
 
     def test_validate_ok(self):
         with ChDir():
@@ -106,6 +137,16 @@ class FileTestCase(unittest.TestCase):
             self.assertEqual(missing, [])
             self.assertEqual(errors, [Path('test2.txt').absolute()])
             self.assertEqual(ok, [])
+
+    def test_validate_no_content(self):
+        def test_callable(context):
+            return None
+
+        f = File(name='test.txt', content=test_callable)
+        missing, error, ok= f.validate(Path.cwd(), {}, Path('test2.txt'))
+        self.assertEqual(missing, [])
+        self.assertEqual(error, [])
+        self.assertEqual(ok, [])
 
     def test_define_with_string_content(self):
         f = File(name='test.txt', content='Dryrun{{a}}')

@@ -72,4 +72,5 @@ class _PkgResourcesTemplateLoader(BaseLoader):
         return source, None, lambda: True
 
 
+# TODO: Make this patchable for e.g. other environment extensions etc.
 JINJA_ENVIRONMENT = Environment(loader=ChoiceLoader([_PkgResourcesTemplateLoader()]))  # nosec B701
