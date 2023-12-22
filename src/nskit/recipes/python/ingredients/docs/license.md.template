@@ -1,7 +1,7 @@
 {% if license %}
 # License
 
-``{{repo.name}}`` is licensed under the {{license | upper }} License
+``{{repo.name}}`` is licensed under the {{license.value | upper }} License
 {% raw %}
 ```
 {%

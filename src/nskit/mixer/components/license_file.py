@@ -111,7 +111,7 @@ def get_license_content(context: Dict[str, Any]):
             LicenseOptionsEnum.BSD_3_Clause,
             LicenseOptionsEnum.MIT,
         ]:
-            content = content.replace('[year]', '{{license_year}}').replace('[fullname]', '{{name}} Developers')
+            content = content.replace('[year]', '{{license_year}}').replace('[fullname]', '{{repo.name}} Developers')
         context['license_year'] = context.get('license_year', date.today().year)
         return content
 
