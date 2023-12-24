@@ -18,7 +18,7 @@ from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
 class GithubRepoSettings(BaseConfiguration):
     """Github Repo settings."""
     private: bool = True
-    has_issue: Optional[bool] = None
+    has_issues: Optional[bool] = None
     has_wiki: Optional[bool] = None
     has_downloads: Optional[bool] = None
     has_projects: Optional[bool] = None
@@ -36,7 +36,7 @@ class GithubSettings(VCSProviderSettings):
     """
     model_config = SettingsConfigDict(env_prefix='GITHUB_', env_file='.env')
     interactive: bool = Field(False, description='Use Interactive Validation for token')
-    url: HttpUrl = "https://github.com"
+    url: HttpUrl = "https://api.github.com"
     organisation: Optional[str] = Field(None, description='Organisation to work in, otherwise uses the user for the token')
     token: SecretStr = Field(None, validate_default=True, description='Token to use for authentication, falls back to interactive device authentication if not provided')
     repo: GithubRepoSettings = GithubRepoSettings()
@@ -69,7 +69,7 @@ class GithubRepoClient(RepoClient):
     def __init__(self, config: GithubSettings):
         """Initialise the client."""
         self._config = config
-        self._github = GhApi(token=self._config.token.get_secret_value(), gh_host=self._config.url)
+        self._github = GhApi(token=self._config.token.get_secret_value(), gh_host=str(self._config.url).rstrip('/'))
         # If the organisation is set, we get it, and assume that the token is valid
         # Otherwise default to the user
         if self._config.organisation:
@@ -77,31 +77,39 @@ class GithubRepoClient(RepoClient):
                 self._github.orgs.get(self._config.organisation)
                 self._org_type = GithubOrgType.org
             except HTTP404NotFoundError:
-                self._github.user.get_by_username(self._config.organisation)
+                self._github.users.get_by_username(self._config.organisation)
                 self._org_type = GithubOrgType.user
         else:
-            self._config.organisation = self._github.get_authenticated()['login']
+            self._config.organisation = self._github.users.get_authenticated()['login']
             self._org_type = GithubOrgType.user
 
     def create(self, repo_name: str):
         """Create the repo in the user/organisation."""
-        return self._github.repos.create_in_org(
-            self._config.organisation,
-            name=repo_name,
-            private=self._config.repo.private,
-            has_issues=self._config.repo.has_issues,
-            has_wiki=self._config.repo.has_wiki,
-            has_downloads=self._config.repo.has_downloads,
-            has_projects=self._config.repo.has_projects,
-            allow_squash_merge=self._config.repo.allow_squash_merge,
-            allow_merge_commit=self._config.repo.allow_merge_commit,
-            allow_rebase_merge=self._config.repo.allow_rebase_merge,
-            auto_init=self._config.repo.auto_init,
-            delete_branch_on_merge=self._config.repo.delete_branch_on_merge
-        )
+        kwargs = {
+            'name': repo_name,
+            'private': self._config.repo.private,
+            'has_issues': self._config.repo.has_issues,
+            'has_wiki': self._config.repo.has_wiki,
+            'has_downloads': self._config.repo.has_downloads,
+            'has_projects': self._config.repo.has_projects,
+            'allow_squash_merge': self._config.repo.allow_squash_merge,
+            'allow_merge_commit': self._config.repo.allow_merge_commit,
+            'allow_rebase_merge': self._config.repo.allow_rebase_merge,
+            'auto_init': self._config.repo.auto_init,
+            'delete_branch_on_merge': self._config.repo.delete_branch_on_merge
+        }
+        if self._org_type == GithubOrgType.org:
+            self._github.repos.create_in_org(self._config.organisation, **kwargs)
+        else:
+            self._github.repos.create_for_authenticated_user(**kwargs)
 
     def get_remote_url(self, repo_name: str) -> HttpUrl:
         """Get the remote url for the repo."""
+        if self.check_exists(repo_name):
+            return self._github.repos.get(self._config.organisation, repo_name)['html_url']
+
+    def get_clone_url(self, repo_name: str) -> HttpUrl:
+        """Get the clone url for the repo."""
         if self.check_exists(repo_name):
             return self._github.repos.get(self._config.organisation, repo_name)['clone_url']
 

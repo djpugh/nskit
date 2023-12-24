@@ -99,6 +99,11 @@ class _Repo(BaseConfiguration):
         """Get the remote url."""
         return self.provider_client.get_remote_url(self.name)
 
+    @property
+    def clone_url(self):
+        """Get the remote url."""
+        return self.provider_client.get_clone_url(self.name)
+
     def create(self):
         """Create the repo."""
         if not self.exists:
@@ -135,8 +140,8 @@ class _Repo(BaseConfiguration):
         if not self.exists_locally:
             if not self.local_dir.parent.exists():
                 self.local_dir.parent.mkdir(exist_ok=True, parents=True)
-            if self.url:
-                self._git_repo_cls.clone_from(url=self.url, to_path=str(self.local_dir))
+            if self.clone_url:
+                self._git_repo_cls.clone_from(url=self.clone_url, to_path=str(self.local_dir))
 
     def pull(self, remote=DEFAULT_REMOTE):
         """Pull the repo from the remote (defaults to origin)."""

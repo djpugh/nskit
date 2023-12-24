@@ -50,12 +50,12 @@ class LicenseFileTestCase(unittest.TestCase):
     def test_get_license_content_cache(self, GhApi):
         # We need to clear the cache here on the test
         _get_license_content.cache_clear()
-        self.assertEqual(f'{date.today().year} test_repo Developers abc', LicenseFile().render_content({'license': 'mit', 'name': 'test_repo'}))
+        self.assertEqual(f'{date.today().year} test_repo Developers abc', LicenseFile().render_content({'license': 'mit', 'repo':{'name': 'test_repo'}}))
         GhApi.assert_called_once_with()
         GhApi().licenses.get.assert_called_once_with('mit')
         GhApi().licenses.get.reset_mock()
         GhApi.reset_mock()
-        self.assertEqual(f'{date.today().year} test_repo2 Developers abc', LicenseFile().render_content({'license': 'mit', 'name': 'test_repo2'}))
+        self.assertEqual(f'{date.today().year} test_repo2 Developers abc', LicenseFile().render_content({'license': 'mit', 'repo':{'name': 'test_repo2'}}))
         GhApi.assert_not_called()
         GhApi().licenses.get.assert_not_called()
 
@@ -105,7 +105,7 @@ class LicenseFileTestCase(unittest.TestCase):
             self.assertFalse(Path('UNLICENSE').exists())
             pre = [u for u in Path.cwd().glob('*')]
             license_file = LicenseFile()
-            resp = license_file.write(Path('.'), {'license':'mit', 'name': 'test_repo2'})
+            resp = license_file.write(Path('.'), {'license':'mit', 'repo':{'name': 'test_repo2'}})
             post = [u for u in Path.cwd().glob('*')]
             self.assertTrue(Path('LICENSE').exists())
             self.assertFalse(Path('COPYING').exists())
@@ -117,15 +117,15 @@ class LicenseFileTestCase(unittest.TestCase):
     @mock_gh_api
     def test_dry_run_license(self, GhApi):
         license_file = LicenseFile()
-        resp = license_file.dryrun(Path('.'), {'license':'mit', 'name': 'test_repo2'})
+        resp = license_file.dryrun(Path('.'), {'license':'mit', 'repo':{'name': 'test_repo2'}})
         self.assertEqual(resp, {Path('LICENSE'): f'{date.today().year} test_repo2 Developers abc'})
 
     @mock_gh_api
     def test_validate_license_ok(self, GhApi):
         with ChDir():
             license_file = LicenseFile()
-            license_file.write(Path('.'), {'license':'mit', 'name': 'test_repo2'})
-            missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'name': 'test_repo2'})
+            license_file.write(Path('.'), {'license':'mit', 'repo':{'name': 'test_repo2'}})
+            missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'repo':{'name': 'test_repo2'}})
             self.assertEqual(missing, [])
             self.assertEqual(errors, [])
             self.assertEqual(ok, [Path('LICENSE')])
@@ -134,7 +134,7 @@ class LicenseFileTestCase(unittest.TestCase):
     def test_validate_license_missing(self, GhApi):
         with ChDir():
             license_file = LicenseFile()
-            missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'name': 'test_repo2'})
+            missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'repo':{'name': 'test_repo2'}})
             self.assertEqual(missing, [Path('LICENSE')])
             self.assertEqual(errors, [])
             self.assertEqual(ok, [])
@@ -145,7 +145,7 @@ class LicenseFileTestCase(unittest.TestCase):
             license_file = LicenseFile()
             # License doesn't have the year fullname replacement
             license_file.write(Path('.'), {'license': 'mpl-2.0'})
-            missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'name': 'test_repo2'})
+            missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'repo':{'name': 'test_repo2'}})
             self.assertEqual(missing, [])
             self.assertEqual(errors, [Path('LICENSE')])
             self.assertEqual(ok, [])
@@ -153,7 +153,7 @@ class LicenseFileTestCase(unittest.TestCase):
     @mock_gh_api
     def test_override_year(self, GhApi):
         license_file = LicenseFile()
-        resp = license_file.dryrun(Path('.'), {'license':'mit', 'name': 'test_repo2', 'license_year': 2022})
+        resp = license_file.dryrun(Path('.'), {'license':'mit', 'repo':{'name': 'test_repo2'}, 'license_year': 2022})
         self.assertEqual(resp, {Path('LICENSE'): '2022 test_repo2 Developers abc'})
 
     def test_license_filename(self):
@@ -217,7 +217,7 @@ class LicenseFileTestCase(unittest.TestCase):
         for license_name in LicenseOptionsEnum:
             with self.subTest(license=license_name):
                 # Test that it renders content
-                license_content = LicenseFile().render_content(context={'license': license_name, 'name': 'test_repo_name'})
+                license_content = LicenseFile().render_content(context={'license': license_name, 'repo':{'name': 'test_repo_name'}})
                 self.assertIsNotNone(license_content)
                 self.assertNotIn('[year]', license_content)
                 self.assertNotIn('[fullname]', license_content)

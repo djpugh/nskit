@@ -20,6 +20,13 @@ class RepoClient(ABC):
         """Get the remote url for a repo."""
         raise NotImplementedError()
 
+    def get_clone_url(self, repo_name: str) -> HttpUrl:
+        """Get the clone URL.
+
+        This defaults to the remote url unless specifically implemented.
+        """
+        return self.get_remote_url(repo_name)
+
     @abstractmethod
     def delete(self, repo_name: str):
         """Delete a repo."""

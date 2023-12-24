@@ -99,7 +99,7 @@ class _RepoTestCase(unittest.TestCase):
         with ChDir():
             cl = self._MockedRepoClientKls()
             cl.check_exists.return_value = False
-            cl.get_remote_url.return_value = None
+            cl.get_clone_url.return_value = None
             r = _Repo(name='test', provider_client=cl)
             r._git_repo_cls = self._MockedGitRepoKls
             r.create()
@@ -111,7 +111,7 @@ class _RepoTestCase(unittest.TestCase):
         with ChDir():
             cl = self._MockedRepoClientKls()
             cl.check_exists.return_value = False
-            cl.get_remote_url.return_value = 'https://test.com'
+            cl.get_clone_url.return_value = 'https://test.com'
             r = _Repo(name='test', provider_client=cl)
             r._git_repo_cls = self._MockedGitRepoKls
             r.create()
@@ -123,7 +123,7 @@ class _RepoTestCase(unittest.TestCase):
         with ChDir():
             cl = self._MockedRepoClientKls()
             cl.check_exists.return_value = True
-            cl.get_remote_url.return_value = 'https://test.com'
+            cl.get_clone_url.return_value = 'https://test.com'
             r = _Repo(name='test', provider_client=cl)
             r._git_repo_cls = self._MockedGitRepoKls
             r.create()
@@ -169,7 +169,7 @@ class _RepoTestCase(unittest.TestCase):
             Path('test/').mkdir(parents=True)
             self.assertTrue(Path('test/').exists())
             cl = self._MockedRepoClientKls()
-            cl.get_remote_url.return_value = 'https://test.com'
+            cl.get_clone_url.return_value = 'https://test.com'
             r = _Repo(name='test', provider_client=cl, local_dir=Path('test/abc'))
             r._git_repo_cls = self._MockedGitRepoKls
             r.clone()
@@ -180,7 +180,7 @@ class _RepoTestCase(unittest.TestCase):
         with ChDir():
             self.assertFalse(Path('test/').exists())
             cl = self._MockedRepoClientKls()
-            cl.get_remote_url.return_value = None
+            cl.get_clone_url.return_value = None
             r = _Repo(name='test', provider_client=cl, local_dir=Path('test/abc'))
             r._git_repo_cls = self._MockedGitRepoKls
             r.clone()
@@ -191,7 +191,7 @@ class _RepoTestCase(unittest.TestCase):
         with ChDir():
             self.assertFalse(Path('test/').exists())
             cl = self._MockedRepoClientKls()
-            cl.get_remote_url.return_value = 'https://test.com'
+            cl.get_clone_url.return_value = 'https://test.com'
             r = _Repo(name='test', provider_client=cl, local_dir=Path('test/abc'))
             r._git_repo_cls = self._MockedGitRepoKls
             r.clone()
@@ -431,7 +431,7 @@ class NamespaceValidationRepoTestCase(unittest.TestCase):
             # Only uses clone and checkout, but we can't mock these on the BaseModel
             # Use tests from clone and checkout for _Repo
             cl = self._MockedRepoClientKls()
-            cl.get_remote_url.return_value = 'https://test.com'
+            cl.get_clone_url.return_value = 'https://test.com'
             r = NamespaceValidationRepo(name='abc', provider_client=cl, local_dir=Path('test/abc'))
             r._git_repo_cls = self._MockedGitRepoKls
             r._git_repo_cls.clone_from.assert_not_called()
@@ -509,7 +509,7 @@ class NamespaceValidationRepoTestCase(unittest.TestCase):
             with open('test/abc/namespaces2.yaml', 'w') as f:
                 f.write(nsv.model_dump_yaml())
             cl = self._MockedRepoClientKls()
-            cl.get_remote_url.return_value = 'https://test.com'
+            cl.get_clone_url.return_value = 'https://test.com'
             r = NamespaceValidationRepo(
                 namespaces_filename='namespaces2.yaml',
                 name='abc',

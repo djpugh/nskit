@@ -442,7 +442,7 @@ This could be implemented as a staticmethod on the recipe object or similar, but
 
 You can also customise the environment initialisation if you need to override specifics of the configuration however this is not recommended as it can cause complex issues with the templates/handling.
 
-The default implementation defines the loader to use ``_PkgResourcesTemplateLoader`` to allow for package resources type loading on the environment (see examples above), but other parameters could be configured/changed
+The default implementation defines the loader to use ``_PkgResourcesTemplateLoader`` to allow for package resources type loading on the environment (see examples above), but other parameters could be configured/changed by setting the ``NSKIT_MIXER_JINJA_ENVIRONMENT_FACTORY`` environment variable to the name of the entrypoint.
 
 !!! warning
 
