@@ -24,7 +24,7 @@ class LicenseFileFunctionalTestCase(unittest.TestCase):
             pre = [u for u in Path.cwd().glob('*')]
             license_file = LicenseFile()
             try:
-                resp = license_file.write(Path('.'), {'license':'mit', 'name': 'test_repo2'})
+                resp = license_file.write(Path('.'), {'license':'mit', 'repo': {'name': 'test_repo2'}})
             except HTTP403ForbiddenError:
                 self.skip_if_rate_limited()
             post = [u for u in Path.cwd().glob('*')]
@@ -40,7 +40,7 @@ class LicenseFileFunctionalTestCase(unittest.TestCase):
     def test_dry_run_license(self):
         license_file = LicenseFile()
         try:
-            resp = license_file.dryrun(Path('.'), {'license':'mit', 'name': 'test_repo2'})
+            resp = license_file.dryrun(Path('.'), {'license':'mit', 'repo': {'name': 'test_repo2'}})
         except HTTP403ForbiddenError:
             self.skip_if_rate_limited()
 
@@ -52,8 +52,8 @@ class LicenseFileFunctionalTestCase(unittest.TestCase):
         with ChDir():
             license_file = LicenseFile()
             try:
-                license_file.write(Path('.'), {'license':'mit', 'name': 'test_repo2'})
-                missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'name': 'test_repo2'})
+                license_file.write(Path('.'), {'license':'mit', 'repo': {'name': 'test_repo2'}})
+                missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'repo': {'name': 'test_repo2'}})
             except HTTP403ForbiddenError:
                 self.skip_if_rate_limited()
             self.assertEqual(missing, [])
@@ -64,7 +64,7 @@ class LicenseFileFunctionalTestCase(unittest.TestCase):
         with ChDir():
             license_file = LicenseFile()
             try:
-               missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'name': 'test_repo2'})
+               missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'repo': {'name': 'test_repo2'}})
             except HTTP403ForbiddenError:
                 self.skip_if_rate_limited()
             self.assertEqual(missing, [Path('LICENSE')])
@@ -77,7 +77,7 @@ class LicenseFileFunctionalTestCase(unittest.TestCase):
             # License doesn't have the year fullname replacement
             try:
                 license_file.write(Path('.'), {'license': 'mpl-2.0'})
-                missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'name': 'test_repo2'})
+                missing, errors, ok = license_file.validate(Path('.'), {'license':'mit', 'repo': {'name': 'test_repo2'}})
             except HTTP403ForbiddenError:
                 self.skip_if_rate_limited()
             self.assertEqual(missing, [])
@@ -87,7 +87,7 @@ class LicenseFileFunctionalTestCase(unittest.TestCase):
     def test_override_year(self):
         license_file = LicenseFile()
         try:
-            resp = license_file.dryrun(Path('.'), {'license':'mit', 'name': 'test_repo2', 'license_year': 1880})
+            resp = license_file.dryrun(Path('.'), {'license':'mit', 'repo': {'name': 'test_repo2'}, 'license_year': 1880})
         except HTTP403ForbiddenError:
             self.skip_if_rate_limited()
 
@@ -100,7 +100,7 @@ class LicenseFileFunctionalTestCase(unittest.TestCase):
             with self.subTest(license=license_name):
                 # Test that it renders content
                 try:
-                    license_content = LicenseFile().render_content(context={'license': license_name, 'name': 'test_repo_name'})
+                    license_content = LicenseFile().render_content(context={'license': license_name, 'repo': {'name': 'test_repo_name'}})
                 except HTTP403ForbiddenError:
                     self.skip_if_rate_limited()
                 self.assertIsNotNone(license_content)
