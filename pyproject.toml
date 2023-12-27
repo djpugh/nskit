@@ -97,6 +97,8 @@ dev-docs = [
     "mkdocs-git-authors-plugin",
     "mkdocs-coverage",
     "mkdocs-include-markdown-plugin",
+    'mkdocs-github-changelog',
+    'mkdocs-licenseinfo',
     # "mkdocs-gen-files",
     # "mkdocs-literate-nav",
     "mike"

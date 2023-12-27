@@ -16,8 +16,9 @@ nav:
     - 'nskit.mixer': api/nskit.mixer.md
     - 'nskit.recipes': api/nskit.recipes.md
     - 'nskit.vcs': api/nskit.vcs.md
- - 'Issue Tracker': https://github.com/djpugh/nskit/issues
  - changelog.md
+ - 'Issue Tracker': https://github.com/djpugh/nskit/issues
+
 exclude_docs: |
   mkdocs.yml
 theme:
