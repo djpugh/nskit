@@ -387,7 +387,15 @@ jobs:
       - shell: bash
         run: |
           pip install $(ls -t dist/*.whl | head -n1)
-          pip install -U pytest setuptools
+      - shell: bash
+        name: Install tomli
+        run: |
+          pip install tomli
+      - shell: python
+        name: Install test dependencies
+        run: |
+          import subprocess, tomli
+          subprocess.check_call(['pip', 'install']+tomli.load(open('./repo/pyproject.toml', 'rb'))['project']['optional-dependencies']['dev-test'])
       - shell: bash
         run: pytest ./repo/tests/unit
       - shell: bash
@@ -471,13 +479,22 @@ jobs:
           else
             echo "tag_exists=false" >> $GITHUB_OUTPUT
           fi
+      - shell: bash
+        name: Install tomli
+        run: |
+          pip install tomli
+      - shell: python
+        name: Install test dependencies
+        run: |
+          import subprocess, tomli
+          subprocess.check_call(['pip', 'install']+tomli.load(open('pyproject.toml', 'rb'))['project']['optional-dependencies']['dev-docs'])
       - name: Deploy
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          mike set-default latest --config-file docs/mkdocs.yml
           mike deploy -u "${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor}}" latest --config-file docs/mkdocs.yml -p
+          mike set-default latest --config-file docs/mkdocs.yml
           git checkout gh-pages
           git pull origin
           git tag docs-${{ steps.get_version.outputs.tag_name }}
-          git push origin
+          git push origin docs-${{ steps.get_version.outputs.tag_name }}
