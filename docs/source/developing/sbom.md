@@ -19,7 +19,7 @@ These are the dependencies used for running ``nskit``:
 
 #### Azure Devops
 ##### ::licenseinfo
-    using: PEP631:azure-devops
+    using: PEP631:azure_devops
     diff: PEP631
 
 ## Development Dependencies

@@ -1,3 +1,3 @@
 # Releases
 
-## ::github-release-changelog djpugh\nskit
+## ::github-release-changelog djpugh/nskit
