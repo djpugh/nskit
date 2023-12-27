@@ -444,11 +444,10 @@ jobs:
     needs:
       - docs
       - publish-package
-    # Only do this on the tagged build, not the release
     if: >
       (github.event_name == 'push' &&
         startsWith(github.ref, 'refs/tags')  && !(contains(github.ref, 'gh-pages') || contains(github.ref, 'docs') || contains(github.ref, 'dev-'))
-      )
+      ) || github.event_name == 'release'
     steps:
       - uses: actions/checkout@v4
         with:
