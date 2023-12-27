@@ -72,8 +72,8 @@ def test(session):
     else:
         test_folder = ['tests']
     session.install('.[dev,dev-test]')
-    args = []
     for folder in test_folder:
+        args = []
         args.append('-rs')
         args.append(folder)
         print(f'Test session: {folder}')
@@ -86,11 +86,11 @@ def test(session):
             '--log-level=WARNING',
             '--cov={{repo.py_name}}',
             '--cov-report',
-            'xml:reports/coverage.xml',
+            f'xml:reports/coverage-{folder}.xml',
             '--cov-report',
             'html:reports/htmlcov',
             '--junitxml',
-            f'reports/{env_name}-test.xml',
+            f'reports/{env_name}-test-{folder}.xml',
             *args)
 
 
