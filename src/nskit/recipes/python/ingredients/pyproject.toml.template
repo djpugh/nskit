@@ -8,7 +8,7 @@ name = "{{repo.name | replace('.', '-')}}"
 authors = [{name = "{{ repo.owner }}", email="{{ repo.email }}"}]
 maintainers = [{ name = "{{ repo.owner }}", email="{{ repo.email }}" }]
 description = "{{ repo.description }}"
-readme = {file="README.md", content-type = "text/x-rst"}
+readme = {file="README.md", content-type = "text/x-markdown"}
 keywords = []
 requires-python = '>3.7'
 classifiers = [

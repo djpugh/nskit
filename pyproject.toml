@@ -8,7 +8,7 @@ name = "nskit"
 authors = [{name = "djpugh@gmail.com", email="djpugh@gmail.com"}]
 maintainers = [{ name = "djpugh@gmail.com", email="djpugh@gmail.com" }]
 description = "Namespace Development Kit, providing a set of useful utilities for building software (in python namespaces)"
-readme = {file="README.md", content-type = "text/x-rst"}
+readme = {file="README.md", content-type = "text/markdown"}
 keywords = []
 requires-python = '>=3.8'
 classifiers = [
