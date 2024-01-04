@@ -4,6 +4,7 @@ from typing import List, Union
 from pydantic import Field
 
 from nskit.mixer import File, Folder, LicenseFile
+from nskit.mixer.components.recipe import RECIPE_ENTRYPOINT
 from nskit.recipes.python import ingredients, PyRecipe
 from nskit.recipes.python.ingredients import recipe as recipe_ingredients
 
@@ -11,6 +12,7 @@ from nskit.recipes.python.ingredients import recipe as recipe_ingredients
 class RecipeRecipe(PyRecipe):
     """A Recipe for creating Recipes, meta!"""
 
+    recipe_entrypoint: str = RECIPE_ENTRYPOINT
     contents: List[Union[File, Folder]] = Field(
         [
             ingredients.gitignore,
