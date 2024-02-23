@@ -35,7 +35,11 @@ dependencies = [
     "logzero",
     "orjson",
     "pydantic[email]",
-    "pydantic-settings",
+    "pydantic-settings<2.2.0",
+    # This is not an ideal pin, but diue to the issue highlighted in https://github.com/pydantic/pydantic-settings/issues/245
+    # and the non-semver compliant versioning in pydantic-settings, we need to add this pin
+    # this version would change the API behaviour for nskit as it will also ignore additional
+    # inputs in the python initialisation so We will pin to version < 2.2.0
     "python-dotenv",
     "ruamel.yaml",
     "tomlkit",

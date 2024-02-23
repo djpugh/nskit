@@ -17,6 +17,14 @@ from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
 
 class GithubRepoSettings(BaseConfiguration):
     """Github Repo settings."""
+
+    # # This is not ideal behaviour, but due to the issue highlighted in
+    # # https://github.com/pydantic/pydantic-settings/issues/245 and the
+    # # non-semver compliant versioning in pydantic-settings, we need to add this behaviour
+    # # this now changes the API behaviour for these objects as they will
+    # # also ignore additional inputs in the python initialisation
+    # # We will pin to version < 2.1.0 instead of allowing 2.2.0+ as it requires the code below:
+    # model_config = ConfigDict(extra='ignore')  noqa: E800
     private: bool = True
     has_issues: Optional[bool] = None
     has_wiki: Optional[bool] = None
@@ -34,12 +42,18 @@ class GithubSettings(VCSProviderSettings):
 
     Uses PAT token for auth (set in environment variables as GITHUB_TOKEN)
     """
-    model_config = SettingsConfigDict(env_prefix='GITHUB_', env_file='.env')
+    # This is not ideal behaviour, but due to the issue highlighted in
+    # https://github.com/pydantic/pydantic-settings/issues/245 and the
+    # non-semver compliant versioning in pydantic-settings, we need to add this behaviour
+    # this now changes the API behaviour for these objects as they will
+    # also ignore additional inputs in the python initialisation
+    # We will pin to version < 2.1.0 instead of allowing 2.2.0+ as it requires the code below:
+    model_config = SettingsConfigDict(env_prefix='GITHUB_', env_file='.env')  # extra='ignore')  noqa: E800
     interactive: bool = Field(False, description='Use Interactive Validation for token')
     url: HttpUrl = "https://api.github.com"
     organisation: Optional[str] = Field(None, description='Organisation to work in, otherwise uses the user for the token')
     token: SecretStr = Field(None, validate_default=True, description='Token to use for authentication, falls back to interactive device authentication if not provided')
-    repo: GithubRepoSettings = GithubRepoSettings()
+    repo: GithubRepoSettings = Field(default_factory=GithubRepoSettings)
 
     @property
     def repo_client(self) -> 'GithubRepoClient':

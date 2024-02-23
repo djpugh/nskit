@@ -1,5 +1,7 @@
 import unittest
 
+from pydantic import ConfigDict
+
 from nskit.common.configuration import BaseConfiguration
 from nskit.common.contextmanagers import ChDir
 from nskit.common.io import json, toml, yaml
@@ -113,3 +115,20 @@ class BaseConfigurationTestCase(unittest.TestCase):
 
     def test_dump_yaml(self):
         self.assertEqual(self.expected.model_dump_yaml(), yaml.dumps(self.file_config))
+
+    def test_nested_properties(self):
+
+        class ASettings(BaseConfiguration):
+            model_config = ConfigDict(extra='ignore')
+            c: str = 'a'
+            d: int = 1
+
+            @property
+            def a(self):
+                return True
+        class TestModel(BaseConfiguration):
+            a: ASettings
+            b: int
+
+        t = TestModel(a=ASettings(), b=2)
+
