@@ -17,6 +17,7 @@ from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
 
 class GithubRepoSettings(BaseConfiguration):
     """Github Repo settings."""
+    model_config = SettingsConfigDict(env_prefix='GITHUB_REPO', env_file='.env')
     private: bool = True
     has_issues: Optional[bool] = None
     has_wiki: Optional[bool] = None
