@@ -13,8 +13,10 @@ nav:
     {% if license %}
     - developing/license.md
     {% endif %}
+    - developing/dependencies.md
     - 'Test Coverage': coverage.md
 {% if "github.com" in "" ~ repo.url %}
+ - changelog.md
  - 'Issue Tracker': {{repo.url}}/issues
 {% endif %}
 exclude_docs: |
@@ -62,7 +64,10 @@ plugins:
       type: iso_date
   - include-markdown
   # https://github.com/mondeja/mkdocs-include-markdown-plugin
-
+  - mkdocs_github_changelog
+  # https://github.com/djpugh/mkdocs_github_changelog
+  - mkdocs_licenseinfo
+  # https://github.com/djpugh/mkdocs_licenseinfo
 # https://mkdocstrings.github.io/recipes/#automatic-code-reference-pages
 
 extra:

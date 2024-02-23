@@ -1,8 +1,8 @@
 {% extends "nskit.recipes.python.ingredients:pyproject.toml.template" %}
 {% block EntryPoints %}
 # Enter the template entrypoints here
-[project.entry-points."{{ recipe.entry_point}}"]
-    example = {{ repo.name }}.templates.example:ExampleTemplate
+[project.entry-points."{{ recipe_entrypoint }}"]
+    example = "{{ repo.name }}.templates.example:ExampleTemplate"
 {% endblock EntryPoints %}
 {% block Dependencies %}
     {{ super() }}
