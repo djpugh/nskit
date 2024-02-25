@@ -19,7 +19,7 @@ class BaseConfigurationTestCase(unittest.TestCase):
         self.settings_cls = Settings
         self.expected = Settings(**self.file_config)
 
-    def test_load_file_source(self):
+    def test_load_file_source_config_filepath(self):
         test_files = {'json': ['test.json', 'test.jsn', 'test.JSON', 'test.JSN'],
                       'yaml': ['test.yaml', 'test.yml', 'test.YAML', 'test.YMl'],
                       'toml': ['test.toml', 'test.tml', 'test.TOML', 'test.TMl']}
@@ -27,7 +27,7 @@ class BaseConfigurationTestCase(unittest.TestCase):
             for file_name in file_names:
 
                 with self.subTest(format=ext, file=file_name):
-                    self.settings_cls.model_config = {'config_file_path': file_name}
+                    self.settings_cls.model_config = {'config_file': file_name}
                     arg = 'w'
                     if ext == 'json':
                         dumper = json.dump
@@ -41,6 +41,27 @@ class BaseConfigurationTestCase(unittest.TestCase):
                             dumper(self.file_config, f)
                         self.assertEqual(self.settings_cls(), self.expected)
 
+    def test_load_file_source_filetype_filepath(self):
+        test_files = {'json': ['test.json', 'test.jsn', 'test.JSON', 'test.JSN'],
+                      'yaml': ['test.yaml', 'test.yml', 'test.YAML', 'test.YMl'],
+                      'toml': ['test.toml', 'test.tml', 'test.TOML', 'test.TMl']}
+        for ext, file_names in test_files.items():
+            for file_name in file_names:
+
+                with self.subTest(format=ext, file=file_name):
+                    self.settings_cls.model_config = {f'{ext}_file': file_name}
+                    arg = 'w'
+                    if ext == 'json':
+                        dumper = json.dump
+                    elif ext == 'yaml':
+                        dumper = yaml.dump
+                    elif ext == 'toml':
+                        dumper = toml.dump
+
+                    with ChDir():
+                        with open(file_name, arg) as f:
+                            dumper(self.file_config, f)
+                        self.assertEqual(self.settings_cls(), self.expected)
 
     def test_no_properties(self):
 
