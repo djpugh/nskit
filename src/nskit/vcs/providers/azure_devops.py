@@ -18,7 +18,13 @@ from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
 
 class AzureDevOpsSettings(VCSProviderSettings):
     """Azure DevOps settings."""
-    model_config = SettingsConfigDict(env_prefix='AZURE_DEVOPS_', env_file='.env')
+    # This is not ideal behaviour, but due to the issue highlighted in
+    # https://github.com/pydantic/pydantic-settings/issues/245 and the
+    # non-semver compliant versioning in pydantic-settings, we need to add this behaviour
+    # this now changes the API behaviour for these objects as they will
+    # also ignore additional inputs in the python initialisation
+    #  We will pin to version < 2.1.0 instead of allowing 2.2.0+ as it requires the code below:
+    model_config = SettingsConfigDict(env_prefix='AZURE_DEVOPS_', env_file='.env')  # , extra='ignore')  noqa: E800
     url: HttpUrl = "https://dev.azure.com"
     organisation: str
     project: str

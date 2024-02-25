@@ -25,7 +25,13 @@ logger = logger_factory.get_logger(__name__)
 
 class CodebaseSettings(BaseConfiguration):
     """Codebase settings object."""
-    model_config = SettingsConfigDict(env_file='.env', env_prefix='NSKIT_VCS_CODEBASE_')
+    # This is not ideal behaviour, but due to the issue highlighted in
+    # https://github.com/pydantic/pydantic-settings/issues/245 and the
+    # non-semver compliant versioning in pydantic-settings, we need to add this behaviour
+    # this now changes the API behaviour for these objects as they will
+    # also ignore additional inputs in the python initialisation
+    # We will pin to version < 2.1.0 instead of allowing 2.2.0+ as it requires the code below:
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='NSKIT_VCS_CODEBASE_')  # , extra='ignore')
 
     default_branch: str = 'main'
     vcs_provider: Annotated[ProviderEnum, Field(validate_default=True)] = None
