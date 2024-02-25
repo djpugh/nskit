@@ -1,69 +1,109 @@
 """Add settings sources."""
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any
 
-from pydantic.fields import FieldInfo
-from pydantic_settings import PydanticBaseSettingsSource
+from pydantic.config import ExtraValues
+from pydantic_settings import BaseSettings, DotenvType, ENV_FILE_SENTINEL
+from pydantic_settings.sources import (
+    DotEnvSettingsSource as _DotEnvSettingsSource,  # isort:skip
+)
+from pydantic_settings.sources import (
+    JsonConfigSettingsSource as _JsonConfigSettingsSource,
+)
+from pydantic_settings.sources import (
+    TomlConfigSettingsSource as _TomlConfigSettingsSource,
+)
+from pydantic_settings.sources import (
+    YamlConfigSettingsSource as _YamlConfigSettingsSource,
+)
 
 from nskit.common.io import json, toml, yaml
 
 
-class FileConfigSettingsSource(PydanticBaseSettingsSource):
-    """A simple settings source class that loads variables from a parsed file.
+class JsonConfigSettingsSource(_JsonConfigSettingsSource):
+    """Use the nskit.common.io.json loading to load settings from a json file."""
+    def _read_file(self, file_path: Path) -> dict[str, Any]:
+        encoding = self.json_file_encoding or 'utf-8'
+        file_contents = file_path.read_text(encoding)
+        return json.loads(file_contents)
 
-    This can parse JSON, TOML, and YAML files based on the extensions.
+    def __call__(self):
+        """Make the file reading at the source instantiation."""
+        self.init_kwargs = self._read_files(self.json_file_path)
+        return super().__call__()
+
+
+class TomlConfigSettingsSource(_TomlConfigSettingsSource):
+    """Use the nskit.common.io.toml loading to load settings from a toml file."""
+    def _read_file(self, file_path: Path) -> dict[str, Any]:
+        file_contents = file_path.read_text()
+        return toml.loads(file_contents)
+
+    def __call__(self):
+        """Make the file reading at the source instantiation."""
+        self.init_kwargs = self._read_files(self.toml_file_path)
+        return super().__call__()
+
+
+class YamlConfigSettingsSource(_YamlConfigSettingsSource):
+    """Use the nskit.common.io.yaml loading to load settings from a yaml file."""
+    def _read_file(self, file_path: Path) -> dict[str, Any]:
+        encoding = self.yaml_file_encoding or 'utf-8'
+        file_contents = file_path.read_text(encoding)
+        return yaml.loads(file_contents)
+
+    def __call__(self):
+        """Make the file reading at the source instantiation."""
+        self.init_kwargs = self._read_files(self.yaml_file_path)
+        return super().__call__()
+
+
+class DotEnvSettingsSource(_DotEnvSettingsSource):
+    """Fixes change of behaviour in pydantic-settings 2.2.0 with extra allowed handling.
+
+    Adds dotenv_extra variable that is set to replicate previous behaviour (ignore).
     """
 
-    def __init__(self, *args, **kwargs):
-        """Initialise the Settings Source."""
-        super().__init__(*args, **kwargs)
-        self.__parsed_contents = None
+    def __init__(
+        self,
+        settings_cls: type[BaseSettings],
+        env_file: DotenvType | None = ENV_FILE_SENTINEL,
+        env_file_encoding: str | None = None,
+        case_sensitive: bool | None = None,
+        env_prefix: str | None = None,
+        env_nested_delimiter: str | None = None,
+        env_ignore_empty: bool | None = None,
+        env_parse_none_str: str | None = None,
+        dotenv_extra: ExtraValues | None = 'ignore'
+    ) -> None:
+        """Wrapper for init function to add dotenv_extra handling."""
+        self.dotenv_extra = dotenv_extra
+        super().__init__(
+            settings_cls,
+            env_file,
+            env_file_encoding,
+            case_sensitive,
+            env_prefix,
+            env_nested_delimiter,
+            env_ignore_empty,
+            env_parse_none_str
+        )
 
-    def get_field_value(
-        self, field: FieldInfo, field_name: str  # noqa: U100
-    ) -> Tuple[Any, str, bool]:
-        """Get a field value."""
-        if self.__parsed_contents is None:
-            try:
-                encoding = self.config.get('env_file_encoding', 'utf-8')
-                file_path = Path(self.config.get('config_file_path'))
-                file_type = self.config.get('config_file_type', None)
-                file_contents = file_path.read_text(encoding)
-                if file_path.suffix.lower() in ['.jsn', '.json'] or (file_type is not None and file_type.lower() == 'json'):
-                    self.__parsed_contents = json.loads(file_contents)
-                elif file_path.suffix.lower() in ['.tml', '.toml'] or (file_type is not None and file_type.lower() == 'toml'):
-                    self.__parsed_contents = toml.loads(file_contents)
-                elif file_path.suffix.lower() in ['.yml', '.yaml'] or (file_type is not None and file_type.lower() == 'yaml'):
-                    self.__parsed_contents = yaml.loads(file_contents)
-            except Exception:
-                pass  # nosec B110
-        if self.__parsed_contents is not None:
-            field_value = self.__parsed_contents.get(field_name)
-        else:
-            field_value = None
-        return field_value, field_name, False
-
-    def prepare_field_value(
-        self, field_name: str, field: FieldInfo, value: Any, value_is_complex: bool  # noqa: U100
-    ) -> Any:
-        """Prepare the field value."""
-        return value
-
-    def __call__(self) -> Dict[str, Any]:
-        """Call the source."""
-        d: Dict[str, Any] = {}
-
-        for field_name, field in self.settings_cls.model_fields.items():
-            field_value, field_key, value_is_complex = self.get_field_value(
-                field, field_name
-            )
-            field_value = self.prepare_field_value(
-                field_name, field, field_value, value_is_complex
-            )
-            if field_value is not None:
-                d[field_key] = field_value
-
-        return d
-
-    def _load_file(self, file_path: Path, encoding: str) -> Dict[str, Any]:  # noqa: U100
-        file_path = Path(file_path)
+    def __call__(self) -> dict[str, Any]:
+        """Wraps call logic introduced in 2.2.0, but is backwards compatible to 2.1.0 and earlier versions."""
+        data: dict[str, Any] = super().__call__()
+        to_pop = []
+        for key in data.keys():
+            matched = False
+            for field_name, field in self.settings_cls.model_fields.items():
+                for field_alias, field_env_name, _ in self._extract_field_info(field, field_name):
+                    if key == field_env_name or key == field_alias:
+                        matched = True
+                        break
+                if matched:
+                    break
+            if not matched and self.dotenv_extra == 'ignore':
+                to_pop.append(key)
+        for key in to_pop:
+            data.pop(key)
+        return data

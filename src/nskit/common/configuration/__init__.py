@@ -7,23 +7,37 @@ Includes:
 """
 from __future__ import annotations
 
-from typing import Any
+from pathlib import Path
+from typing import Any, Optional
 
+from pydantic.config import ExtraValues
 from pydantic_settings import BaseSettings as _BaseSettings
 from pydantic_settings import PydanticBaseSettingsSource as _PydanticBaseSettingsSource
 from pydantic_settings import SettingsConfigDict as _SettingsConfigDict
+from pydantic_settings.sources import PathType
 
 from nskit.common.configuration.mixins import PropertyDumpMixin
-from nskit.common.configuration.sources import FileConfigSettingsSource
+from nskit.common.configuration.sources import (
+    DotEnvSettingsSource,
+    JsonConfigSettingsSource,
+    TomlConfigSettingsSource,
+    YamlConfigSettingsSource,
+)
 from nskit.common.io import json, toml, yaml
+
+
+class SettingsConfigDict(_SettingsConfigDict):
+    """Customised Settings Config Dict."""
+    dotenv_extra: Optional[ExtraValues] = 'ignore'
+    config_file: Optional[PathType] = None
+    config_file_encoding: Optional[str] = None
 
 
 class BaseConfiguration(PropertyDumpMixin, _BaseSettings):
     """A Pydantic BaseSettings type object with Properties included in model dump, and yaml and toml integrations."""
 
-    model_config = _SettingsConfigDict(env_file_encoding='utf-8')
+    model_config = SettingsConfigDict(env_file_encoding='utf-8')
 
-    @classmethod
     def settings_customise_sources(
         cls,
         settings_cls: type[_BaseSettings],
@@ -33,13 +47,50 @@ class BaseConfiguration(PropertyDumpMixin, _BaseSettings):
         file_secret_settings: _PydanticBaseSettingsSource,
     ) -> tuple[_PydanticBaseSettingsSource, ...]:
         """Create settings loading, including the FileConfigSettingsSource."""
-        # TODO This probably needs a tweak to handle complex structures.
+        config_files = cls.model_config.get('config_file')
+        config_file_encoding = cls.model_config.get('config_file_encoding')
+        file_types = {'json' : ['.json', '.jsn'],
+                      'yaml': ['.yaml', '.yml'],
+                      'toml': ['.toml', '.tml']}
+        if config_files:
+            if isinstance(config_files, (Path, str)):
+                config_files = [config_files]
+        else:
+            config_files = []
+
+        split_config_files = {}
+        for file_type, suffixes in file_types.items():
+            original = cls.model_config.get(f'{file_type}_file')
+            if original and isinstance(original, (Path, str)):
+                split_config_files[file_type] = [original]
+            elif original:
+                split_config_files[file_type] = original
+            else:
+                split_config_files[file_type] = []
+            for config_file in config_files:
+                if Path(config_file).suffix.lower() in suffixes:
+                    split_config_files[file_type].append(config_file)
         return (
-            FileConfigSettingsSource(settings_cls),
             init_settings,
             env_settings,
-            dotenv_settings,
-            file_secret_settings,
+            JsonConfigSettingsSource(settings_cls,
+                                     split_config_files['json'],
+                                     cls.model_config.get('json_file_encoding') or config_file_encoding),
+            YamlConfigSettingsSource(settings_cls,
+                                     split_config_files['yaml'],
+                                     cls.model_config.get('yaml_file_encoding') or config_file_encoding),
+            TomlConfigSettingsSource(settings_cls,
+                                     split_config_files['toml']),
+            DotEnvSettingsSource(settings_cls,
+                                 dotenv_settings.env_file,
+                                 dotenv_settings.env_file_encoding,
+                                 dotenv_settings.case_sensitive,
+                                 dotenv_settings.env_prefix,
+                                 dotenv_settings.env_nested_delimiter,
+                                 dotenv_settings.env_ignore_empty,
+                                 dotenv_settings.env_parse_none_str,
+                                 cls.model_config.get('dotenv_extra', 'ignore')),
+            file_secret_settings
         )
 
     def model_dump_toml(

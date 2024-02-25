@@ -10,10 +10,9 @@ else:
     from typing import Annotated
 
 from pydantic import Field, field_validator, ValidationError
-from pydantic_settings import SettingsConfigDict
 
 from nskit._logging import logger_factory
-from nskit.common.configuration import BaseConfiguration
+from nskit.common.configuration import BaseConfiguration, SettingsConfigDict
 from nskit.vcs.namespace_validator import ValidationEnum
 from nskit.vcs.providers import ProviderEnum
 from nskit.vcs.providers.abstract import VCSProviderSettings
@@ -24,13 +23,7 @@ logger = logger_factory.get_logger(__name__)
 
 class CodebaseSettings(BaseConfiguration):
     """Codebase settings object."""
-    # This is not ideal behaviour, but due to the issue highlighted in
-    # https://github.com/pydantic/pydantic-settings/issues/245 and the
-    # non-semver compliant versioning in pydantic-settings, we need to add this behaviour
-    # this now changes the API behaviour for these objects as they will
-    # also ignore additional inputs in the python initialisation
-    # We will pin to version < 2.1.0 instead of allowing 2.2.0+ as it requires the code below:
-    model_config = SettingsConfigDict(env_file='.env', env_prefix='NSKIT_VCS_CODEBASE_')  # , extra='ignore')
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='NSKIT_VCS_CODEBASE_', dotenv_extra='ignore')
 
     default_branch: str = 'main'
     vcs_provider: Annotated[ProviderEnum, Field(validate_default=True)] = None
