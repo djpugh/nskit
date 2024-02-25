@@ -260,7 +260,7 @@ class NamespaceValidationRepo(_Repo):
     @classmethod
     def _validate_local_dir(cls, value: Any, info: ValidationInfo):
         if value is None:
-            value = Path(tempfile.tempdir)/info.data['name']
+            value = Path(tempfile.gettempdir())/info.data['name']
         return value
 
     def _download_namespaces(self):
