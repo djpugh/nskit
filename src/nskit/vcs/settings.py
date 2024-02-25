@@ -1,15 +1,16 @@
 """Codebase Settings."""
 from __future__ import annotations
 
+from pathlib import Path
 import sys
-from typing import Optional
+from typing import Optional, Union
 
 if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
     from typing_extensions import Annotated
 else:
     from typing import Annotated
 
-from pydantic import Field, field_validator, ValidationError
+from pydantic import Field, field_validator, model_validator, ValidationError
 from pydantic_settings import SettingsConfigDict
 
 from nskit._logging import logger_factory
@@ -34,7 +35,7 @@ class CodebaseSettings(BaseConfiguration):
 
     default_branch: str = 'main'
     vcs_provider: Annotated[ProviderEnum, Field(validate_default=True)] = None
-    namespace_validation_repo: Optional[NamespaceValidationRepo] = None
+    namespace_validation_repo: Optional[Union[NamespaceValidationRepo, str]] = None
     validation_level: ValidationEnum = ValidationEnum.none
     _provider_settings = None
 
@@ -58,6 +59,17 @@ class CodebaseSettings(BaseConfiguration):
         if cls.model_fields['vcs_provider'].annotation(value).extension is None:
             raise ValueError('Extension Not Found')
         return value
+
+    @model_validator(mode='after')
+    def _validate_namespace_validation_repo_default(self):
+        if self.namespace_validation_repo is None and Path('.namespaces').exists():
+            # Can we handle the root pathing
+            self.namespace_validation_repo = '.namespaces'
+        if isinstance(self.namespace_validation_repo, str):
+            self.namespace_validation_repo = NamespaceValidationRepo(name=self.namespace_validation_repo,
+                                                                     local_dir=Path(self.namespace_validation_repo),
+                                                                     provider_client=self.provider_settings.repo_client)
+        return self
 
     @property
     def provider_settings(self) -> VCSProviderSettings:
