@@ -31,11 +31,15 @@ def __get_version() -> str:
         # Use the metadata
         import sys
         if sys.version_info.major >= 3 and sys.version_info.minor >= 8:
-            from importlib.metadata import PackageNotFoundError
-            from importlib.metadata import version as parse_version
+            from importlib.metadata import (
+                PackageNotFoundError,
+                version as parse_version,
+            )
         else:
-            from importlib_metadata import PackageNotFoundError
-            from importlib_metadata import version as parse_version  # type: ignore
+            from importlib_metadata import (  # type: ignore
+                PackageNotFoundError,
+                version as parse_version,
+            )
         try:
             version = parse_version("nskit")
         except PackageNotFoundError:

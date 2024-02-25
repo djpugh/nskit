@@ -19,6 +19,7 @@ from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
 class AzureDevOpsSettings(VCSProviderSettings):
     """Azure DevOps settings."""
     model_config = SettingsConfigDict(env_prefix='AZURE_DEVOPS_', env_file='.env', dotenv_extra='ignore')
+
     url: HttpUrl = "https://dev.azure.com"
     organisation: str
     project: str
