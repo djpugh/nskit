@@ -9,15 +9,14 @@ try:
 except ImportError:
     raise ImportError('Github Provider requires installing extra dependencies (ghapi), use pip install nskit[github]')
 from pydantic import Field, field_validator, HttpUrl, SecretStr, ValidationInfo
-from pydantic_settings import SettingsConfigDict
 
-from nskit.common.configuration import BaseConfiguration
+from nskit.common.configuration import BaseConfiguration, SettingsConfigDict
 from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
 
 
 class GithubRepoSettings(BaseConfiguration):
     """Github Repo settings."""
-    model_config = SettingsConfigDict(env_prefix='GITHUB_REPO', env_file='.env')
+    model_config = SettingsConfigDict(env_prefix='GITHUB_REPO_', env_file='.env', dotenv_extra='ignore')
 
     private: bool = True
     has_issues: Optional[bool] = None
@@ -36,13 +35,8 @@ class GithubSettings(VCSProviderSettings):
 
     Uses PAT token for auth (set in environment variables as GITHUB_TOKEN)
     """
-    # This is not ideal behaviour, but due to the issue highlighted in
-    # https://github.com/pydantic/pydantic-settings/issues/245 and the
-    # non-semver compliant versioning in pydantic-settings, we need to add this behaviour
-    # this now changes the API behaviour for these objects as they will
-    # also ignore additional inputs in the python initialisation
-    # We will pin to version < 2.1.0 instead of allowing 2.2.0+ as it requires the code below:
-    model_config = SettingsConfigDict(env_prefix='GITHUB_', env_file='.env')  # extra='ignore')  noqa: E800
+    model_config = SettingsConfigDict(env_prefix='GITHUB_', env_file='.env', dotenv_extra='ignore')
+
     interactive: bool = Field(False, description='Use Interactive Validation for token')
     url: HttpUrl = "https://api.github.com"
     organisation: Optional[str] = Field(None, description='Organisation to work in, otherwise uses the user for the token')
