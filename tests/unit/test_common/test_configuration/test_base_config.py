@@ -1,8 +1,8 @@
 import unittest
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, ValidationError
 
-from nskit.common.configuration import BaseConfiguration
+from nskit.common.configuration import BaseConfiguration, SettingsConfigDict
 from nskit.common.contextmanagers import ChDir
 from nskit.common.io import json, toml, yaml
 
@@ -152,4 +152,71 @@ class BaseConfigurationTestCase(unittest.TestCase):
             b: int
 
         t = TestModel(a=ASettings(), b=2)
+
+    def test_dotenv_extra_ignore(self):
+
+        class ASettings(BaseConfiguration):
+            model_config = SettingsConfigDict(env_prefix='AX_', env_file='.env', dotenv_extra='ignore')
+            c: str = 'a'
+            d: int = 1
+
+            @property
+            def a(self):
+                return True
+        class TestModel(BaseConfiguration):
+            model_config = SettingsConfigDict(env_prefix='TM_', env_file='.env', dotenv_extra='ignore')
+            a: ASettings
+            b: int
+
+        with ChDir():
+            with open('.env', 'w') as f:
+                f.write('AX_D=3\nTM_B=4\nAX_R=123\nTM_EE=44')
+            t = TestModel(a=ASettings())
+            self.assertEqual(t.b, 4)
+            self.assertEqual(t.a.d, 3)
+            self.assertEqual(t.a.c, 'a')
+
+    def test_dotenv_extra_forbid_error(self):
+
+        class ASettings(BaseConfiguration):
+            model_config = SettingsConfigDict(env_prefix='AX_', env_file='.env', dotenv_extra='forbid')
+            c: str = 'a'
+            d: int = 1
+
+            @property
+            def a(self):
+                return True
+        class TestModel(BaseConfiguration):
+            model_config = SettingsConfigDict(env_prefix='TM_', env_file='.env', dotenv_extra='forbid')
+            a: ASettings
+            b: int
+
+        with ChDir():
+            with open('.env', 'w') as f:
+                f.write('AX_D=3\nTM_B=4\nAX_R=123\nTM_EE=44')
+            with self.assertRaises(ValidationError):
+                TestModel(a=ASettings())
+
+    def test_dotenv_extra_forbid_ok(self):
+
+        class ASettings(BaseConfiguration):
+            model_config = SettingsConfigDict(env_prefix='AX_', dotenv_extra='forbid')
+            c: str = 'a'
+            d: int = 1
+
+            @property
+            def a(self):
+                return True
+        class TestModel(BaseConfiguration):
+            model_config = SettingsConfigDict(env_prefix='TM_', env_file='.env', dotenv_extra='forbid')
+            a: ASettings
+            b: int
+
+        with ChDir():
+            with open('.env', 'w') as f:
+                f.write('TM_B=4\n')
+            t = TestModel(a=ASettings())
+            self.assertEqual(t.b, 4)
+            self.assertEqual(t.a.d, 1)
+            self.assertEqual(t.a.c, 'a')
 
