@@ -1,5 +1,5 @@
 from pathlib import Path
-import sys
+import tempfile
 import unittest
 from unittest.mock import call, create_autospec, MagicMock, patch
 
@@ -33,8 +33,9 @@ class CodebaseTestCase(unittest.TestCase):
     def extension(self):
         return TestExtension('dummy', ENTRYPOINT, self._provider_settings_cls)
 
-    def env(self):
-        return Env(override={'TEST_ABACUS': 'A'})
+    def env(self, **override):
+        override.update({'TEST_ABACUS': 'A'})
+        return Env(override=override)
 
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_init_no_settings_error(self):
@@ -105,6 +106,31 @@ class CodebaseTestCase(unittest.TestCase):
                     self.assertEqual(c.namespace_validation_repo, r)
                     self.assertEqual(c.namespace_validation_repo.name, 'abc')
                     self.assertEqual(c.namespace_validation_repo.local_dir, Path.cwd()/'a'/'.namespaces2')
+
+    @patch.object(RepoClient, '__abstractmethods__', set())
+    def test_init_namespace_validation_repo_from_env_default(self):
+        with ChDir():  # Make sure theres no .env file when running tests
+            # Create the namespaces dir
+            Path('.namespaces23').mkdir(parents=True)
+            nsv = NamespaceValidator(options=[{'a': ['b', 'c']}])
+            Path('.namespaces23/namespaces.yaml').write_text(nsv.model_dump_yaml())
+            with self.extension():
+                with self.env(NSKIT_VCS_CODEBASE_NAMESPACES_DIR='.namespaces23'):
+                    settings.ProviderEnum._patch()
+                    c = Codebase(namespaces_dir='.namespaces23')
+                    self.assertIsInstance(c.namespace_validation_repo, NamespaceValidationRepo)
+                    self.assertEqual(c.namespace_validation_repo.name, '.namespaces')
+                    self.assertEqual(c.namespace_validation_repo.local_dir.name, '.namespaces23')
+
+    @patch.object(RepoClient, '__abstractmethods__', set())
+    def test_init_namespace_validation_repo_from_env_missing(self):
+        with ChDir():  # Make sure theres no .env file when running tests
+            # Create the namespaces dir
+            with self.extension():
+                with self.env(NSKIT_VCS_CODEBASE_NAMESPACES_DIR='.namespaces'):
+                    settings.ProviderEnum._patch()
+                    c = Codebase()
+                    self.assertIsNone(c.namespace_validation_repo, NamespaceValidationRepo)
 
     @patch.object(RepoClient, '__abstractmethods__', set())
     def test_namespace_validator_provided(self):
@@ -445,7 +471,7 @@ class CodebaseTestCase(unittest.TestCase):
         options = [{'a': ['b', 'c']}, 'd']
         c.create_namespace_repo(name='test-namespaces', namespace_options=options)
         self.assertIsNotNone(c.namespace_validation_repo)
-        nsv_rp.assert_called_once_with(name='test-namespaces', namespaces_filename='namespaces.yaml', local_dir=Path('.namespaces'))
+        nsv_rp.assert_called_once_with(name='test-namespaces', namespaces_filename='namespaces.yaml', local_dir=c.root_dir/'.namespaces')
         c.namespace_validation_repo.create.assert_called_once_with(namespace_options=options, delimiters=None, repo_separator=None)
 
     @patch.object(codebase, 'NamespaceValidationRepo', autospec=True)
@@ -460,6 +486,6 @@ class CodebaseTestCase(unittest.TestCase):
         options = [{'a': ['b', 'c']}, 'd']
         c.create_namespace_repo(namespace_options=options)
         self.assertIsNotNone(c.namespace_validation_repo)
-        nsv_rp.assert_called_once_with(name='.namespaces2', namespaces_filename='namespaces.yaml', local_dir=Path('.namespaces2'))
+        nsv_rp.assert_called_once_with(name='.namespaces2', namespaces_filename='namespaces.yaml', local_dir=c.root_dir/'.namespaces2')
         c.namespace_validation_repo.create.assert_called_once_with(namespace_options=options, delimiters=None, repo_separator=None)
 

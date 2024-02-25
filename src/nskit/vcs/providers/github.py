@@ -17,14 +17,8 @@ from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
 
 class GithubRepoSettings(BaseConfiguration):
     """Github Repo settings."""
+    model_config = SettingsConfigDict(env_prefix='GITHUB_REPO', env_file='.env')
 
-    # # This is not ideal behaviour, but due to the issue highlighted in
-    # # https://github.com/pydantic/pydantic-settings/issues/245 and the
-    # # non-semver compliant versioning in pydantic-settings, we need to add this behaviour
-    # # this now changes the API behaviour for these objects as they will
-    # # also ignore additional inputs in the python initialisation
-    # # We will pin to version < 2.1.0 instead of allowing 2.2.0+ as it requires the code below:
-    # model_config = ConfigDict(extra='ignore')  noqa: E800
     private: bool = True
     has_issues: Optional[bool] = None
     has_wiki: Optional[bool] = None

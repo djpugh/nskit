@@ -21,9 +21,9 @@ NamespaceOptionsType = TypeAliasType('NamespaceOptionsType', List[Union[str, Dic
 
 class ValidationEnum(Enum):
     """Enum for validation level."""
-    strict = 2
-    warn = 1
-    none = 0
+    strict = '2'
+    warn = '1'
+    none = '0'
 
 
 class NamespaceValidator(BaseConfiguration):

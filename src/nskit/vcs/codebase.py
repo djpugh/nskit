@@ -22,15 +22,19 @@ from nskit.vcs.settings import CodebaseSettings
 class Codebase(BaseConfiguration):
     """Object for managing a codebase."""
     root_dir: Path = Field(default_factory=Path.cwd)
-    settings: Annotated[CodebaseSettings, Field(validate_default=True)] = None
     namespaces_dir: Path = Path('.namespaces')
+    settings: Annotated[CodebaseSettings, Field(validate_default=True)] = None
     namespace_validation_repo: Optional[NamespaceValidationRepo] = None
 
     @field_validator('settings', mode='before')
     @classmethod
-    def _validate_settings(cls, value):
+    def _validate_settings(cls, value, info: ValidationInfo):
         if value is None:
-            value = CodebaseSettings()
+            namespace_validation_repo = None
+            if (info.data.get('root_dir')/info.data.get('namespaces_dir')).exists():
+                # Namespaces repo exists
+                namespace_validation_repo = NamespaceValidationRepo(local_dir=info.data.get('root_dir')/info.data.get('namespaces_dir'))
+            value = CodebaseSettings(namespace_validation_repo=namespace_validation_repo)
         return value
 
     @field_validator('namespace_validation_repo', mode='before')
@@ -157,7 +161,7 @@ class Codebase(BaseConfiguration):
         self.namespace_validation_repo = NamespaceValidationRepo(
             name=name,
             namespaces_filename=namespaces_filename,
-            local_dir=self.namespaces_dir
+            local_dir=self.root_dir/self.namespaces_dir
         )
         self.namespace_validation_repo.create(
             namespace_options=namespace_options,
