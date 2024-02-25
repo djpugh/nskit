@@ -483,8 +483,12 @@ jobs:
         name: Install tomli
         run: |
           pip install tomli
+      - shell: bash
+        name: Install docs dependencies
+        run: |
+          pip install nskit==${{ steps.get_version.outputs.tag_name }}
       - shell: python
-        name: Install test dependencies
+        name: Install docs dependencies
         run: |
           import subprocess, tomli
           subprocess.check_call(['pip', 'install']+tomli.load(open('pyproject.toml', 'rb'))['project']['optional-dependencies']['dev-docs'])
@@ -492,8 +496,8 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          mike deploy -u "${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor}}" latest --config-file docs/mkdocs.yml -p
-          mike set-default latest --config-file docs/mkdocs.yml
+          mike deploy -u "${{ steps.get_version.outputs.tag_name }}" latest --config-file docs/mkdocs.yml -p
+
           git checkout gh-pages
           git pull origin
           git tag docs-${{ steps.get_version.outputs.tag_name }}
