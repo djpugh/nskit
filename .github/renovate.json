@@ -1,4 +1,7 @@
 {
+    "fileMatch": [
+      "(^|/)pyproject\\.toml$"
+    ],
     "extends": [
         "config:base",
         ":preserveSemverRanges"
