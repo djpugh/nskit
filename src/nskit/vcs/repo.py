@@ -231,6 +231,13 @@ class _Repo(BaseConfiguration):
 
 class NamespaceValidationRepo(_Repo):
     """Repo for managing namespace validation."""
+    # # This is not ideal behaviour, but due to the issue highlighted in
+    # # https://github.com/pydantic/pydantic-settings/issues/245 and the
+    # # non-semver compliant versioning in pydantic-settings, we need to add this behaviour
+    # # this now changes the API behaviour for these objects as they will
+    # # also ignore additional inputs in the python initialisation
+    # # We will pin to version < 2.1.0 instead of allowing 2.2.0+ as it requires the code below:
+    # model_config = ConfigDict(extra='ignore')  noqa: E800
     name: str = '.namespaces'
     namespaces_filename: Union[str, Path] = 'namespaces.yaml'
     local_dir: Annotated[Path, Field(validate_default=True)] = None

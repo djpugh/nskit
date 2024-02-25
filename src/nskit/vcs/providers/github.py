@@ -17,6 +17,7 @@ from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
 class GithubRepoSettings(BaseConfiguration):
     """Github Repo settings."""
     model_config = SettingsConfigDict(env_prefix='GITHUB_REPO_', env_file='.env', dotenv_extra='ignore')
+    
     private: bool = True
     has_issues: Optional[bool] = None
     has_wiki: Optional[bool] = None
@@ -35,6 +36,7 @@ class GithubSettings(VCSProviderSettings):
     Uses PAT token for auth (set in environment variables as GITHUB_TOKEN)
     """
     model_config = SettingsConfigDict(env_prefix='GITHUB_', env_file='.env', dotenv_extra='ignore')
+    
     interactive: bool = Field(False, description='Use Interactive Validation for token')
     url: HttpUrl = "https://api.github.com"
     organisation: Optional[str] = Field(None, description='Organisation to work in, otherwise uses the user for the token')

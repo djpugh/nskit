@@ -24,7 +24,7 @@ logger = logger_factory.get_logger(__name__)
 class CodebaseSettings(BaseConfiguration):
     """Codebase settings object."""
     model_config = SettingsConfigDict(env_file='.env', env_prefix='NSKIT_VCS_CODEBASE_', dotenv_extra='ignore')
-
+  
     default_branch: str = 'main'
     vcs_provider: Annotated[ProviderEnum, Field(validate_default=True)] = None
     namespace_validation_repo: Optional[NamespaceValidationRepo] = None
