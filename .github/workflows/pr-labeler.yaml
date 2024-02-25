@@ -11,7 +11,7 @@ jobs:
       contents: read # for TimonVS/pr-labeler-action to read config file
       pull-requests: write # for TimonVS/pr-labeler-action to add labels in PR
     steps:
-      - uses: TimonVS/pr-labeler-action@v4
+      - uses: TimonVS/pr-labeler-action@v5
         with:
           configuration-path: .github/pr-labeler.yml # optional, .github/pr-labeler.yml is the default value
         env:
