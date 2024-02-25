@@ -1,0 +1,1668 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../developing/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
+    
+    
+      
+        <title>Using NSKit - NSKit</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#using-nskit" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="NSKit" class="md-header__button md-logo" aria-label="NSKit" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1a2.5 2.5 0 0 0-2.5 2.5A2.5 2.5 0 0 0 11 5.79V7H7a2 2 0 0 0-2 2v.71A2.5 2.5 0 0 0 3.5 12 2.5 2.5 0 0 0 5 14.29V15H4a2 2 0 0 0-2 2v1.21A2.5 2.5 0 0 0 .5 20.5 2.5 2.5 0 0 0 3 23a2.5 2.5 0 0 0 2.5-2.5A2.5 2.5 0 0 0 4 18.21V17h4v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 9 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17a2 2 0 0 0-2-2H7v-.71A2.5 2.5 0 0 0 8.5 12 2.5 2.5 0 0 0 7 9.71V9h10v.71A2.5 2.5 0 0 0 15.5 12a2.5 2.5 0 0 0 1.5 2.29V15h-1a2 2 0 0 0-2 2v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 15 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17h4v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 21 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17a2 2 0 0 0-2-2h-1v-.71A2.5 2.5 0 0 0 20.5 12 2.5 2.5 0 0 0 19 9.71V9a2 2 0 0 0-2-2h-4V5.79a2.5 2.5 0 0 0 1.5-2.29A2.5 2.5 0 0 0 12 1m0 1.5a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1M6 11a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m12 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1M3 19.5a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NSKit
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Using NSKit
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/djpugh/nskit/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+    
+  
+  nskit
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+    
+  
+  Using NSKit
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../developing/" class="md-tabs__link">
+          
+  
+    
+  
+  Developing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../api/nskit.common/" class="md-tabs__link">
+          
+  
+    
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../changelog/" class="md-tabs__link">
+        
+  
+    
+  
+  Releases
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://github.com/djpugh/nskit/issues" class="md-tabs__link">
+        
+  
+    
+  
+  Issue Tracker
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="NSKit" class="md-nav__button md-logo" aria-label="NSKit" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1a2.5 2.5 0 0 0-2.5 2.5A2.5 2.5 0 0 0 11 5.79V7H7a2 2 0 0 0-2 2v.71A2.5 2.5 0 0 0 3.5 12 2.5 2.5 0 0 0 5 14.29V15H4a2 2 0 0 0-2 2v1.21A2.5 2.5 0 0 0 .5 20.5 2.5 2.5 0 0 0 3 23a2.5 2.5 0 0 0 2.5-2.5A2.5 2.5 0 0 0 4 18.21V17h4v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 9 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17a2 2 0 0 0-2-2H7v-.71A2.5 2.5 0 0 0 8.5 12 2.5 2.5 0 0 0 7 9.71V9h10v.71A2.5 2.5 0 0 0 15.5 12a2.5 2.5 0 0 0 1.5 2.29V15h-1a2 2 0 0 0-2 2v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 15 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17h4v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 21 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17a2 2 0 0 0-2-2h-1v-.71A2.5 2.5 0 0 0 20.5 12 2.5 2.5 0 0 0 19 9.71V9a2 2 0 0 0-2-2h-4V5.79a2.5 2.5 0 0 0 1.5-2.29A2.5 2.5 0 0 0 12 1m0 1.5a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1M6 11a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m12 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1M3 19.5a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1Z"/></svg>
+
+    </a>
+    NSKit
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/djpugh/nskit/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    nskit
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Using NSKit
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Using NSKit
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simple-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Simple Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-repo-from-a-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a repo from a recipe
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a repo from a recipe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#license-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      License Files
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-codebase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a codebase
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a codebase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-azure-devops-nskitvcsprovidersazure_devopsazuredevopssettings" class="md-nav__link">
+    <span class="md-ellipsis">
+      For Azure DevOps - nskit.vcs.providers.azure_devops.AzureDevOpsSettings:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-github-nskitvcsprovidersgithubgithubsettings" class="md-nav__link">
+    <span class="md-ellipsis">
+      For Github - nskit.vcs.providers.github.GithubSettings:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a new repo
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a new repo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-a-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      With a recipe
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloning-the-codebase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cloning the codebase
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-new-recipes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating new recipes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating new recipes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ingredients" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ingredients
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hooks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recipe
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipes-in-other-languages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recipes in other languages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-namespaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using namespaces
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inheriting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inheriting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extending-nskit" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extending nskit
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extending nskit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#customising-the-nskitmixer-jinja2-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Customising the nskit.mixer jinja2 Environment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../developing/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Developing
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Developing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developing/license/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    License
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developing/sbom/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Software Bill of Materials
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coverage/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Coverage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/nskit.common/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    nskit.common
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/nskit.mixer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    nskit.mixer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/nskit.recipes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    nskit.recipes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/nskit.vcs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    nskit.vcs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Releases
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/djpugh/nskit/issues" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Issue Tracker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simple-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Simple Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-repo-from-a-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a repo from a recipe
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a repo from a recipe">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#license-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      License Files
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-codebase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a codebase
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a codebase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-azure-devops-nskitvcsprovidersazure_devopsazuredevopssettings" class="md-nav__link">
+    <span class="md-ellipsis">
+      For Azure DevOps - nskit.vcs.providers.azure_devops.AzureDevOpsSettings:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-github-nskitvcsprovidersgithubgithubsettings" class="md-nav__link">
+    <span class="md-ellipsis">
+      For Github - nskit.vcs.providers.github.GithubSettings:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a new repo
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a new repo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-a-recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      With a recipe
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloning-the-codebase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cloning the codebase
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Usage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-new-recipes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating new recipes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating new recipes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ingredients" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ingredients
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hooks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipe" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recipe
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recipes-in-other-languages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recipes in other languages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-namespaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using namespaces
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inheriting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inheriting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extending-nskit" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extending nskit
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extending nskit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#customising-the-nskitmixer-jinja2-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Customising the nskit.mixer jinja2 Environment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="using-nskit">Using NSKit</h1>
+<h2 id="installing">Installing</h2>
+<p>Installation is as simple as:
+<div class="highlight"><pre><span></span><code>pip install nskit
+</code></pre></div>
+It requires a Python version after 3.8+</p>
+<h3 id="optional-dependencies">Optional dependencies</h3>
+<p>nskit has optional dependencies for different VCS systems:</p>
+<ul>
+<li><a href="https://github.com">Github</a> - add <code>ghapi</code> or use <code>pip install nskit[github]</code></li>
+<li><a href="https://dev.azure.com">Azure Devops</a> - add <code>azure-cli</code> or use <code>pip install nskit[azure_devops]</code></li>
+</ul>
+<h2 id="simple-usage">Simple Usage</h2>
+<p><code>nskit</code> is designed to be used for two main use cases, creating repositories from repository recipes, and managing codebase repositories in a version control system.</p>
+<h3 id="creating-a-repo-from-a-recipe">Creating a repo from a recipe</h3>
+<p>Recipes are the combination of ingredients (e.g. <a class="autorefs autorefs-internal" href="../api/nskit.recipes/#nskit.recipes.python.ingredients">nskit.recipes.python.ingredients</a>) that are put together to create a template repository that can have contextual information added.</p>
+<p>It uses <a href="https://jinja.palletsprojects.com/en/3.1.x/">jinja2</a> to provide the template information.</p>
+<p>There are 3 recipes provided through <code>nskit</code>:</p>
+<ul>
+<li><a class="autorefs autorefs-internal" href="../api/nskit.recipes/#nskit.recipes.recipe.RecipeRecipe">recipe</a> for creating new recipes</li>
+<li><a class="autorefs autorefs-internal" href="../api/nskit.recipes/#nskit.recipes.python.package.PackageRecipe">python_package</a> for python packages</li>
+<li><a class="autorefs autorefs-internal" href="../api/nskit.recipes/#nskit.recipes.python.api.APIRecipe">python_api_service</a> for python <a href="https://fastapi.tiangolo.com">fastapi</a> based  API services</li>
+</ul>
+<p>A Recipe can be loaded and instantiated using the base <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.Recipe">nskit.mixer.Recipe</a> class
+<div class="highlight"><pre><span></span><code>from nskit.mixer import Recipe
+# kwargs are the context variables
+# You can see the required and available fields/objects using
+# print(Recipe.inspect(‘python_package))
+# In this case, they are:
+
+&lt;Signature (*,
+  name: str = ‘my_package’,
+  repo: nskit.recipes.python.PyRepoMetadata = &lt;Signature (*
+    repo_separator: str = &#39;-&#39;,
+    owner: str,
+    email:str,
+    description: str = &#39;&#39;,
+    url: ...) -&gt; nskit.recipes.python.PyRepoMetadata&gt;,
+  git: nskit.mixer.repo.GitConfig = &lt;Signature (*,
+    initial_branch_name: str = &#39;main&#39;,
+    git_flow: bool = True) -&gt; nskit.mixer.repo.GitConfig&gt;,
+  license: Optional[nskit.mixer.components.license_file.LicenseOptionsEnum] = None
+) -&gt; nskit.recipes.pythong.package.PackageRecipe&gt;
+# So to load it you have to specify the following fields
+kwargs = {
+    &#39;repo&#39;: {
+        &#39;owner&#39;: ...,
+        &#39;email&#39;: ...,
+        &#39;url&#39;: ...
+    }
+}
+# Although you can obviously override the defaults and set e.g. name, repo.description
+my_package = Recipe.load(‘python_package’, **kwargs)
+</code></pre></div></p>
+<p>This uses entry points, specifically the <code>nskit.recipes</code> entrypoint to find other recipes.</p>
+<p>And then create the recipe object:
+<div class="highlight"><pre><span></span><code>my_package.create()
+# creates the repository using the local directory as the root
+# e.g. if it is creating a folder my_package it will be in &lt;cwd&gt;/my_package.
+
+#The location and folder name can be customised:
+my_package.create(base_path=‘/path/to/my/root/folder’, override_path=‘xyz’)
+# Creates the template at /path/to/my/root/folder/xyz instead of &lt;cwd&gt;/my_package
+# You could also specifically override context parameters at create time as additional kwargs
+</code></pre></div></p>
+<h4 id="license-files">License Files</h4>
+<p>The 3 example templates have a license file option, using the <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.LicenseFile">nskit.mixer.components.LicenseFile</a> class, which calls the github API to get the license file definitions available on Github. These files will only be created if an appropriate <code>license</code> context variable is passed in (the default is None), so you can override the license with your own specific license in a template as required.</p>
+<p>The license options are defined in <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.LicenseOptionsEnum">nskit.mixer.components.LicenseOptionsEnum</a>.</p>
+<h3 id="creating-a-codebase">Creating a codebase</h3>
+<p>The <a class="autorefs autorefs-internal" href="../api/nskit.vcs/#nskit.vcs">nskit.vcs.Codebase</a> object is used to manage recipes on a remote version control system.</p>
+<p>The supported providers with <code>nskit</code> are:</p>
+<ul>
+<li><a href="https://www.github.com">Github</a></li>
+<li><a href="https://dev.azure.com">Azure Devops</a></li>
+</ul>
+<p>More can be added as extensions with the <code>nskit.vcs.providers</code> entry point (see [Extending nskit][]).</p>
+<p>You need to initialise the codebase at the root folder that you want the codebase to exist under, or override the root_dir parameter.</p>
+<p>I.e.</p>
+<p>if you create a Codebase object as
+<div class="highlight"><pre><span></span><code>c = Codebase()
+</code></pre></div>
+It will use the current directory as the root directory.</p>
+<p>Alternatively, you can specify the root directory
+<div class="highlight"><pre><span></span><code>c = Codebase(root_dir=Path.cwd().parent)
+</code></pre></div>
+To use the parent directory</p>
+<p>There are other parameters that you can set:</p>
+<ul>
+<li><code>settings</code>: the codebase settings, configures the provider to use</li>
+<li><code>namespaces_dir</code>: the directory (from <code>root_dir</code>) for the namespace constraints to be cloned to - see <a class="autorefs autorefs-internal" href="#using-namespaces">Using namespaces</a> below</li>
+<li><code>virtualenv_dir</code>: the directory (from <code>root_dir</code>) for the virtualenv to be created in.</li>
+<li><code>virtualenv_args</code>: additional args to use for virtual env creation (e.g. azure_devops_artifacts_helpers)</li>
+</ul>
+<p>The defaults for these should work, but can also be set via environment variables (or <code>.env</code> files).</p>
+<p>The settings provide the provider to use.
+This can be set through environment variables or .env files, and can either be set explicitly (via the <code>vcs_provider</code> settings parameter), or if that is not set, by trying to initialise all available providers to see if one succeeds - the last successful provider will be used.</p>
+<p>Initialising the provider clients relies on the correct settings for that provider being set.</p>
+<h5 id="for-azure-devops-nskitvcsprovidersazure_devopsazuredevopssettings">For Azure DevOps - <a class="autorefs autorefs-internal" href="../api/nskit.vcs/#nskit.vcs.providers.azure_devops.AzureDevOpsSettings">nskit.vcs.providers.azure_devops.AzureDevOpsSettings</a>:</h5>
+<ul>
+<li><code>organisation</code> - the Azure Devops organisation to use</li>
+<li><code>project</code> - the Azure Devops project to use</li>
+</ul>
+<p>The azure devops url can also be overwritten for e.g private servers, although the associated API functionality is built against the cloud API.</p>
+<p>These can be set using the following environment variables <code>AZURE_DEVOPS_ORGANISATION</code>, and <code>AZURE_DEVOPS_PROJECT</code>.</p>
+<p>You may also want to set the <code>NSKIT_PYTHON_INSTALLER_VIRTUALENV_ARGS</code> environment variable to <code>["--seeder","azdo-pip"]</code> to make the created virtualenvironment be seeded with the azure devops authentication helpers. This is using pydantic settings handling, which parses environment variables for complex parameters as a JSON string.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>This uses the <a href="https://djpugh.github.io/azure_devops_artifacts_helpers"><code>azure_devops_artifacts_helpers</code></a> library.</p>
+</div>
+<h5 id="for-github-nskitvcsprovidersgithubgithubsettings">For Github - <a class="autorefs autorefs-internal" href="../api/nskit.vcs/#nskit.vcs.providers.github.GithubSettings">nskit.vcs.providers.github.GithubSettings</a>:</h5>
+<ul>
+<li><code>organisation</code> - the Github organisation/user to use</li>
+<li><code>token</code> - the Github token to use</li>
+</ul>
+<p>The github url can also be overwritten for e.g private servers, although the associated API functionality is built against the cloud API.</p>
+<p>These can be set using the following environment variables <code>GITHUB_ORGANISATION</code>, and <code>GITHUB_TOKEN</code>.</p>
+<p>There are other parameters that can be set for these providers as well as described in the <a class="autorefs autorefs-internal" href="../api/nskit.vcs/#nskit.vcs.providers">API</a></p>
+<h4 id="creating-a-new-repo">Creating a new repo</h4>
+<p>Once you have created a Codebase object, you can create a new repo using it.
+<div class="highlight"><pre><span></span><code>c.create_repo(&#39;my_new_repo&#39;)
+</code></pre></div></p>
+<p>This will create the repo in the VCS provider (if it doesn't exist, erroring if it exists remotely or locally), and clone it to the local structure.</p>
+<h5 id="with-a-recipe">With a recipe</h5>
+<p>To use a recipe, you need to specify the recipe and kwargs in the <code>create_repo</code> call:
+<div class="highlight"><pre><span></span><code>kwargs = {
+    repo&#39;: {
+        &#39;owner&#39;: ...,
+        &#39;email&#39;: ...,
+        &#39;url&#39;: ...
+    }
+}
+c.create_repo(&#39;my_new_package&#39;, with_recipe=&#39;python_package&#39;, **kwargs)
+</code></pre></div>
+These are the same recipe names and kwargs as used in <a class="autorefs autorefs-internal" href="#creating-a-repo-from-a-recipe">Creating a repo from a recipe</a>.</p>
+<p>This will create that repo in the VCS and locally, and then use the recipe to initialise the repo with an intial commit, push it, and install into the virtualenv.</p>
+<h4 id="cloning-the-codebase">Cloning the codebase</h4>
+<p>You can use the codebase object to clone all the repos (see <a class="autorefs autorefs-internal" href="#using-namespaces">Using namespaces</a> for how this works with namespaces).</p>
+<div class="highlight"><pre><span></span><code>c.clone()
+</code></pre></div>
+<p>This will clone the repos in the VCS provider to the local directory, and install them into the virtualenv without dependencies, and then run through all the repos to install them with dependencies.</p>
+<p>This means that you will get a virtualenv with all your codebase dependencies installed as editable installs.</p>
+<h2 id="advanced-usage">Advanced Usage</h2>
+<h3 id="creating-new-recipes">Creating new recipes</h3>
+<p>A key feature from using <code>nskit</code> is the recipes. These can be added based on your personal or organisational needs.</p>
+<p>The recipe approach is inspired by <a href="https://cookiecutter.readthedocs.io/">cookiecutter</a>, but is structured with a bottom up, building blocks, design, which allows easier inheritance and sharing of strutures and components.</p>
+<p>There is an easy way to create a new recipe, using the <a class="autorefs autorefs-internal" href="../api/nskit.recipes/#nskit.recipes.recipe.RecipeRecipe">recipe</a> recipe.</p>
+<p>This will create a simple structure with the correct <code>pyproject.toml</code>, including the <code>[project.entry-points."nskit.recipes"]</code> entrypoint section, and some template files.</p>
+<p>There are 3 key parts to a recipe:</p>
+<h4 id="ingredients">Ingredients</h4>
+<p>These are the recipe building blocks, intended to be template files and folders (e.g. a <code>docs</code> folder, or a <code>src</code> folder, or a <code>.gitgnore</code> file).</p>
+<p>These use <a href="https://jinja.palletsprojects.com/en/3.1.x/">jinja2</a> to provide the template information, and are built with two main python classes:</p>
+<ul>
+<li><a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.File">File</a> - has <code>content</code> which is either a <code>jinja2</code> template, callable, or just text, and a <code>name</code>, which is again either a <code>jinja2</code> template, callable or text.</li>
+<li><a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.Folder">Folder</a> - has <code>contents</code> which is either <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.File">Files</a>, or <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.Folder">Folders</a> and a <code>name</code>, which is again either a <code>jinja2</code> template, callable, or text.</li>
+</ul>
+<p>The callable options for <code>content</code> and <code>name</code> need to have the signature: <code>def &lt;func&gt;(context: Dict[str, Any]):</code>. An example of these is the methods in <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.LicenseFile">nskit.mixer.components.LicenseFile</a> for the name and content (<a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.license_file.get_license_filename">get_license_filename</a>, and <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.license_file.get_license_content">get_license_content</a>).</p>
+<p>These allow the different template blocks to be reused, and adapted.</p>
+<p>Folder contents can be updated using indexing, either by <code>name</code>, or <code>id_</code> (an additional parameter that can be set on  <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.File">Files</a> and <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.Folder">Folders</a> to allow for indexing), using e.g.:
+<div class="highlight"><pre><span></span><code>my_folder = Folder(name=&#39;my_folder&#39;, contents = [
+    File(name=&#39;example.md&#39;, id_=&#39;example&#39;, content=&#39;123&#39;)
+])
+my_new_file = File(name=&#39;example.md&#39;, content=&#39;Hello world&#39;)
+# There are 3 ways to get the file in the folder:
+# By list index
+original_file = my_folder.contents[0]
+# By name
+original_file = my_folder[&#39;example.md&#39;]
+# By id
+original_file = my_folder[&#39;example&#39;]
+
+# Each of those three ways can be used to also change it, e.g.
+# my_folder.contents[0] = my_new_file
+# my_folder[&#39;example.md&#39;] = my_new_file
+my_folder[&#39;example&#39;] = my_new_file
+
+# Note, because id_ is not set on my_new_file, referencing by the ID won&#39;t work now
+</code></pre></div></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>names and ids are not enorced to be unique, so the first response that matches either id or name is returned. If you anticipate making use of this, please make sure files and ids do not clash</p>
+</div>
+<h4 id="hooks">Hooks</h4>
+<p>A <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.Hook">Hook</a> is a callable object that can modify things before or after the recipe is created.</p>
+<p>These are intended for e.g. specific configuration actions, or installing/configuring utilities (e.g. <code>pre-commit</code>).</p>
+<p>Hooks are easy to create, see for example the code for the [nskit.mixer.hooks.git.GitInit] hook, or for a more simple example:
+<div class="highlight"><pre><span></span><code>from typing import Any, Dict
+from pathlib import Path
+
+from nskit.mixer.components import Hook
+
+class MyHook(Hook):
+
+    def call(self, recipe_path: Path, context: Dict[str, Any]):
+        &quot;&quot;&quot;This is where your hook logic goes&quot;&quot;&quot;
+        # recipe_path is the proposed (if pre_hook) path to create the recipe at,
+        # or current (if post_hook) path the recipe has been created at.
+        #
+        # context is the proposed (if pre_hook) context dictionary to pass to the templates,
+        # or used context dictionary (if post_hook)
+        #
+        print(f&#39;Recipe created at {recipe_path}, with context {context}&#39;)
+        # return None
+        # or
+        # return recipe_path, context
+        # e.g. if you edit them/change them
+</code></pre></div></p>
+<h4 id="recipe">Recipe</h4>
+<p>The <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.Recipe">Recipe</a> is the main object that pulls this all together. It inherits from <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.Folder">Folder</a>, and adds the <code>pre_hooks</code> and <code>post_hooks</code> variables.</p>
+<p>When creating a recipe, you should add fields (the <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.Folder">Folder</a> object is based on <a href="https://pydantic-docs.helpmanual.io/">pydantic</a>) for context variables as required.</p>
+<p>There is a more specific <a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.repo.CodeRecipe">CodeRecipe</a> class which includes repo metadata, git configuration, and git initialisation and precommit install hooks, that is recommended for creating recipes that are code repositories.</p>
+<p>A good example recipe is <a class="autorefs autorefs-internal" href="../api/nskit.recipes/#nskit.recipes.python.api.APIRecipe">nskit.recipes.python.api.APIRecipe</a>, which includes inheritance from  <a class="autorefs autorefs-internal" href="../api/nskit.recipes/#nskit.recipes.python.package.PackageRecipe">nskit.recipes.python.package.PackageRecipe</a> (inheriting from a python base recipe <a class="autorefs autorefs-internal" href="../api/nskit.recipes/#nskit.recipes.python.PyRecipe">nskit.recipes.python.PyRecipe</a>).</p>
+<p>For a more simple example for a general repo:
+<div class="highlight"><pre><span></span><code>from typing import List, Union
+from nskit.mixer import CodeRecipe, File, Folder
+
+class MyRecipe(CodeRecipe):
+    contents: List[Union[File, Folder]] = [
+        Folder(name=&#39;my_recipe&#39;, contents=[
+            File(name=&#39;hello_world.txt&#39;, content=&#39;Hello world! from {{whoami}}&#39;)
+        ])
+    ]
+    # Adding a simple context variable
+    whoami: str
+    # This doesn&#39;t have a default so needs to be set when initialising the repo
+    # You could e.g. use pydantic validators or Field factories to initialise this dynamically as well
+</code></pre></div></p>
+<p>To make a recipe available to <code>nskit</code>, you need to make it an installable entrypoint, e.g. in <code>pyproject.toml</code>:
+<div class="highlight"><pre><span></span><code>[project.entry-points.&quot;nskit.recipes&quot;]
+my_recipe = &quot;my_package.my_recipe:MyRecipe&quot;
+</code></pre></div></p>
+<p>and, when installed in the environment with nskit, will be available as <code>my_recipe</code> using the commands described in [Creating a repo from a recipe][]</p>
+<h3 id="recipes-in-other-languages">Recipes in other languages</h3>
+<p>It is possible to create additional installation handlers for other languages. This uses the <code>nskit.vcs.installers</code> entrypoint, and should inherit from <a class="autorefs autorefs-internal" href="../api/nskit.vcs/#nskit.vcs.installer.Installer">nskit.vcs.installer.Installer</a>.</p>
+<p>This has two abstract methods that should be implemented for a specific language:</p>
+<ul>
+<li><code>check_repo</code> - check if the repo is of the language/installer type</li>
+<li><code>install</code> - takes the repo path, current codebase (optional), and whether to install dependencies (<code>deps</code>) and gets the appropriate installation environment from the codebase or elsewhere.</li>
+</ul>
+<p>An example of this is the <a class="autorefs autorefs-internal" href="../api/nskit.vcs/#nskit.vcs.installer.PythonInstaller">nskit.vcs.installer.PythonInstaller</a>.</p>
+<p>This implements editable python package installation into a <code>virtualenv</code> in the codebase root. It has some specific configuration variables (that can be set using environment variables:</p>
+<ul>
+<li><code>NSKIT_PYTHON_INSTALLER_ENABLED</code> - set to false to disable</li>
+<li><code>NSKIT_PYTHON_INSTALLER_VIRTUALENV_DIR</code> - set a specific directory path, or directory name for the virtualenv dir to use</li>
+<li><code>NSKIT_PYTHON_INSTALLER_VIRTUALENV_ARGS</code> - specify any specific args for virtualenv.</li>
+</ul>
+<p>And provides the two methods mentioned above:
+* <code>check_repo</code> - checks if there is a <code>setup.py</code>, <code>pyproject.toml</code>, or <code>requirements.txt</code> file in the repo root
+* <code>install</code> - gets the virtualenv/other executable to use and installs with/without dependencies as configured.</p>
+<p>A similar installer can be implemented for other languages (using e.g. <code>subprocess</code> for running the installation).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To set the environment variable names, use the <code>model_config</code> variable:
+<div class="highlight"><pre><span></span><code>    model_config = SettingsConfigDic(env_prefix=&#39;&lt;MY_ENV_PREFIX_&gt;&#39;, env_file=&#39;.env&#39;)
+</code></pre></div></p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>All installers will be tried, and if they are enabled (using environment variables), and the repo passes the <code>check_repo</code> call, the install method will be called. This could cause issues for multi-language repos. For complex cases like that, we suggest using a custom installer and disabling the others.</p>
+</div>
+<h3 id="using-namespaces">Using namespaces</h3>
+<p>Another key feature of <code>nskit</code> is handling namespaces. A namespace is e.g. a organisational or personal naming convention that makes it easy to identify and structure repositories and modules.</p>
+<p>For python code, this might look like <code>my_org.my_team.my_module</code>, but can look different for other languages.
+You may want to replicate this in my repository naming convention (which doesn't usually allow folders in repository names), and this can be done with the <a class="autorefs autorefs-internal" href="../api/nskit.vcs/#nskit.vcs">nskit.vcs.NamespaceValidationRepo</a>, which can be created and stored in your VCS.</p>
+<p>The structure of the namespace file is a <code>namespace.yaml</code> file with valid names at a given level, e.g.:
+<div class="highlight"><pre><span></span><code>options;
+- my_org:
+    - my_team
+    - team_a:
+        - module_1
+        - module_2
+</code></pre></div>
+Which means we can have repos structured as:
+<div class="highlight"><pre><span></span><code>my_org-my_team-&lt;*&gt;
+my_org-team_a-module_1
+my_org-team_a-module_1-&lt;*&gt;
+my_org-team_a-module_2
+my_org-team_a-module_2-&lt;*&gt;
+</code></pre></div>
+But no others.</p>
+<p>You can create a namespace repo for a codebase:</p>
+<div class="highlight"><pre><span></span><code>from nskit.vcs import Codebase
+
+c = Codebase()
+options = [{&#39;my_org&#39;: [&#39;my_team&#39;, {&#39;team_a&#39;: [&#39;module_1&#39;, &#39;module_2&#39;]}]}]
+c.create_namespace_repo(namespace_options=options)
+</code></pre></div>
+<p>There are additional parameters that you can set:</p>
+<ul>
+<li><code>repo_separator</code> defines the separator to use on the VCS repo names (defaults to <code>-</code>)</li>
+<li><code>delimiters</code> is a list of valid delimiters to use to split the names up (defaults to a standard set of <code>,</code>, <code>.</code>, <code>-</code>)</li>
+</ul>
+<p>You will also need to set the validation level to ensure name validation occurs when creating new repos.</p>
+<p><div class="highlight"><pre><span></span><code>c.settings.validation_level =  c.settings.validation_level.strict
+# Options are none (default), warning, and strict
+</code></pre></div>
+With strict validation and a <code>namespace_validation_repo</code> for the codebase, creating a repo with a non-matching name will error (otherwise it will just warn, or do nothing)
+<div class="highlight"><pre><span></span><code>c.create_repo(name=&#39;abc-def&#39;)
+# Raise a ValueError
+</code></pre></div></p>
+<p>If you are not using the full codebase behaviours, you can also set the <code>namespace_validation_repo</code> parameter on the <a class="autorefs autorefs-internal" href="../api/nskit.vcs/#nskit.vcs.Repo">nskit.vcs.repo.Repo</a> object to enforce name validation.</p>
+<h3 id="inheriting">Inheriting</h3>
+<p><code>nskit</code> is designed to be used as a based for creating your own scaffolding for managing an organisational or personal codebase with namespaces.</p>
+<p>You can provide simple stubs in your own module/package for a few key classes:</p>
+<ul>
+<li><a class="autorefs autorefs-internal" href="../api/nskit.vcs/#nskit.vcs.Codebase">nskit.vcs.Codebase</a></li>
+<li><a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.repo.CodeRecipe">nskit.mixer.CodeRecipe</a></li>
+<li><a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.Recipe">nskit.mixer.Recipe</a></li>
+<li><a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.File">nskit.mixer.File</a></li>
+<li><a class="autorefs autorefs-internal" href="../api/nskit.mixer/#nskit.mixer.components.Folder">nskit.mixer.Folder</a></li>
+</ul>
+<p>which make it easy for people to refer to that (and add customisation, and e.g. additional extensions or recipes as required) for your internal use.</p>
+<h3 id="extending-nskit">Extending nskit</h3>
+<p><code>nskit</code> is designed around a few key entrypoints to make it easily accessible, including</p>
+<ul>
+<li><code>[project.entry-points."nskit.recipes"]</code> for code recipes</li>
+<li><code>[project.entry-points."nskit.vcs.providers"]</code> for other VCS providers</li>
+<li><code>[project.entry-points."nskit.mixer.environment.extensions"]</code> for the mixer <code>jinja2</code> <a class="autorefs autorefs-external" href="https://jinja.palletsprojects.com/en/3.1.x/api/#jinja2.Environment">Environment</a> extensions</li>
+<li><code>[project.entry-points."nskit.mixer.environment.factory"]</code> for the mixer <code>jinja2</code> <a class="autorefs autorefs-external" href="https://jinja.palletsprojects.com/en/3.1.x/api/#jinja2.Environment">Environment</a> initialisation</li>
+</ul>
+<p>Additionally, key methods and behaviours can be overwritten or extended using inheritance.</p>
+<h4 id="customising-the-nskitmixer-jinja2-environment">Customising the <code>nskit.mixer</code> <code>jinja2</code> <code>Environment</code></h4>
+<p>There are 2 entrypoints to enable customising the Jinja Environment used for the template rendering.</p>
+<ul>
+<li><code>[project.entry-points."nskit.mixer.environment.extensions"]</code> for the mixer <code>jinja2</code> <a class="autorefs autorefs-external" href="https://jinja.palletsprojects.com/en/3.1.x/api/#jinja2.Environment">Environment</a> extensions</li>
+<li><code>[project.entry-points."nskit.mixer.environment.factory"]</code> for the mixer <code>jinja2</code> <a class="autorefs autorefs-external" href="https://jinja.palletsprojects.com/en/3.1.x/api/#jinja2.Environment">Environment</a> initialisation</li>
+</ul>
+<p>The first allows extension recipes to define a list of extensions to add to the environment (must be installed as dependencies of the recipe)</p>
+<p>An example might be:
+<div class="highlight"><pre><span></span><code>def recipe_jinja_extensions():
+    return [&#39;jinja2.ext.debug&#39;, &#39;jinja2.ext.i8n&#39;]
+</code></pre></div></p>
+<p>This could be implemented as a staticmethod on the recipe object or similar, but it needs to be defined to the <code>nskit.mixer.environment.extensions</code> entrypoint in the <code>pyproject.toml</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>All requested extensions for installed recipes are added to the environment so it could be possible for clashes/issues to occur there, however given the maturity of the jinja ecosystem, we are not loading them recipe by recipe due to the added complexity/issues.</p>
+</div>
+<p>You can also customise the environment initialisation if you need to override specifics of the configuration however this is not recommended as it can cause complex issues with the templates/handling.</p>
+<p>The default implementation defines the loader to use <code>_PkgResourcesTemplateLoader</code> to allow for package resources type loading on the environment (see examples above), but other parameters could be configured/changed by setting the <code>NSKIT_MIXER_JINJA_ENVIRONMENT_FACTORY</code> environment variable to the name of the entrypoint.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The default configurations are the expected one, so changing this could break e.g. inherited ingredients, so proceed with caution.</p>
+</div>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-12-24</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.prefetch", "navigation.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.path", "navigation.indexes", "search.suggest", "search.highlight", "search.share"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.8fd75fb4.min.js"></script>
+      
+    
+  </body>
+</html>
