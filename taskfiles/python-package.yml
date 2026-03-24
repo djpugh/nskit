@@ -1,0 +1,88 @@
+version: '3'
+
+tasks:
+
+  help:
+    desc: This help menu.
+    cmds:
+      - task --list-all
+
+  setup:
+    desc: Install the project dependencies (with uv) and pre-commit hooks.
+    cmds:
+      - uv sync
+      - uv run pre-commit install
+
+  lint:
+    desc: Run the linter (Ruff) to check for code style issues (with tentative to fix).
+    cmds:
+      - uv run ruff check --fix .
+
+  format:
+    desc: Run the formatter (Ruff) and isort to format the code.
+    cmds:
+      - uv run isort src tests
+      - uv run ruff format .
+
+  check:
+    desc: Run all the checks on the codebase.
+    cmds:
+      - task: check:precommit
+      - task: check:security
+      - task: check:licences
+
+  check:precommit:
+    desc: Run all the precommit checks on all files.
+    cmds:
+      - uv run pre-commit run -a
+
+  check:security:
+    desc: Run the security checks on the codebase.
+    cmds:
+      - uv run bandit -r src
+
+  check:licences:
+    desc: Check the licences of the dependencies.
+    cmds:
+      - mkdir -p reports
+      - uv run licensecheck --format json --file reports/licenses.json
+      - uv run licensecheck --format ansi
+
+  test:unit:
+    desc: Run the unit tests with coverage report.
+    cmds:
+      - uv run coverage run --source src -m pytest -s -v tests -m "not integration"
+      - uv run coverage report -m
+      - uv run coverage xml
+      - rm .coverage
+
+  test:integration:
+    desc: Run the integration tests with coverage report.
+    cmds:
+      - uv run coverage run --source src -m pytest -s -v tests -m integration
+      - uv run coverage report -m
+      - uv run coverage xml
+      - rm .coverage
+
+  test:property:
+    desc: Run the property-based tests.
+    cmds:
+      - uv run pytest -s -v tests/test_properties.py
+
+  test:
+    desc: Run all the tests with coverage report.
+    cmds:
+      - uv run coverage run --source src -m pytest -s -v tests
+      - uv run coverage report -m
+      - uv run coverage xml
+      - rm .coverage
+
+  build:
+    desc: Build the distribution package.
+    cmds:
+      - uv build
+
+  publish:
+    desc: Publish the distribution package to PyPI.
+    cmds:
+      - uv publish

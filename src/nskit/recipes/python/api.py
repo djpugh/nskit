@@ -4,7 +4,7 @@ from typing import List, Union
 from pydantic import Field
 
 from nskit.mixer import File, Folder, LicenseFile
-from nskit.recipes.python import ingredients, PyRecipe
+from nskit.recipes.python import PyRecipe, ingredients
 from nskit.recipes.python.ingredients import api as api_ingredients
 
 

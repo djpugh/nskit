@@ -1,9 +1,9 @@
 """License file handler."""
+import sys
 from datetime import date
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-import sys
 from typing import Any, Callable, Dict, Optional, Union
 
 from ghapi.all import GhApi
@@ -90,7 +90,7 @@ def get_license_filename(context: Optional[Dict[str, Any]] = None):
         return name
 
 
-@lru_cache()
+@lru_cache
 def _get_license_content(license: LicenseOptionsEnum):
     # Cache results as a static method to make testing etc. better on rates/rate limiting
     license_content = GhApi().licenses.get(license.value)

@@ -1,13 +1,13 @@
 """Repo management class."""
 from __future__ import annotations
 
-from pathlib import Path
 import shutil
 import subprocess  # nosec B404
 import sys
 import tempfile
-from typing import Any, Optional, TYPE_CHECKING, Union
 import warnings
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
     from typing_extensions import Annotated
@@ -15,7 +15,7 @@ else:
     from typing import Annotated
 
 import git
-from pydantic import Field, field_validator, model_validator, ValidationInfo
+from pydantic import Field, ValidationInfo, field_validator, model_validator
 
 from nskit._logging import logger_factory
 from nskit.common.configuration import BaseConfiguration

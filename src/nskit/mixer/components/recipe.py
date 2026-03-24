@@ -1,9 +1,9 @@
 """The base recipe object."""
 import datetime as dt
 import inspect
-from pathlib import Path
 import sys
-from typing import List, Optional
+from pathlib import Path
+from typing import ClassVar, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -36,6 +36,10 @@ class Recipe(Folder):
         description='Hooks that can be used to modify a recipe path and context after writing'
     )
     extension_name: Optional[str] = Field(None, description="The name of the recipe as an extension to load.")
+
+    # Config path constants (can be overridden by subclasses)
+    config_dir: ClassVar[str] = ".recipe"
+    config_filename: ClassVar[str] = "config.yml"
 
     @property
     def recipe(self):
@@ -87,7 +91,7 @@ class Recipe(Folder):
     def recipe_batch(self):
         """Get information about the specific info of this recipe."""
         if sys.version_info.major <= 3 and sys.version_info.minor < 11:
-            creation_time = dt.datetime.now().astimezone()
+            creation_time = dt.datetime.now().astimezone().isoformat()
         else:
             creation_time = dt.datetime.now(dt.UTC).isoformat()
         return {'context': self.__dump_context(ser=True),
@@ -155,21 +159,53 @@ class Recipe(Folder):
         return super().validate(base_path=base_path, context=combined_context, override_path=override_path)
 
     @staticmethod
-    def load(recipe_name: str, **kwargs):
-        """Load a recipe as an extension."""
-        recipe_klass = load_extension(RECIPE_ENTRYPOINT, recipe_name)
+    def load(recipe_name: str, entrypoint: Optional[str] = None, initialize: bool = True, **kwargs):
+        """Load a recipe as an extension.
+        
+        Args:
+            recipe_name: Name of the recipe to load
+            entrypoint: Recipe entrypoint to use (defaults to RECIPE_ENTRYPOINT)
+            initialize: Whether to initialize the recipe instance (default True)
+            **kwargs: Arguments to pass to recipe initialization
+            
+        Returns:
+            Recipe instance if initialize=True, otherwise recipe class
+        """
+        if entrypoint is None:
+            entrypoint = RECIPE_ENTRYPOINT
+
+        recipe_klass = load_extension(entrypoint, recipe_name)
         if recipe_klass is None:
-            raise ValueError(f'Recipe {recipe_name} not found, it may be mis-spelt or not installed. Available recipes: {get_extension_names(RECIPE_ENTRYPOINT)}')
+            raise ValueError(f'Recipe {recipe_name} not found, it may be mis-spelt or not installed. Available recipes: {get_extension_names(entrypoint)}')
+
+        if not initialize:
+            recipe_klass.extension_name = recipe_name
+            return recipe_klass
+
         recipe = recipe_klass(**kwargs)
         recipe.extension_name = recipe_name
         return recipe
 
     @staticmethod
-    def inspect(recipe_name: str, include_private: bool = False, include_folder: bool = False, include_base: bool = False):
-        """Get the fields on a recipe as an extension."""
-        recipe_klass = load_extension(RECIPE_ENTRYPOINT, recipe_name)
+    def inspect(recipe_name: str, entrypoint: Optional[str] = None, include_private: bool = False, include_folder: bool = False, include_base: bool = False):
+        """Get the fields on a recipe as an extension.
+        
+        Args:
+            recipe_name: Name of the recipe to inspect
+            entrypoint: Recipe entrypoint to use (defaults to RECIPE_ENTRYPOINT)
+            include_private: Include private fields
+            include_folder: Include folder fields
+            include_base: Include base recipe fields
+            
+        Returns:
+            Signature of the recipe
+        """
+        if entrypoint is None:
+            entrypoint = RECIPE_ENTRYPOINT
+
+        recipe_klass = load_extension(entrypoint, recipe_name)
         if recipe_klass is None:
-            raise ValueError(f'Recipe {recipe_name} not found, it may be mis-spelt or not installed. Available recipes: {get_extension_names(RECIPE_ENTRYPOINT)}')
+            raise ValueError(f'Recipe {recipe_name} not found, it may be mis-spelt or not installed. Available recipes: {get_extension_names(entrypoint)}')
         sig = Recipe._inspect_basemodel(recipe_klass, include_private=include_private)
         if not include_folder:
             folder_sig = inspect.signature(Folder)

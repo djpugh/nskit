@@ -1,8 +1,8 @@
 """Utilities for interacting with systems etc."""
 import os
-from pathlib import Path
 import sys
-from typing import Any
+from pathlib import Path
+from typing import Any, Dict, get_args, get_origin
 
 if sys.version_info.major <= 3 and sys.version_info.minor < 9:
     from importlib_resources import files
@@ -10,8 +10,8 @@ else:
     from importlib.resources import files
 
 from jinja2 import BaseLoader, ChoiceLoader, Environment, TemplateNotFound
-from pydantic import GetCoreSchemaHandler, TypeAdapter, ValidationError
-from pydantic_core import core_schema, CoreSchema
+from pydantic import BaseModel, GetCoreSchemaHandler, TypeAdapter, ValidationError
+from pydantic_core import CoreSchema, core_schema
 
 from nskit.common.extensions import ExtensionsEnum
 
@@ -58,11 +58,11 @@ class Resource(str):
 
 
 class _PkgResourcesTemplateLoader(BaseLoader):
-    """Load jinja templates via imporlib.resources."""
+    """Load jinja templates via importlib.resources."""
 
     @staticmethod
     def get_source(environment, template):  # noqa: U100
-        """Get the source using imporlib.resources."""
+        """Get the source using importlib.resources."""
         try:
             Resource.validate(template)
         except ValidationError as e:
@@ -75,7 +75,7 @@ class _PkgResourcesTemplateLoader(BaseLoader):
         return source, None, lambda: True
 
 
-class _EnvironmentFactory():
+class _EnvironmentFactory:
     """Jinja2 Environment Factory to allow for extension/customisation."""
 
     def __init__(self):
@@ -123,3 +123,4 @@ class _EnvironmentFactory():
 
 
 JINJA_ENVIRONMENT_FACTORY = _EnvironmentFactory()
+

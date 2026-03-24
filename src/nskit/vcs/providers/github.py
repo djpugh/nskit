@@ -4,11 +4,11 @@ from typing import List, Optional
 
 try:
     from fastcore.net import HTTP404NotFoundError
-    from ghapi.all import GhApi, GhDeviceAuth, paged, Scope
+    from ghapi.all import GhApi, GhDeviceAuth, Scope, paged
     from ghapi.auth import _def_clientid
 except ImportError:
     raise ImportError('Github Provider requires installing extra dependencies (ghapi), use pip install nskit[github]')
-from pydantic import Field, field_validator, HttpUrl, SecretStr, ValidationInfo
+from pydantic import Field, HttpUrl, SecretStr, ValidationInfo, field_validator
 
 from nskit.common.configuration import BaseConfiguration, SettingsConfigDict
 from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings

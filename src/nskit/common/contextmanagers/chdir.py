@@ -1,10 +1,10 @@
 """Context manager for running in a specific directory."""
-from contextlib import ContextDecorator
 import os
-from pathlib import Path
 import tempfile
-from typing import Optional
 import warnings
+from contextlib import ContextDecorator
+from pathlib import Path
+from typing import Optional
 
 from nskit._logging import logger_factory
 
@@ -48,5 +48,5 @@ class ChDir(ContextDecorator):
                 self.target_dir.__exit__(exc_type, exc_val, exc_tb)
             except PermissionError as e:
                 # Handling circular imports with LoggingConfig
-                logger_factory.get_logger(__name__).warn('Unable to delete temporary directory.')
+                logger_factory.get_logger(__name__).warning('Unable to delete temporary directory.')
                 warnings.warn(e, stacklevel=2)

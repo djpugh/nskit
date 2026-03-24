@@ -1,6 +1,6 @@
 """Context manager for running in a specific directory."""
-from contextlib import ContextDecorator
 import os
+from contextlib import ContextDecorator
 from typing import Dict, List, Optional
 
 from nskit._logging import logger_factory

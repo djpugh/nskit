@@ -1,14 +1,14 @@
 """Repository installers."""
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from pathlib import Path
 import subprocess  # nosec B404
 import sys
-from typing import List, TYPE_CHECKING
+from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import TYPE_CHECKING, List
 
-from pydantic_settings import SettingsConfigDict
 import virtualenv
+from pydantic_settings import SettingsConfigDict
 
 from nskit._logging import logger_factory
 from nskit.common.configuration import BaseConfiguration

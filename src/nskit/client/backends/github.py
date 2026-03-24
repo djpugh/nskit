@@ -1,0 +1,175 @@
+"""GitHub backend for recipe management."""
+import subprocess
+import tempfile
+import zipfile
+from pathlib import Path
+from typing import List, Optional
+
+from ghapi.core import GhApi
+
+from nskit.client.backends.base import RecipeBackend
+from nskit.client.models import RecipeInfo
+
+
+class GitHubBackend(RecipeBackend):
+    """Backend that fetches recipes from GitHub releases."""
+
+    def __init__(
+        self,
+        org: str,
+        repo_pattern: str = "{recipe_name}",
+        token: Optional[str] = None,
+        entrypoint: str = "nskit.recipes",
+    ):
+        """Initialize GitHub backend.
+        
+        Args:
+            org: GitHub organization
+            repo_pattern: Pattern for repository names (use {recipe_name} placeholder)
+            token: Optional GitHub token (uses gh CLI if not provided)
+            entrypoint: Recipe entrypoint name
+        """
+        self.org = org
+        self.repo_pattern = repo_pattern
+        self._token = token
+        self._github: Optional[GhApi] = None
+        self._entrypoint = entrypoint
+
+    @property
+    def entrypoint(self) -> str:
+        """Get the recipe entrypoint."""
+        return self._entrypoint
+
+    def _get_token(self) -> str:
+        """Get GitHub token from gh CLI or provided token."""
+        if self._token:
+            return self._token
+
+        try:
+            result = subprocess.run(
+                ["gh", "auth", "token"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            self._token = result.stdout.strip()
+            return self._token
+        except subprocess.CalledProcessError:
+            raise RuntimeError(
+                "GitHub authentication required. Please run: gh auth login"
+            )
+        except FileNotFoundError:
+            raise RuntimeError(
+                "GitHub CLI (gh) not found. Please install it: https://cli.github.com/"
+            )
+
+    def _get_client(self) -> GhApi:
+        """Get authenticated GitHub client."""
+        if self._github is None:
+            token = self._get_token()
+            self._github = GhApi(token=token)
+        return self._github
+
+    def _get_repo_name(self, recipe_name: str) -> str:
+        """Build repository name from pattern."""
+        return self.repo_pattern.format(recipe_name=recipe_name)
+
+    def list_recipes(self) -> List[RecipeInfo]:
+        """List available recipes from GitHub org."""
+        github = self._get_client()
+
+        repos = github.repos.list_for_org(self.org, type="public")
+
+        recipes = []
+        for repo in repos:
+            # Get releases for version info
+            try:
+                releases = github.repos.list_releases(self.org, repo.name)
+                versions = [r.tag_name for r in releases if not r.draft]
+            except Exception:
+                versions = []
+
+            recipes.append(
+                RecipeInfo(
+                    name=repo.name,
+                    versions=versions,
+                    description=repo.description,
+                )
+            )
+
+        return recipes
+
+    def get_recipe_versions(self, recipe_name: str) -> List[str]:
+        """Get available versions for a recipe."""
+        github = self._get_client()
+        repo_name = self._get_repo_name(recipe_name)
+
+        try:
+            releases = github.repos.list_releases(self.org, repo_name)
+            return [r.tag_name for r in releases if not r.draft]
+        except Exception:
+            return []
+
+    def fetch_recipe(
+        self, recipe_name: str, version: str, target_path: Path
+    ) -> Path:
+        """Fetch recipe from GitHub release.
+        
+        Args:
+            recipe_name: Recipe name
+            version: Recipe version (tag name)
+            target_path: Where to extract recipe
+            
+        Returns:
+            Path to extracted recipe
+        """
+        github = self._get_client()
+        repo_name = self._get_repo_name(recipe_name)
+
+        # Get release by tag
+        release = github.repos.get_release_by_tag(self.org, repo_name, version)
+
+        # Download source archive
+        archive_url = f"https://github.com/{self.org}/{repo_name}/archive/refs/tags/{version}.zip"
+
+        with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
+            subprocess.run(
+                ["curl", "-L", "-o", tmp.name, archive_url],
+                check=True,
+                capture_output=True,
+            )
+
+            # Extract archive
+            with zipfile.ZipFile(tmp.name, "r") as zip_ref:
+                zip_ref.extractall(target_path)
+
+        # GitHub archives extract to {repo}-{tag}/ directory
+        extracted_dir = target_path / f"{repo_name}-{version.lstrip('v')}"
+        if not extracted_dir.exists():
+            extracted_dir = target_path / f"{repo_name}-{version}"
+
+        return extracted_dir
+
+    def get_image_url(self, recipe: str, version: str) -> str:
+        """Get Docker image URL from GitHub Container Registry."""
+        repo_name = self._get_repo_name(recipe)
+        return f"ghcr.io/{self.org}/{repo_name}:{version}"
+
+    def pull_image(self, image_url: str) -> None:
+        """Pull Docker image from GitHub Container Registry."""
+        # Authenticate with ghcr.io using GitHub token
+        token = self._get_token()
+        subprocess.run(
+            ["docker", "login", "ghcr.io", "-u", "token", "--password-stdin"],
+            input=token,
+            text=True,
+            check=True,
+            capture_output=True,
+        )
+        
+        # Pull image
+        subprocess.run(
+            ["docker", "pull", image_url],
+            check=True,
+            capture_output=True,
+        )

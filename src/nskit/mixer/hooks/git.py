@@ -1,6 +1,6 @@
 """Git hooks."""
-from pathlib import Path
 import subprocess  # nosec: B404
+from pathlib import Path
 from typing import Any, Dict
 
 from packaging.version import parse

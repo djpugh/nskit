@@ -24,3 +24,6 @@ src_dir['src_path'].contents += [
         content='nskit.recipes.python.ingredients.recipe:ingredient.py.template.template'
         )
 ]
+
+
+# What build info to use here (docker?)

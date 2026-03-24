@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Union
 
 from pydantic import Field, GetCoreSchemaHandler
-from pydantic_core import core_schema, CoreSchema
+from pydantic_core import CoreSchema, core_schema
 
 from nskit.common.configuration import BaseConfiguration
 from nskit.mixer.utilities import JINJA_ENVIRONMENT_FACTORY

@@ -1,6 +1,6 @@
 """Azure Devops provider using azure-cli to manage it."""
-from io import StringIO
 import json
+from io import StringIO
 from typing import List
 
 try:

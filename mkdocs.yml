@@ -1,0 +1,59 @@
+site_name: nskit Recipe System
+site_description: Flexible recipe management with client/service architecture
+site_author: Arkas Studio
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Recipe Users: users/quickstart.md
+    - Recipe Builders: builders/quickstart.md
+    - Platform Engineers: platform/quickstart.md
+  - User Guides:
+    - Installation: users/installation.md
+    - Using Recipes: users/using-recipes.md
+    - Updating Projects: users/updates.md
+  - Builder Guides:
+    - Creating Recipes: builders/creating-recipes.md
+    - Testing Recipes: builders/testing.md
+    - Publishing Recipes: builders/publishing.md
+  - Platform Guides:
+    - Architecture: platform/architecture.md
+    - Deployment: platform/deployment.md
+    - Backends: platform/backends.md
+    - Security: platform/security.md
+  - Developer Reference:
+    - API & Patterns: developers.md
+    - Client APIs: api/clients.md
+    - Backend APIs: api/backends.md
+    - Models: api/models.md
+    - Extension Points: api/extensions.md
+  - Contributing: contributing.md
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.details
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true

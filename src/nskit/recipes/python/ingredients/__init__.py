@@ -1,33 +1,15 @@
 """Ingredients for repos."""
 from nskit.mixer import File, Folder
-from nskit.recipes.python.ingredients.docs import docs_dir  # noqa: F401
+from nskit.recipes.python.ingredients import tools  # noqa: F401
+from nskit.recipes.python.ingredients import docs  # noqa: F401
 
-gitignore = File(
-    name='.gitignore',
-    content='nskit.recipes.python.ingredients:gitignore.template'
-    )
-noxfile = File(
-    name='noxfile.py',
-    content='nskit.recipes.python.ingredients:noxfile.py.template'
-    )
-pre_commit = File(
-    name='.pre-commit-config.yaml',
-    content='nskit.recipes.python.ingredients:pre-commit-config.yaml.template'
-    )
-pyproject_toml = File(
-    name='pyproject.toml',
-    content='nskit.recipes.python.ingredients:pyproject.toml.template'
-    )
-readme_md = File(
-    name='README.md',
-    content='nskit.recipes.python.ingredients:readme.md.template'
-    )
-
-test_placeholder = """import {{repo.py_name}}
+test_version = """from {{repo.py_name}} import __version__
 
 
-def test_placeholder():
-    pass
+def test_version():
+    assert __version__ is not None
+    assert isinstance(__version__, str)
+    assert len(__version__) > 0
 """
 
 test_dir = Folder(
@@ -37,13 +19,31 @@ test_dir = Folder(
             name='unit',
             contents=[
                 File(
-                    name='test_placeholder.py',
-                    content=test_placeholder
+                    name='test__version.py',
+                    content=test_version
                 )
             ]
         ),
         Folder(
             name='functional',
+            contents=[
+                File(name='.git-keep', content="")
+            ]
+        ),
+        Folder(
+            name='integration',
+            contents=[
+                File(name='.git-keep', content="")
+            ]
+        ),
+        Folder(
+            name='performance',
+            contents=[
+                File(name='.git-keep', content="")
+            ]
+        ),
+        Folder(
+            name='smoke',
             contents=[
                 File(name='.git-keep', content="")
             ]
@@ -58,7 +58,8 @@ src_dir = Folder(
             id_='src_path',
             name='{{repo.src_path}}',  # Make it be parsed as a template string for the name
             contents=[
-                File(name='__init__.py', content='nskit.recipes.python.ingredients:__init__.py.template')
+                File(name='__init__.py', content='nskit.recipes.python.ingredients:__init__.py.jinja'),
+                File(name='_version.py', content='nskit.recipes.python.ingredients:_version.py.jinja'),
             ]
         )
     ]

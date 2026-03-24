@@ -1,0 +1,14 @@
+{% extends "nskit.recipes.shared:pre_commit_config.yaml.jinja" %}
+
+{% block AdditionalHooks %}
+{{ super() }}
+- repo: https://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.88.0
+  hooks:
+    - id: terraform_fmt
+    - id: terraform_tflint
+      args:
+        - --args=--disable-rule=terraform_required_providers
+        - --args=--disable-rule=terraform_required_version
+        - --args=--disable-rule=terraform_module_pinned_source
+{% endblock %}

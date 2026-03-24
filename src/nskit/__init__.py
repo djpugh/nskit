@@ -33,11 +33,15 @@ def __get_version() -> str:
         if sys.version_info.major >= 3 and sys.version_info.minor >= 8:
             from importlib.metadata import (
                 PackageNotFoundError,
+            )
+            from importlib.metadata import (
                 version as parse_version,
             )
         else:
             from importlib_metadata import (  # type: ignore
                 PackageNotFoundError,
+            )
+            from importlib_metadata import (
                 version as parse_version,
             )
         try:

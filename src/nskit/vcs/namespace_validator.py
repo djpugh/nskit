@@ -1,10 +1,10 @@
 """Namespace Validator for validating if a name is in a namespace."""
-from enum import Enum
 import re
 import sys
+from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from pydantic import field_validator, ValidationInfo
+from pydantic import ValidationInfo, field_validator
 
 from nskit.common.configuration import BaseConfiguration
 

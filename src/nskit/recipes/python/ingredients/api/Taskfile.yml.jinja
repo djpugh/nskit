@@ -1,0 +1,8 @@
+{%- extends "nskit.recipes.python.ingredients.docker:taskfile_root.yml.jinja" %}
+
+{%- block AdditionalTaskfiles -%}
+{{super()}}
+  python-api:
+    taskfile: taskfiles/python-api.yml
+    flatten: true
+{%- endblock AdditionalTaskfiles -%}

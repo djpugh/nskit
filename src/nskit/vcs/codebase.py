@@ -1,8 +1,8 @@
 """Manage a codebase."""
 from __future__ import annotations
 
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import List, Optional
 
 if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
@@ -10,7 +10,7 @@ if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
 else:
     from typing import Annotated
 
-from pydantic import Field, field_validator, ValidationInfo
+from pydantic import Field, ValidationInfo, field_validator
 
 from nskit.common.configuration import BaseConfiguration
 from nskit.mixer import Recipe

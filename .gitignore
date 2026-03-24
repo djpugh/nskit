@@ -2,6 +2,9 @@
 # SCM versions
 src/nskit/_version.py
 
+# hypothesis
+.hypothesis
+
 # Compiled files
 *.pyc
 *.nfs*
