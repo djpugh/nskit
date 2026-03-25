@@ -93,7 +93,7 @@ def test(session):
         test_folder = [f"tests/{u}" for u in session.posargs]
     else:
         test_folder = ["tests/unit"]
-    session.install(".[dev,dev-test]")
+    session.install(".[dev]")
     for folder in test_folder:
         args = []
         args.append("-rs")
@@ -102,10 +102,6 @@ def test(session):
         env_name = f"py-{python_version()}-os-{platform()}"
         session.run(
             "pytest",
-            "-n",
-            "logical",
-            "--dist",
-            "loadscope",
             "--log-level=WARNING",
             "--cov=nskit",
             "--cov-report",
