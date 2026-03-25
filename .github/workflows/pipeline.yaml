@@ -127,8 +127,14 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - name: Install Task
+        uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ github.token }}
+      - name: Install dependencies
+        run: task setup
       - name: Lint
-        run: uv run ruff check src/ tests/
+        run: task lint
 
   test:
     name: Test Python ${{ matrix.py }} - ${{ matrix.os }} (${{ github.event_name }})
@@ -157,6 +163,7 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
     steps:
     - uses: actions/checkout@v6
     - name: Install uv
@@ -166,11 +173,13 @@ jobs:
       with:
         python-version: ${{ matrix.py }}
     - name: Install Task
-      uses: arduino/setup-task@v2
+      uses: go-task/setup-task@v2
+      with:
+        repo-token: ${{ github.token }}
     - name: Install dependencies
-      run: uv sync
+      run: task setup
     - name: Run Test Suite
-      run: uv run pytest tests/unit tests/functional --junitxml reports/${{ matrix.py }}-${{ matrix.os }}-test.xml --cov=nskit --cov-report xml:reports/coverage.xml
+      run: task test -- unit functional
       env:
         GITHUB_TOKEN: ${{ github.token}}
     - name: Upload test reports
@@ -333,9 +342,12 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-
+      - name: Install Task
+        uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ github.token }}
       - name: Build nskit
-        run: uv build
+        run: task build
 
       - name: Store build artifact
         uses: actions/upload-artifact@v7
@@ -408,6 +420,7 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
     steps:
       - uses: actions/checkout@v6
         with:
