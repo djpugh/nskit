@@ -83,14 +83,14 @@
 
 #### ``src_dir``
 
-Adds ``app.py``, ``auth.py``, ``server.py``, ``api/__init__.py``, ``base.py`` to [nskit.recipes.python.ingredients.src_dir]
+Adds ``app.py``, ``server.py``, ``api/__init__.py``, ``base.py`` to [nskit.recipes.python.ingredients.src_dir]
 
-### ::: nskit.recipes.python.ingredients.api.docker
+### ::: nskit.recipes.python.ingredients.docker
     options:
         show_root_heading: True
         members:
-            - api_dockerfile
-            - dockerignore
+            - dockerfile
+            - docker_ignore
 
 ### ::: nskit.recipes.python.ingredients.recipe
     options:
@@ -100,4 +100,4 @@ Adds ``app.py``, ``auth.py``, ``server.py``, ``api/__init__.py``, ``base.py`` to
             - readme_md
 
 #### ``src_dir``
-Adds ``recipe.py`` and ``ingredient.py.template`` to [nskit.recipes.python.ingredients.src_dir]
+Adds ``recipe.py`` and ``ingredient.py.jinja`` to [nskit.recipes.python.ingredients.src_dir]

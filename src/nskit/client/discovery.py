@@ -10,7 +10,7 @@ class DiscoveryClient:
 
     def __init__(self, backend: RecipeBackend):
         """Initialize discovery client.
-        
+
         Args:
             backend: Backend for recipe discovery
         """
@@ -21,10 +21,10 @@ class DiscoveryClient:
         search_term: Optional[str] = None,
     ) -> List[RecipeInfo]:
         """Discover available recipes.
-        
+
         Args:
             search_term: Optional search term to filter recipes
-            
+
         Returns:
             List of discovered recipes
         """
@@ -33,19 +33,19 @@ class DiscoveryClient:
         if search_term:
             search_lower = search_term.lower()
             recipes = [
-                r for r in recipes
-                if search_lower in r.name.lower()
-                or (r.description and search_lower in r.description.lower())
+                r
+                for r in recipes
+                if search_lower in r.name.lower() or (r.description and search_lower in r.description.lower())
             ]
 
         return recipes
 
     def get_recipe_info(self, recipe_name: str) -> Optional[RecipeInfo]:
         """Get detailed info for a specific recipe.
-        
+
         Args:
             recipe_name: Recipe name
-            
+
         Returns:
             Recipe info or None if not found
         """
@@ -59,10 +59,10 @@ class DiscoveryClient:
 
     def get_recipe_versions(self, recipe_name: str) -> List[str]:
         """Get available versions for a recipe.
-        
+
         Args:
             recipe_name: Recipe name
-            
+
         Returns:
             List of available versions
         """

@@ -1,15 +1,12 @@
 """Git utilities for recipe operations."""
-import subprocess
+import subprocess  # nosec B404
 import tempfile
 from pathlib import Path
 from typing import Optional, Tuple
 
+from nskit.client.exceptions import GitStatusError
 
-class GitStatusError(Exception):
-    """Raised when Git repository is in an invalid state."""
-
-    def __init__(self, reason: str):
-        super().__init__(f"Git repository is not ready: {reason}")
+__all__ = ["GitStatusError", "GitUtils"]
 
 
 class GitUtils:
@@ -21,7 +18,7 @@ class GitUtils:
     def is_git_repository(self) -> bool:
         """Check if directory is a Git repository."""
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B603, B607
                 ["git", "rev-parse", "--git-dir"],
                 cwd=self.project_path,
                 capture_output=True,
@@ -38,7 +35,7 @@ class GitUtils:
             return False
 
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B603, B607
                 ["git", "status", "--porcelain"],
                 cwd=self.project_path,
                 capture_output=True,
@@ -52,7 +49,7 @@ class GitUtils:
     def get_current_commit(self) -> Optional[str]:
         """Get current commit hash."""
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B603, B607
                 ["git", "rev-parse", "HEAD"],
                 cwd=self.project_path,
                 capture_output=True,
@@ -73,7 +70,7 @@ class GitUtils:
         template_label: str = "TEMPLATE CHANGES",
     ) -> Tuple[str, bool]:
         """Perform 3-way merge using git merge-file.
-        
+
         Args:
             base_content: Original content (common ancestor)
             user_content: User's version
@@ -81,7 +78,7 @@ class GitUtils:
             user_label: Label for user changes in conflict markers
             base_label: Label for base version
             template_label: Label for template changes
-            
+
         Returns:
             Tuple of (merged_content, has_conflicts)
         """
@@ -99,13 +96,16 @@ class GitUtils:
 
             try:
                 # Run git merge-file
-                result = subprocess.run(
+                result = subprocess.run(  # nosec B603, B607
                     [
                         "git",
                         "merge-file",
-                        "-L", user_label,
-                        "-L", base_label,
-                        "-L", template_label,
+                        "-L",
+                        user_label,
+                        "-L",
+                        base_label,
+                        "-L",
+                        template_label,
                         str(user_file),
                         str(base_file),
                         str(template_file),
@@ -121,20 +121,20 @@ class GitUtils:
                 return merged_content, has_conflicts
 
             except Exception as e:
-                raise RuntimeError(f"Git merge-file failed: {e}")
+                raise RuntimeError(f"Git merge-file failed: {e}") from None
 
     def diff_files(self, old_path: Path, new_path: Path) -> str:
         """Get diff between two files using git diff.
-        
+
         Args:
             old_path: Path to old file
             new_path: Path to new file
-            
+
         Returns:
             Diff output
         """
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B603, B607
                 [
                     "git",
                     "diff",
@@ -148,4 +148,4 @@ class GitUtils:
             )
             return result.stdout
         except Exception as e:
-            raise RuntimeError(f"Git diff failed: {e}")
+            raise RuntimeError(f"Git diff failed: {e}") from None

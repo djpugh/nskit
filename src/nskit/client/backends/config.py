@@ -10,26 +10,24 @@ from nskit.client.backends.github import GitHubBackend
 from nskit.client.backends.local import LocalBackend
 
 
-def create_backend_from_config(
-    config: Union[dict, Path, str]
-) -> RecipeBackend:
+def create_backend_from_config(config: Union[dict, Path, str]) -> RecipeBackend:
     """Create backend from configuration.
-    
+
     Args:
         config: Dict config or path to YAML config file
-        
+
     Returns:
         Configured backend instance
-        
+
     Example config:
         type: local
         path: /path/to/recipes
-        
+
         type: docker
         registry_url: ghcr.io
         image_prefix: org/project
         auth_token: ${GITHUB_TOKEN}
-        
+
         type: github
         org: myorg
         repo_pattern: recipe-{recipe_name}

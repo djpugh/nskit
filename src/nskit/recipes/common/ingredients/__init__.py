@@ -35,6 +35,6 @@ taskfile = File(
 
 # Base README template
 readme_base = File(
-    name="README_base.md",
-    content="nskit.recipes.common.ingredients:README_base.md.jinja",
+    name="README.md",
+    content="nskit.recipes.common.ingredients:README.md.jinja",
 )

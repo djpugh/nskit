@@ -1,10 +1,11 @@
 """Functional tests for RecipeClient with mocked backends."""
-import pytest
 from pathlib import Path
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
-from nskit.recipes import RecipeClient
+import pytest
+
 from nskit.client.models import RecipeInfo
+from nskit.recipes import RecipeClient
 
 
 @pytest.fixture
@@ -47,12 +48,11 @@ class TestRecipeClient:
     def test_initialize_recipe(self, mock_backend, tmp_path):
         """Test initializing a recipe."""
         client = RecipeClient(mock_backend)
-        
+
         # Just test that the method exists and can be called
         # Full integration test would require actual recipe files
-        assert hasattr(client, 'initialize_recipe')
+        assert hasattr(client, "initialize_recipe")
         assert callable(client.initialize_recipe)
-
 
 
 class TestRecipeClientAdditional:
@@ -61,14 +61,14 @@ class TestRecipeClientAdditional:
     def test_get_recipe_versions(self):
         """Test getting recipe versions."""
         from unittest.mock import Mock
-        
+
         backend = Mock()
         backend.entrypoint = "test.recipes"
         backend.get_recipe_versions.return_value = ["v1.0.0", "v2.0.0", "v3.0.0"]
-        
+
         client = RecipeClient(backend)
         versions = client.get_recipe_versions("test_recipe")
-        
+
         assert len(versions) == 3
         assert "v1.0.0" in versions
         assert "v3.0.0" in versions

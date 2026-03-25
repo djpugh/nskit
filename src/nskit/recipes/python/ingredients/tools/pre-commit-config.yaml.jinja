@@ -1,4 +1,4 @@
-{% extends "nskit.recipes.common:pre_commit_config.yaml.jinja" %}
+{% extends "nskit.recipes.common.ingredients:pre_commit_config.yaml.jinja" %}
 
 {% block AdditionalHooks %}
 {{super()}}
@@ -16,15 +16,15 @@
       args: [ --fix ]
     - id: ruff-format
 
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v2.31.0
-    hooks:
+- repo: https://github.com/asottile/pyupgrade
+  rev: v2.31.0
+  hooks:
     - id: pyupgrade
       args: [--py36-plus]
 
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0
-    hooks:
-      - id: debug-statements
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.1.0
+  hooks:
+    - id: debug-statements
 
 {% endblock %}

@@ -1,4 +1,4 @@
-from typying import Dict, get_origin, get_args
+from typing import Dict, get_args, get_origin
 
 from pydantic import BaseModel
 
@@ -33,15 +33,11 @@ def get_required_fields_as_dict(model: BaseModel, prefix: str = "") -> Dict[str,
 
         if field.is_required() or is_functionally_required:
             # If the field is a submodel, recurse
-            if isinstance(field.annotation, type) and issubclass(
-                field.annotation, BaseModel
-            ):
-                nested = get_required_fields_as_dict(
-                    field.annotation, prefix=full_field_name + "."
-                )
+            if isinstance(field.annotation, type) and issubclass(field.annotation, BaseModel):
+                nested = get_required_fields_as_dict(field.annotation, prefix=full_field_name + ".")
                 required_fields.update(nested)
             else:
-                type_name = getattr(field.annotation, '__name__', str(field.annotation))
+                type_name = getattr(field.annotation, "__name__", str(field.annotation))
                 required_fields[full_field_name] = type_name
 
     return required_fields

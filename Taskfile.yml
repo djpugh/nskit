@@ -6,7 +6,7 @@ includes:
     flatten: true
   docs:
     taskfile: taskfiles/docs.yml
-    flatten: true
+    flatten: false
 
 tasks:
   default:

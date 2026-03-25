@@ -1,6 +1,7 @@
 """Tests for LocalBackend."""
-import pytest
 from pathlib import Path
+
+import pytest
 
 from nskit.client.backends import LocalBackend
 

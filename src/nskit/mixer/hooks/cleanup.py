@@ -9,6 +9,7 @@ from nskit.mixer.components.hook import Hook
 
 class RemoveEmptyFilesHook(Hook):
     """Post hook that removes all empty files from the generated recipe."""
+
     skip_gitkeep: bool = True
 
     def call(
@@ -30,16 +31,14 @@ class RemoveEmptyFilesHook(Hook):
         empty_files_removed = []
 
         # Walk through all files in the recipe directory
-        for root, dirs, files in os.walk(recipe_path):
+        for root, _dirs, files in os.walk(recipe_path):
             for file in files:
                 file_path = Path(root) / file
                 try:
                     # Check if file is empty (0 bytes)
                     if file_path.stat().st_size == 0 and not (skip_gitkeep and file_path.name == ".gitkeep"):
                         file_path.unlink()  # Remove the empty file
-                        empty_files_removed.append(
-                            str(file_path.relative_to(recipe_path))
-                        )
+                        empty_files_removed.append(str(file_path.relative_to(recipe_path)))
                 except OSError as e:
                     # Log error but continue processing other files
                     print(f"Warning: Could not process file {file_path}: {e}")
@@ -57,9 +56,7 @@ class RemoveEmptyFilesHook(Hook):
 class RemoveEmptyDirectoriesHook(Hook):
     """Post hook that removes all empty directories from the generated recipe."""
 
-    def call(
-        self, recipe_path: Path, context: Dict[str, Any]
-    ) -> Optional[Tuple[Path, Dict[str, Any]]]:
+    def call(self, recipe_path: Path, context: Dict[str, Any]) -> Optional[Tuple[Path, Dict[str, Any]]]:
         """Remove all empty directories from the recipe directory.
 
         Args:
@@ -75,16 +72,14 @@ class RemoveEmptyDirectoriesHook(Hook):
         empty_dirs_removed = []
 
         # Walk through directories in reverse order (deepest first)
-        for root, dirs, files in os.walk(recipe_path, topdown=False):
+        for root, dirs, _files in os.walk(recipe_path, topdown=False):
             for dir_name in dirs:
                 dir_path = Path(root) / dir_name
                 try:
                     # Check if directory is empty
                     if not any(dir_path.iterdir()):
                         dir_path.rmdir()  # Remove the empty directory
-                        empty_dirs_removed.append(
-                            str(dir_path.relative_to(recipe_path))
-                        )
+                        empty_dirs_removed.append(str(dir_path.relative_to(recipe_path)))
                 except OSError as e:
                     # Log error but continue processing other directories
                     print(f"Warning: Could not process directory {dir_path}: {e}")
@@ -106,9 +101,7 @@ class CleanupHook(Hook):
     remove_empty_dirs: bool = True
     skip_gitkeep: bool = True
 
-    def call(
-        self, recipe_path: Path, context: Dict[str, Any]
-    ) -> Optional[Tuple[Path, Dict[str, Any]]]:
+    def call(self, recipe_path: Path, context: Dict[str, Any]) -> Optional[Tuple[Path, Dict[str, Any]]]:
         """Clean up empty files and/or directories from the recipe directory.
 
         Args:

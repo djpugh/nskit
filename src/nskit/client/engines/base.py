@@ -20,7 +20,7 @@ class RecipeEngine(ABC):
         entrypoint: str = None,
     ) -> RecipeResult:
         """Execute a recipe.
-        
+
         Args:
             recipe: Recipe name
             version: Recipe version
@@ -28,7 +28,7 @@ class RecipeEngine(ABC):
             output_dir: Output directory
             image_url: Docker image URL (for Docker engine)
             entrypoint: Recipe entrypoint (for Local engine)
-            
+
         Returns:
             Recipe execution result
         """

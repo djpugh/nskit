@@ -2,14 +2,15 @@
 from typing import Optional
 
 from nskit.client.models import RepositoryInfo
+from nskit.vcs.providers.abstract import RepoClient
 
 
 class RepositoryClient:
     """Client for managing recipe repositories."""
 
-    def __init__(self, vcs_client: Optional['RepoClient'] = None):
+    def __init__(self, vcs_client: RepoClient | None = None):
         """Initialize repository client.
-        
+
         Args:
             vcs_client: Optional VCS client (e.g., GithubRepoClient)
         """
@@ -22,12 +23,12 @@ class RepositoryClient:
         private: bool = True,
     ) -> RepositoryInfo:
         """Create a new repository.
-        
+
         Args:
             repo_name: Repository name
             description: Repository description
             private: Whether repository is private
-            
+
         Returns:
             Repository info
         """
@@ -49,7 +50,7 @@ class RepositoryClient:
         require_reviews: bool = True,
     ) -> None:
         """Configure repository settings.
-        
+
         Args:
             repo_name: Repository name
             branch_protection: Enable branch protection
@@ -64,10 +65,10 @@ class RepositoryClient:
 
     def get_repository_info(self, repo_name: str) -> Optional[RepositoryInfo]:
         """Get repository information.
-        
+
         Args:
             repo_name: Repository name
-            
+
         Returns:
             Repository info or None if not found
         """

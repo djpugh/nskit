@@ -6,7 +6,9 @@ from typing import List
 try:
     from azure.cli.core import get_default_cli
 except ImportError:
-    raise ImportError('Azure Devops Provider requires installing extra dependencies, use pip install nskit[azure_devops]')
+    raise ImportError(
+        "Azure Devops Provider requires installing extra dependencies, use pip install nskit[azure_devops]"
+    ) from None
 
 from pydantic import HttpUrl
 
@@ -18,7 +20,8 @@ from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
 
 class AzureDevOpsSettings(VCSProviderSettings):
     """Azure DevOps settings."""
-    model_config = SettingsConfigDict(env_prefix='AZURE_DEVOPS_', env_file='.env', dotenv_extra='ignore')
+
+    model_config = SettingsConfigDict(env_prefix="AZURE_DEVOPS_", env_file=".env", dotenv_extra="ignore")
 
     url: HttpUrl = "https://dev.azure.com"
     organisation: str
@@ -27,15 +30,15 @@ class AzureDevOpsSettings(VCSProviderSettings):
     @property
     def organisation_url(self):
         """Get the organistion Url."""
-        return f'{self.url}/{self.organisation}'
+        return f"{self.url}/{self.organisation}"
 
     @property
     def project_url(self):
         """Get the project url."""
-        return f'{self.organisation_url}/{self.project}'
+        return f"{self.organisation_url}/{self.project}"
 
     @property
-    def repo_client(self) -> 'AzureDevOpsRepoClient':
+    def repo_client(self) -> "AzureDevOpsRepoClient":
         """Get the instantiated repo client."""
         return AzureDevOpsRepoClient(self)
 
@@ -54,85 +57,102 @@ class AzureDevOpsRepoClient(RepoClient):
     def check_exists(self, repo_name: str) -> bool:
         """Check if the repo exists in the project."""
         output = StringIO()
-        return not self._invoke(['repos',
-                                 'show',
-                                 '--organization',
-                                 self._config.organisation_url,
-                                 '--project',
-                                 self._config.project,
-                                 '-r',
-                                 repo_name],
-                                out_file=output)
+        return not self._invoke(
+            [
+                "repos",
+                "show",
+                "--organization",
+                self._config.organisation_url,
+                "--project",
+                self._config.project,
+                "-r",
+                repo_name,
+            ],
+            out_file=output,
+        )
 
     def create(self, repo_name: str):
         """Create the repo in the project."""
         output = StringIO()
-        return self._invoke(['repos',
-                             'create',
-                             '--organization',
-                             self._config.organisation_url,
-                             '--project',
-                             self._config.project,
-                             '--name',
-                             repo_name],
-                            out_file=output)
+        return self._invoke(
+            [
+                "repos",
+                "create",
+                "--organization",
+                self._config.organisation_url,
+                "--project",
+                self._config.project,
+                "--name",
+                repo_name,
+            ],
+            out_file=output,
+        )
 
     def delete(self, repo_name: str):
         """Delete the repo if it exists in the project."""
         # We need to get the ID
         show_output = StringIO()
-        result = self._invoke(['repos',
-                               'show',
-                               '--organization',
-                               self._config.organisation_url,
-                               '--project',
-                               self._config.project,
-                               '-r',
-                               repo_name],
-                              out_file=show_output)
+        result = self._invoke(
+            [
+                "repos",
+                "show",
+                "--organization",
+                self._config.organisation_url,
+                "--project",
+                self._config.project,
+                "-r",
+                repo_name,
+            ],
+            out_file=show_output,
+        )
         if not result:
             # Exists
             repo_info = json.loads(show_output.getvalue())
-            repo_id = repo_info['id']
+            repo_id = repo_info["id"]
             output = StringIO()
-            return self._invoke(['repos',
-                                 'delete',
-                                 '--organization',
-                                 self._config.organisation_url,
-                                 '--project',
-                                 self._config.project,
-                                 '--id',
-                                 repo_id],
-                                out_file=output)
+            return self._invoke(
+                [
+                    "repos",
+                    "delete",
+                    "--organization",
+                    self._config.organisation_url,
+                    "--project",
+                    self._config.project,
+                    "--id",
+                    repo_id,
+                ],
+                out_file=output,
+            )
 
     def get_remote_url(self, repo_name: str) -> HttpUrl:
         """Get the remote url for the repo."""
         output = StringIO()
-        result = self._invoke(['repos',
-                               'show',
-                               '--organization',
-                               self._config.organisation_url,
-                               '--project',
-                               self._config.project,
-                               '-r',
-                               repo_name],
-                              out_file=output)
+        result = self._invoke(
+            [
+                "repos",
+                "show",
+                "--organization",
+                self._config.organisation_url,
+                "--project",
+                self._config.project,
+                "-r",
+                repo_name,
+            ],
+            out_file=output,
+        )
         if not result:
             # Exists
             repo_info = json.loads(output.getvalue())
-            return repo_info['remoteUrl']
+            return repo_info["remoteUrl"]
 
     def list(self) -> List[str]:
         """List the repos in the project."""
         output = StringIO()
-        result = self._invoke(['repos',
-                               'list',
-                               '--organization',
-                               self._config.organisation_url,
-                               '--project',
-                               self._config.project],
-                              out_file=output)
+        result = self._invoke(
+            ["repos", "list", "--organization", self._config.organisation_url, "--project", self._config.project],
+            out_file=output,
+        )
         if not result:
             # Exists
-            repo_list = [u['name'] for u in json.loads(output.getvalue())]
+            repo_list = [u["name"] for u in json.loads(output.getvalue())]
             return repo_list

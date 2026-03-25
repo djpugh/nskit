@@ -56,12 +56,13 @@ app = create_cli(
 
 ## Features
 
-- **Two Execution Modes** - Docker (production) or local (development)
-- **Client/Service Architecture** - Use programmatically, via CLI, or wrap with web API
-- **Multiple Backends** - Local filesystem, Docker registry, GitHub releases
-- **3-Way Merge Updates** - Preserves user customizations while applying recipe updates
-- **Conflict Detection** - Intelligent merge with conflict reporting
-- **Pluggable** - Easy to extend with custom backends
+- **Two Execution Modes** — Docker (production, recommended) or local (recipe development)
+- **Reproducible Updates** — Docker mode pins each recipe version as an immutable image, enabling deterministic 3-way merges
+- **Client/Service Architecture** — Use programmatically, via CLI, or wrap with web API
+- **Multiple Backends** — Local filesystem, Docker registry, GitHub releases
+- **3-Way Merge Updates** — Preserves user customisations while applying recipe updates
+- **Conflict Detection** — Intelligent merge with conflict reporting
+- **Pluggable** — Easy to extend with custom backends
 
 ## Architecture
 
@@ -70,6 +71,8 @@ CLI Layer (Thin Wrapper)
     ↓
 Client Layer (Pure Python)
     ↓
+Engine Layer (Docker or Local)
+    ↓
 Backend Layer (Pluggable)
 ```
 
@@ -77,10 +80,10 @@ Backend Layer (Pluggable)
 
 Full documentation: [https://docs.example.com](https://docs.example.com)
 
-- [Recipe Users Guide](docs/users/quickstart.md)
-- [Recipe Builders Guide](docs/builders/quickstart.md)
-- [Platform Engineers Guide](docs/platform/quickstart.md)
-- [Developer Reference](docs/developers.md) - API, patterns, and extensions
+- [Using a Recipe](docs/source/guides/using-a-recipe.md)
+- [Updating from a Recipe](docs/source/guides/updating-from-a-recipe.md)
+- [Building a Recipe](docs/source/guides/building-a-recipe.md)
+- [Platform Integration](docs/source/guides/platform-integration.md)
 
 ## Installation
 
@@ -109,10 +112,10 @@ nskit supports multiple backends for recipe distribution:
 | **DockerBackend** | Docker registry | Docker | Custom registries | Docker |
 
 **Execution Modes:**
-- **Docker Mode (Default)** - Recipes run in containers from ghcr.io or custom registry
-- **Local Mode (--local)** - Recipes run from locally installed Python packages
+- **Docker Mode (Default)** — Recipes run in versioned containers. Each version is a pinned image, enabling deterministic 3-way merge updates. Recommended for production.
+- **Local Mode (`--local`)** — Recipes run from locally installed Python packages. Faster, but the output may vary across environments. Best for recipe development only.
 
-See [Docker Execution Guide](docs/docker-execution.md) for detailed workflow and [Developer Guide](docs/developers.md) for backend comparison.
+See [Architecture](docs/source/architecture/index.md) for the detailed design rationale and [Docker vs Local Execution](docs/source/architecture/docker-execution.md) for the execution flow.
 
 ## Usage Examples
 
@@ -120,18 +123,18 @@ See [Docker Execution Guide](docs/docker-execution.md) for detailed workflow and
 
 ```python
 from nskit.client import RecipeClient, UpdateClient
-from nskit.client.execution import ExecutionMode
+from nskit.client.engines import LocalEngine, DockerEngine
 from nskit.client.backends import GitHubBackend
 from pathlib import Path
 
-# Initialize backend
+# Initialise backend
 backend = GitHubBackend(org='myorg')
 
-# Create client with Docker mode (default)
-client = RecipeClient(backend, execution_mode=ExecutionMode.DOCKER)
+# Create client with Docker engine (default, recommended)
+client = RecipeClient(backend)
 
-# Or use local mode for development
-client = RecipeClient(backend, execution_mode=ExecutionMode.LOCAL)
+# Or with local engine for recipe development
+client = RecipeClient(backend, engine=LocalEngine())
 
 # List recipes
 recipes = client.list_recipes()
@@ -178,8 +181,8 @@ myrecipes update --target-version v2.0.0
 
 ```python
 from fastapi import FastAPI
-from nskit.recipes import RecipeClient
-from nskit.cli.backends import GitHubBackend
+from nskit.client import RecipeClient
+from nskit.client.backends import GitHubBackend
 
 app = FastAPI()
 backend = GitHubBackend(org='myorg')

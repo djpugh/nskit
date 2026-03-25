@@ -2,16 +2,17 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from nskit.client.backends.base import RecipeBackend
+from nskit.client.engines import DockerEngine, RecipeEngine
 from nskit.client.models import RecipeInfo, RecipeResult
-from nskit.client.engines import RecipeEngine, DockerEngine
 
 
 class RecipeClient:
     """Pure Python client for recipe operations (no CLI dependencies)."""
 
-    def __init__(self, backend: 'RecipeBackend', engine: Optional[RecipeEngine] = None):
+    def __init__(self, backend: RecipeBackend, engine: Optional[RecipeEngine] = None):
         """Initialize the recipe client.
-        
+
         Args:
             backend: Backend for recipe discovery and fetching
             engine: Execution engine (defaults to DockerEngine)
@@ -21,7 +22,7 @@ class RecipeClient:
 
     def list_recipes(self) -> List[RecipeInfo]:
         """List all available recipes from the backend.
-        
+
         Returns:
             List of recipe information
         """
@@ -29,10 +30,10 @@ class RecipeClient:
 
     def get_recipe_versions(self, recipe: str) -> List[str]:
         """Get available versions for a specific recipe.
-        
+
         Args:
             recipe: Recipe name
-            
+
         Returns:
             List of available versions
         """
@@ -47,14 +48,14 @@ class RecipeClient:
         force: bool = False,
     ) -> RecipeResult:
         """Initialize a new project from a recipe.
-        
+
         Args:
             recipe: Recipe name
             version: Recipe version
             parameters: Recipe parameters
             output_dir: Output directory for the project
             force: Allow initialization in non-empty directory
-            
+
         Returns:
             Result of the initialization
         """
@@ -73,15 +74,15 @@ class RecipeClient:
 
         try:
             output_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # Get image URL from backend (only if backend supports it and engine needs it)
             image_url = None
-            if hasattr(self.engine, '__class__') and self.engine.__class__.__name__ == 'DockerEngine':
-                if hasattr(self.backend, 'get_image_url'):
+            if hasattr(self.engine, "__class__") and self.engine.__class__.__name__ == "DockerEngine":
+                if hasattr(self.backend, "get_image_url"):
                     image_url = self.backend.get_image_url(recipe, version)
-                    if hasattr(self.backend, 'pull_image'):
+                    if hasattr(self.backend, "pull_image"):
                         self.backend.pull_image(image_url)
-            
+
             # Execute using engine
             return self.engine.execute(
                 recipe=recipe,
@@ -101,4 +102,3 @@ class RecipeClient:
                 recipe_version=version,
                 errors=errors,
             )
-

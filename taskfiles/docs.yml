@@ -1,18 +1,21 @@
 version: '3'
 
+vars:
+  MKDOCS_CONFIG: docs/mkdocs.yml
+
 tasks:
 
   serve:
     desc: Serve the documentation locally.
     cmds:
-      - uv run mkdocs serve
+      - uv run mkdocs serve --config-file {{.MKDOCS_CONFIG}}
 
   build:
     desc: Build the documentation.
     cmds:
-      - uv run mkdocs build
+      - uv run mkdocs build --config-file {{.MKDOCS_CONFIG}}
 
   deploy:
     desc: Deploy the documentation to GitHub Pages.
     cmds:
-      - uv run mkdocs gh-deploy --force
+      - uv run mkdocs gh-deploy --force --config-file {{.MKDOCS_CONFIG}}

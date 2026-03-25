@@ -8,10 +8,10 @@ build-backend = "pdm.backend"
 
 [project]
 name = "{{repo.name | replace('.', '-')}}"
-authors = [{name = "{{ repo.owner }}", email="{{ repo.email }}"}]
-maintainers = [{ name = "{{ repo.owner }}", email="{{ repo.email }}" }]
+authors = [{{ '{' }}name = "{{ repo.owner }}", email="{{ repo.email }}"{{ '}' }}]
+maintainers = [{{ '{' }} name = "{{ repo.owner }}", email="{{ repo.email }}" {{ '}' }}]
 description = "{{ repo.description }}"
-readme = {file="README.md", content-type = "text/markdown"}
+readme = {{ '{' }}file="README.md", content-type = "text/markdown"{{ '}' }}
 keywords = []
 requires-python = '>={{ python_version | default("3.11.0") }}'
 classifiers = [
@@ -56,6 +56,10 @@ security = [
   "bandit>=1.7.10",
 ]
 
+licenses = [
+  "licensecheck>=2024.3",
+]
+
 docs = [
   "mike>=2.1.3",
   "mkdocs-autorefs>=1.2.0",
@@ -71,6 +75,7 @@ docs = [
   "mkdocs-licenseinfo>=0.1.0",
 ]
 
+{% raw %}
 dev = [
   "ipykernel>=6.29.5",
   "ipdb>=0.13.3",
@@ -84,7 +89,7 @@ dev = [
   {include-group = "licenses"},
   {include-group = "docs"},
 ]
-
+{% endraw %}
 
 [project.optional-dependencies]
 
@@ -119,8 +124,8 @@ includes = ["src/"]
 
 [tool.pdm.version]
 source = "scm"
-write_to = "{{ namespace_folder_structure | replace('src/', '') }}/_version.py"
-write_template = "__version__ = '{}'"
+write_to = "{{ repo.src_path }}/_version.py"
+write_template = "__version__ = '{{ '{' }}{{ '}' }}'"
 fallback_version = "0.0.0"
 
 
@@ -128,13 +133,15 @@ fallback_version = "0.0.0"
 python_version = "3.11"
 show_error_codes = true
 strict = true
+{% raw %}
 overrides = [
   { module = [
     "virtualenv.*",
     "tox.*",
     "importlib_metadata.*",
+{% endraw %}
     "{{ repo.name }}._version"
-  ], ignore_missing_imports = true },
+  ], ignore_missing_imports = true {{ '}' }},
 ]
 
 

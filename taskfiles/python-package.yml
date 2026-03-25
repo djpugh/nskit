@@ -14,15 +14,14 @@ tasks:
       - uv run pre-commit install
 
   lint:
-    desc: Run the linter (Ruff) to check for code style issues (with tentative to fix).
+    desc: Run the linter via nox.
     cmds:
-      - uv run ruff check --fix .
+      - uv run nox -s lint
 
   format:
-    desc: Run the formatter (Ruff) and isort to format the code.
+    desc: Run the formatter (ruff format + isort) via nox.
     cmds:
-      - uv run isort src tests
-      - uv run ruff format .
+      - uv run nox -s format
 
   check:
     desc: Run all the checks on the codebase.
@@ -37,32 +36,24 @@ tasks:
       - uv run pre-commit run -a
 
   check:security:
-    desc: Run the security checks on the codebase.
+    desc: Run the security checks via nox.
     cmds:
-      - uv run bandit -r src
+      - uv run nox -s security
 
   check:licences:
-    desc: Check the licences of the dependencies.
+    desc: Check the licences of the dependencies via nox.
     cmds:
-      - mkdir -p reports
-      - uv run licensecheck --format json --file reports/licenses.json
-      - uv run licensecheck --format ansi
+      - uv run nox -s licenses
 
   test:unit:
-    desc: Run the unit tests with coverage report.
+    desc: Run the unit tests via nox.
     cmds:
-      - uv run coverage run --source src -m pytest -s -v tests -m "not integration"
-      - uv run coverage report -m
-      - uv run coverage xml
-      - rm .coverage
+      - uv run nox -s test -- unit
 
   test:integration:
-    desc: Run the integration tests with coverage report.
+    desc: Run the integration tests via nox.
     cmds:
-      - uv run coverage run --source src -m pytest -s -v tests -m integration
-      - uv run coverage report -m
-      - uv run coverage xml
-      - rm .coverage
+      - uv run nox -s test -- functional
 
   test:property:
     desc: Run the property-based tests.
@@ -70,17 +61,14 @@ tasks:
       - uv run pytest -s -v tests/test_properties.py
 
   test:
-    desc: Run all the tests with coverage report.
+    desc: Run all the tests via nox.
     cmds:
-      - uv run coverage run --source src -m pytest -s -v tests
-      - uv run coverage report -m
-      - uv run coverage xml
-      - rm .coverage
+      - uv run nox -s test -- {{.CLI_ARGS}}
 
   build:
-    desc: Build the distribution package.
+    desc: Build the distribution package via nox.
     cmds:
-      - uv build
+      - uv run nox -s build
 
   publish:
     desc: Publish the distribution package to PyPI.

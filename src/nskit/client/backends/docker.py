@@ -1,5 +1,5 @@
 """Docker backend for recipe management."""
-import subprocess
+import subprocess  # nosec B404
 from pathlib import Path
 from typing import List, Optional
 
@@ -18,7 +18,7 @@ class DockerBackend(RecipeBackend):
         entrypoint: str = "nskit.recipes",
     ):
         """Initialize Docker backend.
-        
+
         Args:
             registry_url: Docker registry URL (e.g., ghcr.io)
             image_prefix: Prefix for image names (e.g., org/project)
@@ -34,24 +34,18 @@ class DockerBackend(RecipeBackend):
     def _check_docker(self) -> None:
         """Check if Docker is installed and running."""
         try:
-            subprocess.run(
+            subprocess.run(  # nosec B603, B607
                 ["docker", "info"],
                 check=True,
                 capture_output=True,
                 timeout=5,
             )
         except FileNotFoundError:
-            raise RuntimeError(
-                "Docker not found. Please install Docker: https://docs.docker.com/get-docker/"
-            )
+            raise RuntimeError("Docker not found. Please install Docker: https://docs.docker.com/get-docker/") from None
         except subprocess.CalledProcessError:
-            raise RuntimeError(
-                "Docker is not running. Please start Docker Desktop or the Docker daemon."
-            )
+            raise RuntimeError("Docker is not running. Please start Docker Desktop or the Docker daemon.") from None
         except subprocess.TimeoutExpired:
-            raise RuntimeError(
-                "Docker is not responding. Please check if Docker is running properly."
-            )
+            raise RuntimeError("Docker is not responding. Please check if Docker is running properly.") from None
 
     @property
     def entrypoint(self) -> str:
@@ -69,7 +63,7 @@ class DockerBackend(RecipeBackend):
         if not self.auth_token:
             return
 
-        subprocess.run(
+        subprocess.run(  # nosec B603, B607
             ["docker", "login", self.registry_url, "-u", "token", "--password-stdin"],
             input=self.auth_token,
             text=True,
@@ -79,7 +73,7 @@ class DockerBackend(RecipeBackend):
 
     def list_recipes(self) -> List[RecipeInfo]:
         """List available recipes.
-        
+
         Note: Docker registries don't provide easy listing.
         This is a limitation of the Docker backend.
         """
@@ -87,22 +81,20 @@ class DockerBackend(RecipeBackend):
 
     def get_recipe_versions(self, recipe_name: str) -> List[str]:
         """Get available versions for a recipe.
-        
+
         Note: Requires external API or manifest inspection.
         Returns empty list as Docker doesn't provide easy version listing.
         """
         return []
 
-    def fetch_recipe(
-        self, recipe_name: str, version: str, target_path: Path
-    ) -> Path:
+    def fetch_recipe(self, recipe_name: str, version: str, target_path: Path) -> Path:
         """Fetch recipe from Docker image.
-        
+
         Args:
             recipe_name: Recipe name
             version: Recipe version
             target_path: Where to extract recipe
-            
+
         Returns:
             Path to extracted recipe
         """
@@ -111,7 +103,7 @@ class DockerBackend(RecipeBackend):
         image_url = self._build_image_url(recipe_name, version)
 
         # Pull image
-        subprocess.run(
+        subprocess.run(  # nosec B603, B607
             ["docker", "pull", image_url],
             check=True,
             capture_output=True,
@@ -119,7 +111,7 @@ class DockerBackend(RecipeBackend):
 
         # Extract recipe files from image
         # Create temporary container to copy files
-        result = subprocess.run(
+        result = subprocess.run(  # nosec B603, B607
             ["docker", "create", image_url],
             check=True,
             capture_output=True,
@@ -129,13 +121,13 @@ class DockerBackend(RecipeBackend):
 
         try:
             # Copy recipe files from container
-            subprocess.run(
+            subprocess.run(  # nosec B603, B607
                 ["docker", "cp", f"{container_id}:/app/recipes/", str(target_path)],
                 check=True,
             )
         finally:
             # Remove temporary container
-            subprocess.run(
+            subprocess.run(  # nosec B603, B607
                 ["docker", "rm", container_id],
                 check=True,
                 capture_output=True,
@@ -150,7 +142,7 @@ class DockerBackend(RecipeBackend):
     def pull_image(self, image_url: str) -> None:
         """Pull Docker image."""
         self._authenticate()
-        subprocess.run(
+        subprocess.run(  # nosec B603, B607
             ["docker", "pull", image_url],
             check=True,
             capture_output=True,

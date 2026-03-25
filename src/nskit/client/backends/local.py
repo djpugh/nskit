@@ -11,7 +11,7 @@ class LocalBackend(RecipeBackend):
 
     def __init__(self, recipes_dir: Path, entrypoint: str = "nskit.recipes"):
         """Initialize local backend.
-        
+
         Args:
             recipes_dir: Directory containing recipes
             entrypoint: Recipe entrypoint name
@@ -33,19 +33,21 @@ class LocalBackend(RecipeBackend):
 
         # Scan for recipe directories
         for recipe_dir in self.recipes_dir.iterdir():
-            if recipe_dir.is_dir() and not recipe_dir.name.startswith('.'):
+            if recipe_dir.is_dir() and not recipe_dir.name.startswith("."):
                 # Look for version directories
                 versions = []
                 for version_dir in recipe_dir.iterdir():
-                    if version_dir.is_dir() and not version_dir.name.startswith('.'):
+                    if version_dir.is_dir() and not version_dir.name.startswith("."):
                         versions.append(version_dir.name)
 
                 if versions:
-                    recipes.append(RecipeInfo(
-                        name=recipe_dir.name,
-                        versions=sorted(versions),
-                        description=f"Local recipe: {recipe_dir.name}",
-                    ))
+                    recipes.append(
+                        RecipeInfo(
+                            name=recipe_dir.name,
+                            versions=sorted(versions),
+                            description=f"Local recipe: {recipe_dir.name}",
+                        )
+                    )
 
         return recipes
 
@@ -57,7 +59,7 @@ class LocalBackend(RecipeBackend):
 
         versions = []
         for version_dir in recipe_dir.iterdir():
-            if version_dir.is_dir() and not version_dir.name.startswith('.'):
+            if version_dir.is_dir() and not version_dir.name.startswith("."):
                 versions.append(version_dir.name)
 
         return sorted(versions)

@@ -20,9 +20,10 @@ class APIRecipe(PyRecipe):
             api_ingredients.readme_md,
             ingredients.test_dir,
             api_ingredients.src_dir,
-            api_ingredients.docker.dockerignore,
-            api_ingredients.docker.api_dockerfile,
+            api_ingredients.docker.docker_ignore,
+            api_ingredients.docker.dockerfile,
             ingredients.docs_dir,
-            LicenseFile()
+            LicenseFile(),
         ],
-        description='The folder contents')
+        description="The folder contents",
+    )

@@ -3,18 +3,17 @@ import json
 from pathlib import Path
 from typing import Annotated, Optional, Union
 
-
-from rich import print as rich_print
-from rich.table import Table
 import typer
 import yaml
+from rich import print as rich_print
+from rich.table import Table
 
-
-from nskit.client import RecipeClient, UpdateClient, DiscoveryClient
-
-from nskit.client.diff.models import DiffMode
+from nskit.client import DiscoveryClient, RecipeClient, UpdateClient
 from nskit.client.backends import create_backend_from_config
+from nskit.client.backends.base import RecipeBackend
+from nskit.client.diff.models import DiffMode
 from nskit.client.engines import LocalEngine
+from nskit.client.models import RecipeInfo
 from nskit.client.utils import get_required_fields_as_dict
 from nskit.mixer.components.recipe import Recipe
 
@@ -23,7 +22,7 @@ def create_cli(
     recipe_entrypoint: str,
     app_name: str = "nskit",
     app_help: str = "CLI for managing nskit recipes.",
-    backend: Optional[Union['RecipeBackend', dict, Path, str]] = None,
+    backend: Optional[Union[RecipeBackend, dict, Path, str]] = None,
 ) -> typer.Typer:
     """Create a CLI app for a recipe entrypoint.
 
@@ -42,13 +41,42 @@ def create_cli(
     # Create client if backend provided
     if backend:
         # Convert config to backend if needed
-        if not hasattr(backend, 'list_recipes'):
+        if not hasattr(backend, "list_recipes"):
             backend = create_backend_from_config(backend)
 
         client = RecipeClient(backend)
     else:
         client = None
         backend = None
+
+    @app.command(help="List available recipes.")
+    def list():
+        """List available recipes from backend or installed entry points."""
+        if client:
+            recipes = client.list_recipes()
+        else:
+            # Discover from entry points
+            from nskit.common.extensions import get_extension_names
+
+            names = get_extension_names(recipe_entrypoint)
+            recipes = [RecipeInfo(name=n, versions=["local"]) for n in names]
+
+        if not recipes:
+            rich_print("[yellow]No recipes found[/yellow]")
+            return
+
+        table = Table(title="Available Recipes")
+        table.add_column("Name", style="cyan")
+        table.add_column("Versions", style="green")
+        table.add_column("Description", style="white")
+
+        for recipe in recipes:
+            versions_str = ", ".join(recipe.versions[:3])
+            if len(recipe.versions) > 3:
+                versions_str += f" (+{len(recipe.versions) - 3} more)"
+            table.add_row(recipe.name, versions_str, recipe.description or "")
+
+        rich_print(table)
 
     @app.command(help="Initialize a recipe.")
     def init(
@@ -58,22 +86,15 @@ def create_cli(
         ] = None,
         output_base_path: Annotated[
             Optional[Path],
-            typer.Option(
-                help="Base output path for the recipe. Defaults to current directory."
-            ),
+            typer.Option(help="Base output path for the recipe. Defaults to current directory."),
         ] = None,
         output_override_path: Annotated[
             Optional[Path],
-            typer.Option(
-                help="Override path for the recipe output. Defaults to recipe name."
-            ),
+            typer.Option(help="Override path for the recipe output. Defaults to recipe name."),
         ] = None,
         local: Annotated[
             bool,
-            typer.Option(
-                "--local",
-                help="Use locally installed packages instead of Docker (development mode)."
-            ),
+            typer.Option("--local", help="Use locally installed packages instead of Docker (development mode)."),
         ] = False,
     ):
         """Initialize a recipe from the configured entrypoint."""
@@ -83,11 +104,27 @@ def create_cli(
                 if input_data is None:
                     input_data = {}
         else:
+            # Interactive mode: prompt for fields using rich
+            from rich.console import Console
+            from rich.prompt import Confirm, Prompt
+
+            console = Console()
+
+            r = Recipe.load(recipe, entrypoint=recipe_entrypoint, initialize=False)
+            fields = get_required_fields_as_dict(r)
             input_data = {}
+            if fields:
+                console.print(f"\n[bold cyan]Fields for {recipe}[/bold cyan]\n")
+                for field_name, field_type in fields.items():
+                    if field_type == "bool":
+                        input_data[field_name] = Confirm.ask(f"  {field_name}")
+                    else:
+                        value = Prompt.ask(f"  {field_name} ({field_type})")
+                        input_data[field_name] = value
+                console.print()
 
         # Use client if available
         if client:
-
             # Override engine based on --local flag
             if local:
                 client.engine = LocalEngine()
@@ -122,58 +159,22 @@ def create_cli(
 
     @app.command(help="Get required fields for a recipe.")
     def get_required_fields(
-        recipe: Annotated[
-            str, typer.Option(help="The name of the recipe to get the input fields for.")
-        ],
+        recipe: Annotated[str, typer.Option(help="The name of the recipe to get the input fields for.")],
     ):
         """Get required fields for a recipe as JSON."""
 
         r = Recipe.load(recipe, entrypoint=recipe_entrypoint, initialize=False)
         print(json.dumps(get_required_fields_as_dict(r)))
 
-    # Add list command if backend provided
+    # Add backend-dependent commands
     if client:
-        @app.command(help="List available recipes.")
-        def list():
-            """List all available recipes from the backend."""
 
-            recipes = client.list_recipes()
-
-            if not recipes:
-                rich_print("[yellow]No recipes found[/yellow]")
-                return
-
-            table = Table(title="Available Recipes")
-            table.add_column("Name", style="cyan")
-            table.add_column("Versions", style="green")
-            table.add_column("Description", style="white")
-
-            for recipe in recipes:
-                versions_str = ", ".join(recipe.versions[:3])
-                if len(recipe.versions) > 3:
-                    versions_str += f" (+{len(recipe.versions) - 3} more)"
-                table.add_row(
-                    recipe.name,
-                    versions_str,
-                    recipe.description or ""
-                )
-
-            rich_print(table)
-
-        @app.command(help="Update project to newer recipe version.")
         def update(
-            target_version: Annotated[
-                Optional[str],
-                typer.Option(help="Target version (defaults to latest)")
-            ] = None,
+            target_version: Annotated[Optional[str], typer.Option(help="Target version (defaults to latest)")] = None,
             project_path: Annotated[
-                Optional[Path],
-                typer.Option(help="Project path (defaults to current directory)")
+                Optional[Path], typer.Option(help="Project path (defaults to current directory)")
             ] = None,
-            dry_run: Annotated[
-                bool,
-                typer.Option(help="Show what would be updated without making changes")
-            ] = False,
+            dry_run: Annotated[bool, typer.Option(help="Show what would be updated without making changes")] = False,
         ):
             """Update a recipe-based project to newer version."""
 
@@ -211,8 +212,7 @@ def create_cli(
         @app.command(help="Check for recipe updates.")
         def check(
             project_path: Annotated[
-                Optional[Path],
-                typer.Option(help="Project path (defaults to current directory)")
+                Optional[Path], typer.Option(help="Project path (defaults to current directory)")
             ] = None,
         ):
             """Check if updates are available for the project."""
@@ -229,10 +229,7 @@ def create_cli(
 
         @app.command(help="Discover available recipes.")
         def discover(
-            search: Annotated[
-                Optional[str],
-                typer.Option(help="Search term to filter recipes")
-            ] = None,
+            search: Annotated[Optional[str], typer.Option(help="Search term to filter recipes")] = None,
         ):
             """Discover available recipes from the backend."""
             discovery_client = DiscoveryClient(backend)
@@ -249,11 +246,7 @@ def create_cli(
 
             for recipe in recipes:
                 latest = recipe.versions[0] if recipe.versions else "N/A"
-                table.add_row(
-                    recipe.name,
-                    latest,
-                    recipe.description or ""
-                )
+                table.add_row(recipe.name, latest, recipe.description or "")
 
             rich_print(table)
 

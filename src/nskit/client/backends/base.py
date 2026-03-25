@@ -18,7 +18,7 @@ class RecipeBackend(ABC):
     @abstractmethod
     def list_recipes(self) -> List[RecipeInfo]:
         """List all available recipes.
-        
+
         Returns:
             List of recipe information
         """
@@ -27,10 +27,10 @@ class RecipeBackend(ABC):
     @abstractmethod
     def get_recipe_versions(self, recipe: str) -> List[str]:
         """Get available versions for a recipe.
-        
+
         Args:
             recipe: Recipe name
-            
+
         Returns:
             List of version strings
         """
@@ -39,12 +39,12 @@ class RecipeBackend(ABC):
     @abstractmethod
     def fetch_recipe(self, recipe: str, version: str, dest: Path) -> Path:
         """Fetch a recipe to a destination directory.
-        
+
         Args:
             recipe: Recipe name
             version: Recipe version
             dest: Destination directory
-            
+
         Returns:
             Path to the fetched recipe
         """
@@ -52,11 +52,11 @@ class RecipeBackend(ABC):
 
     def get_recipe_metadata(self, recipe: str, version: str) -> Dict[str, Any]:
         """Get metadata for a specific recipe version.
-        
+
         Args:
             recipe: Recipe name
             version: Recipe version
-            
+
         Returns:
             Recipe metadata dictionary
         """
@@ -64,11 +64,11 @@ class RecipeBackend(ABC):
 
     def get_image_url(self, recipe: str, version: str) -> str:
         """Get Docker image URL for a recipe.
-        
+
         Args:
             recipe: Recipe name
             version: Recipe version
-            
+
         Returns:
             Docker image URL
         """
@@ -76,7 +76,7 @@ class RecipeBackend(ABC):
 
     def pull_image(self, image_url: str) -> None:
         """Pull Docker image.
-        
+
         Args:
             image_url: Docker image URL to pull
         """

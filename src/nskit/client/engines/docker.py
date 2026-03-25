@@ -1,9 +1,10 @@
 """Docker execution engine."""
-import json
-import subprocess
+import subprocess  # nosec B404
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+
+import yaml
 
 from nskit.client.engines.base import RecipeEngine
 from nskit.client.models import RecipeResult
@@ -12,68 +13,86 @@ from nskit.client.models import RecipeResult
 class DockerEngine(RecipeEngine):
     """Execute recipes in Docker containers."""
 
+    def __init__(self, skip_pull: bool = False) -> None:
+        """Initialise the Docker engine.
+
+        Args:
+            skip_pull: Skip pulling the image (useful for locally built images).
+        """
+        self.skip_pull = skip_pull
+
     def execute(
         self,
         recipe: str,
         version: str,
         parameters: Dict[str, Any],
         output_dir: Path,
-        image_url: str = None,
-        entrypoint: str = None,
+        image_url: Optional[str] = None,
+        entrypoint: Optional[str] = None,
     ) -> RecipeResult:
-        """Execute recipe in Docker container.
-        
+        """Execute recipe in a Docker container.
+
+        Writes parameters to a YAML file, mounts it into the container,
+        and invokes the nskit CLI ``init`` command.
+
         Args:
-            recipe: Recipe name
-            version: Recipe version
-            parameters: Recipe parameters
-            output_dir: Output directory
-            image_url: Docker image URL (required)
-            entrypoint: Not used for Docker engine
-            
+            recipe: Recipe name.
+            version: Recipe version.
+            parameters: Recipe input parameters.
+            output_dir: Host directory for generated output.
+            image_url: Docker image URL (required).
+            entrypoint: Not used for Docker engine.
+
         Returns:
-            Recipe execution result
+            Recipe execution result.
         """
         if not image_url:
             raise ValueError("Docker engine requires image_url")
 
-        errors = []
+        errors: List[str] = []
         warnings: List[str] = []
 
         try:
-            # Pull image
-            subprocess.run(
-                ["docker", "pull", image_url],
-                check=True,
-                capture_output=True,
-            )
+            if not self.skip_pull:
+                subprocess.run(  # nosec B603, B607
+                    ["docker", "pull", image_url],
+                    check=True,
+                    capture_output=True,
+                )
 
-            # Write parameters to temp file
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-                json.dump(parameters, f)
+            # Write parameters as YAML (matches CLI --input-yaml-path)
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
+                yaml.dump(parameters, f, default_flow_style=False)
                 input_file = Path(f.name)
 
             try:
-                # Run container
+                output_dir.mkdir(parents=True, exist_ok=True)
+
                 cmd = [
-                    "docker", "run", "--rm",
-                    "-v", f"{output_dir.absolute()}:/app/output",
-                    "-v", f"{input_file.absolute()}:/app/input.json",
+                    "docker",
+                    "run",
+                    "--rm",
+                    "-v",
+                    f"{output_dir.absolute()}:/app/output",
+                    "-v",
+                    f"{input_file.absolute()}:/app/input.yml:ro",
                     image_url,
-                    "recipe", "init",
-                    "--recipe", recipe,
-                    "--input-json", "/app/input.json",
-                    "--output", "/app/output"
+                    "init",
+                    "--recipe",
+                    recipe,
+                    "--input-yaml-path",
+                    "/app/input.yml",
+                    "--output-override-path",
+                    "/app/output",
                 ]
-                
-                subprocess.run(cmd, capture_output=True, text=True, check=True)
-                
+
+                result = subprocess.run(cmd, capture_output=True, text=True, check=True)  # nosec B603, B607
+
+                if result.stderr:
+                    warnings.append(result.stderr.strip())
+
                 # Collect created files
-                files_created = [
-                    str(p.relative_to(output_dir)) 
-                    for p in output_dir.rglob("*") 
-                    if p.is_file()
-                ]
+                files_created = [str(p.relative_to(output_dir)) for p in output_dir.rglob("*") if p.is_file()]
 
                 return RecipeResult(
                     success=True,

@@ -1,38 +1,51 @@
 """Diff engine for recipe updates."""
-import subprocess
+import subprocess  # nosec B404
 from pathlib import Path
-from typing import Set
+from typing import Optional, Set
 
+from nskit.client.diff.file_discovery import FileDiscovery
 from nskit.client.diff.models import DiffMode, DiffResult, DiffType, FileDiff
 
 
 class DiffEngine:
     """Engine for computing diffs between recipe versions."""
 
-    def __init__(self, context_lines: int = 3):
-        """Initialize diff engine.
-        
+    def __init__(
+        self,
+        context_lines: int = 3,
+        file_discovery: Optional[FileDiscovery] = None,
+    ):
+        """Initialise diff engine.
+
         Args:
-            context_lines: Number of context lines for diffs
+            context_lines: Number of context lines for diffs.
+            file_discovery: Optional file discovery instance for
+                ignore-pattern-aware file filtering. When provided, it
+                replaces the built-in ``_get_files`` logic.
         """
         self.context_lines = context_lines
+        self.file_discovery = file_discovery
 
-    def extract_diff(
-        self, old_path: Path, new_path: Path, diff_mode: DiffMode = DiffMode.TWO_WAY
-    ) -> DiffResult:
+    def extract_diff(self, old_path: Path, new_path: Path, diff_mode: DiffMode = DiffMode.TWO_WAY) -> DiffResult:
         """Extract differences between two paths.
-        
+
+        When a ``FileDiscovery`` instance is configured, it is used to
+        filter files before computing per-file diffs.
+
         Args:
-            old_path: Path to old version
-            new_path: Path to new version
-            diff_mode: Diff mode (2-way or 3-way)
-            
+            old_path: Path to old version.
+            new_path: Path to new version.
+            diff_mode: Diff mode (2-way or 3-way).
+
         Returns:
-            Structured diff result
+            Structured diff result.
         """
-        # Get list of all files in both directories
-        old_files = self._get_files(old_path)
-        new_files = self._get_files(new_path)
+        if self.file_discovery is not None:
+            old_files = {p.as_posix() for p in self.file_discovery.discover_files(old_path)}
+            new_files = {p.as_posix() for p in self.file_discovery.discover_files(new_path)}
+        else:
+            old_files = self._get_files(old_path)
+            new_files = self._get_files(new_path)
 
         added = []
         deleted = []
@@ -105,7 +118,7 @@ class DiffEngine:
         """Check if two files differ."""
         try:
             # Use git diff for comparison
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B603, B607
                 ["git", "diff", "--no-index", "--quiet", str(file1), str(file2)],
                 capture_output=True,
             )

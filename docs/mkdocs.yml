@@ -3,29 +3,56 @@ repo_url: https://github.com/djpugh/nskit/
 edit_uri: blob/main/docs/source/
 docs_dir: ./source
 site_dir: ./html
+
 nav:
- - index.md
- - usage.md
- - 'Developing':
-    - developing/index.md
-    - developing/license.md
-    - developing/sbom.md
-    - 'Test Coverage': coverage.md
- - 'API':
-    - 'nskit.common': api/nskit.common.md
-    - 'nskit.mixer': api/nskit.mixer.md
-    - 'nskit.recipes': api/nskit.recipes.md
-    - 'nskit.vcs': api/nskit.vcs.md
- - changelog.md
- - 'Issue Tracker': https://github.com/djpugh/nskit/issues
+  - index.md
+  - 'Guides':
+      - 'Using a Recipe': guides/using-a-recipe.md
+      - 'Updating from a Recipe': guides/updating-from-a-recipe.md
+      - 'Building a Recipe': guides/building-a-recipe.md
+      - 'Working with Namespaces': guides/namespaces.md
+      - 'Platform Integration': guides/platform-integration.md
+  - 'Architecture':
+      - architecture/index.md
+      - 'Recipes': architecture/recipes.md
+      - 'The Mixer': architecture/mixer.md
+      - 'Docker vs Local Execution': architecture/docker-execution.md
+  - 'Developing':
+      - developing/index.md
+      - developing/license.md
+      - developing/sbom.md
+      - 'Test Coverage': coverage.md
+  - 'API':
+      - 'nskit.cli': api/nskit.cli.md
+      - 'nskit.client': api/nskit.client.md
+      - 'nskit.common': api/nskit.common.md
+      - 'nskit.mixer': api/nskit.mixer.md
+      - 'nskit.recipes': api/nskit.recipes.md
+      - 'nskit.vcs': api/nskit.vcs.md
+  - changelog.md
+  - 'Issue Tracker': https://github.com/djpugh/nskit/issues
 
 exclude_docs: |
   mkdocs.yml
+
 theme:
   name: material
   icon:
     logo: material/family-tree
   favicon: assets/images/favicon.ico
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
   features:
     - navigation.instant
     - navigation.prefetch
@@ -34,18 +61,31 @@ theme:
     - navigation.tabs.sticky
     - navigation.path
     - navigation.indexes
+    - navigation.top
     - search.suggest
     - search.highlight
     - search.share
+    - content.code.copy
+
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
 plugins:
   - search
   - autorefs
-  # - def_list
-  # - mkdocs-gen-files
   - mkdocstrings:
       default_handler: python
       enable_inventory: true
@@ -54,24 +94,18 @@ plugins:
           import:
             - https://jinja.palletsprojects.com/en/3.1.x/objects.inv
           paths: [src]
-  # https://github.com/jimporter/mike
   - mike:
       canonical_version: latest
-  # https://github.com/pawamoy/mkdocs-coverage
   - coverage:
-      page_name: coverage  # default
+      page_name: coverage
       html_report_dir: reports/htmlcov
-  # https://github.com/timvink/mkdocs-git-revision-date-localized-plugin
   - git-revision-date-localized:
       exclude:
         - coverage.md
       type: iso_date
   - include-markdown
-  # https://github.com/mondeja/mkdocs-include-markdown-plugin
   - mkdocs_github_changelog:
       match: '[0-9+].[0-9+].[0-9]+'
-  - mkdocs_licenseinfo
-# https://mkdocstrings.github.io/recipes/#automatic-code-reference-pages
 
 extra:
   version:

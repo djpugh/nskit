@@ -16,8 +16,11 @@ class TestDockerEngine:
         engine = DockerEngine()
         with pytest.raises(ValueError, match="image_url"):
             engine.execute(
-                recipe="r", version="v1", parameters={},
-                output_dir=tmp_path, image_url=None,
+                recipe="r",
+                version="v1",
+                parameters={},
+                output_dir=tmp_path,
+                image_url=None,
             )
 
     def test_success_returns_result(self, tmp_path):
@@ -30,8 +33,10 @@ class TestDockerEngine:
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = Mock(returncode=0, stdout="", stderr="")
             result = engine.execute(
-                recipe="my-recipe", version="v1.0.0",
-                parameters={"name": "test"}, output_dir=output,
+                recipe="my-recipe",
+                version="v1.0.0",
+                parameters={"name": "test"},
+                output_dir=output,
                 image_url="ghcr.io/test:v1",
             )
 
@@ -45,8 +50,11 @@ class TestDockerEngine:
         engine = DockerEngine()
         with patch("subprocess.run", side_effect=Exception("docker not found")):
             result = engine.execute(
-                recipe="r", version="v1", parameters={},
-                output_dir=tmp_path, image_url="img:latest",
+                recipe="r",
+                version="v1",
+                parameters={},
+                output_dir=tmp_path,
+                image_url="img:latest",
             )
 
         assert not result.success
@@ -61,8 +69,11 @@ class TestDockerEngine:
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = Mock(returncode=0, stdout="", stderr="")
             engine.execute(
-                recipe="r", version="v1", parameters={},
-                output_dir=output, image_url="img:v1",
+                recipe="r",
+                version="v1",
+                parameters={},
+                output_dir=output,
+                image_url="img:v1",
             )
 
         # pull call, then run call
@@ -84,8 +95,11 @@ class TestLocalEngine:
         engine = LocalEngine()
         with pytest.raises(ValueError, match="entrypoint"):
             engine.execute(
-                recipe="r", version="v1", parameters={},
-                output_dir=tmp_path, entrypoint=None,
+                recipe="r",
+                version="v1",
+                parameters={},
+                output_dir=tmp_path,
+                entrypoint=None,
             )
 
     def test_success_returns_result(self, tmp_path):
@@ -93,14 +107,16 @@ class TestLocalEngine:
         engine = LocalEngine()
         output = tmp_path / "output"
 
-        with patch("nskit.mixer.components.Recipe") as MockRecipe:
+        with patch("nskit.client.engines.local.Recipe") as MockRecipe:
             mock_instance = Mock()
             mock_instance.create.return_value = {"README.md": "content", "setup.py": "content"}
             MockRecipe.load.return_value = mock_instance
 
             result = engine.execute(
-                recipe="my-recipe", version="v1.0.0",
-                parameters={"name": "test"}, output_dir=output,
+                recipe="my-recipe",
+                version="v1.0.0",
+                parameters={"name": "test"},
+                output_dir=output,
                 entrypoint="test.recipes",
             )
 
@@ -113,12 +129,15 @@ class TestLocalEngine:
         """Recipe load failure returns RecipeResult with success=False."""
         engine = LocalEngine()
 
-        with patch("nskit.mixer.components.Recipe") as MockRecipe:
+        with patch("nskit.client.engines.local.Recipe") as MockRecipe:
             MockRecipe.load.side_effect = ModuleNotFoundError("No module named 'fake'")
 
             result = engine.execute(
-                recipe="r", version="v1", parameters={},
-                output_dir=tmp_path, entrypoint="fake.recipes",
+                recipe="r",
+                version="v1",
+                parameters={},
+                output_dir=tmp_path,
+                entrypoint="fake.recipes",
             )
 
         assert not result.success
@@ -128,14 +147,17 @@ class TestLocalEngine:
         """Recipe create failure returns RecipeResult with success=False."""
         engine = LocalEngine()
 
-        with patch("nskit.mixer.components.Recipe") as MockRecipe:
+        with patch("nskit.client.engines.local.Recipe") as MockRecipe:
             mock_instance = Mock()
             mock_instance.create.side_effect = RuntimeError("disk full")
             MockRecipe.load.return_value = mock_instance
 
             result = engine.execute(
-                recipe="r", version="v1", parameters={},
-                output_dir=tmp_path, entrypoint="test.recipes",
+                recipe="r",
+                version="v1",
+                parameters={},
+                output_dir=tmp_path,
+                entrypoint="test.recipes",
             )
 
         assert not result.success

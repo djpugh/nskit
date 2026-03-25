@@ -1,11 +1,14 @@
 """GitHub backend for recipe management."""
-import subprocess
+import subprocess  # nosec B404
 import tempfile
 import zipfile
 from pathlib import Path
 from typing import List, Optional
 
-from ghapi.core import GhApi
+try:
+    from ghapi.core import GhApi
+except ImportError:
+    GhApi = None
 
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.models import RecipeInfo
@@ -22,7 +25,7 @@ class GitHubBackend(RecipeBackend):
         entrypoint: str = "nskit.recipes",
     ):
         """Initialize GitHub backend.
-        
+
         Args:
             org: GitHub organization
             repo_pattern: Pattern for repository names (use {recipe_name} placeholder)
@@ -34,6 +37,8 @@ class GitHubBackend(RecipeBackend):
         self._token = token
         self._github: Optional[GhApi] = None
         self._entrypoint = entrypoint
+        if GhApi is None:
+            raise ImportError("GitHubBackend requires ghapi. Install with: pip install nskit[github]")
 
     @property
     def entrypoint(self) -> str:
@@ -46,7 +51,7 @@ class GitHubBackend(RecipeBackend):
             return self._token
 
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B603, B607
                 ["gh", "auth", "token"],
                 check=True,
                 capture_output=True,
@@ -54,14 +59,10 @@ class GitHubBackend(RecipeBackend):
             )
             self._token = result.stdout.strip()
             return self._token
-        except subprocess.CalledProcessError:
-            raise RuntimeError(
-                "GitHub authentication required. Please run: gh auth login"
-            )
         except FileNotFoundError:
-            raise RuntimeError(
-                "GitHub CLI (gh) not found. Please install it: https://cli.github.com/"
-            )
+            raise RuntimeError("GitHub CLI (gh) not found. Please install it: https://cli.github.com/") from None
+        except subprocess.CalledProcessError:
+            raise RuntimeError("GitHub authentication required. Please run: gh auth login") from None
 
     def _get_client(self) -> GhApi:
         """Get authenticated GitHub client."""
@@ -110,16 +111,14 @@ class GitHubBackend(RecipeBackend):
         except Exception:
             return []
 
-    def fetch_recipe(
-        self, recipe_name: str, version: str, target_path: Path
-    ) -> Path:
+    def fetch_recipe(self, recipe_name: str, version: str, target_path: Path) -> Path:
         """Fetch recipe from GitHub release.
-        
+
         Args:
             recipe_name: Recipe name
             version: Recipe version (tag name)
             target_path: Where to extract recipe
-            
+
         Returns:
             Path to extracted recipe
         """
@@ -127,13 +126,13 @@ class GitHubBackend(RecipeBackend):
         repo_name = self._get_repo_name(recipe_name)
 
         # Get release by tag
-        release = github.repos.get_release_by_tag(self.org, repo_name, version)
+        github.repos.get_release_by_tag(self.org, repo_name, version)
 
         # Download source archive
         archive_url = f"https://github.com/{self.org}/{repo_name}/archive/refs/tags/{version}.zip"
 
         with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
-            subprocess.run(
+            subprocess.run(  # nosec B603, B607
                 ["curl", "-L", "-o", tmp.name, archive_url],
                 check=True,
                 capture_output=True,
@@ -159,16 +158,16 @@ class GitHubBackend(RecipeBackend):
         """Pull Docker image from GitHub Container Registry."""
         # Authenticate with ghcr.io using GitHub token
         token = self._get_token()
-        subprocess.run(
+        subprocess.run(  # nosec B603, B607
             ["docker", "login", "ghcr.io", "-u", "token", "--password-stdin"],
             input=token,
             text=True,
             check=True,
             capture_output=True,
         )
-        
+
         # Pull image
-        subprocess.run(
+        subprocess.run(  # nosec B603, B607
             ["docker", "pull", image_url],
             check=True,
             capture_output=True,

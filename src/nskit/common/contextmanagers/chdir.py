@@ -24,7 +24,7 @@ class ChDir(ContextDecorator):
         self._temp_dir = None
         if not target_dir:
             # Handling circular imports with LoggingConfig
-            logger_factory.get_logger(__name__).debug('No target_dir provided, using a temporary directory')
+            logger_factory.get_logger(__name__).debug("No target_dir provided, using a temporary directory")
             self._temp_dir = tempfile.TemporaryDirectory()
             target_dir = self._temp_dir.name
         self.cwd = Path.cwd()
@@ -33,7 +33,7 @@ class ChDir(ContextDecorator):
     def __enter__(self):
         """Change to the target directory."""
         # Handling circular imports with LoggingConfig
-        logger_factory.get_logger(__name__).info(f'Changing to {self.target_dir}')
+        logger_factory.get_logger(__name__).info(f"Changing to {self.target_dir}")
         if not self.target_dir.exists():
             self.target_dir.mkdir()
         os.chdir(str(self.target_dir))
@@ -45,8 +45,8 @@ class ChDir(ContextDecorator):
         os.chdir(str(self.cwd))
         if self._temp_dir:
             try:
-                self.target_dir.__exit__(exc_type, exc_val, exc_tb)
+                self._temp_dir.__exit__(exc_type, exc_val, exc_tb)
             except PermissionError as e:
                 # Handling circular imports with LoggingConfig
-                logger_factory.get_logger(__name__).warning('Unable to delete temporary directory.')
+                logger_factory.get_logger(__name__).warning("Unable to delete temporary directory.")
                 warnings.warn(e, stacklevel=2)

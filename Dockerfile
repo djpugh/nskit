@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Generic Dockerfile for nskit-based recipe CLIs
-# 
+#
 # Build args:
 #   - RECIPE_ENTRYPOINT: Python entrypoint for recipe discovery (e.g., "nskit.recipes")
 #   - CLI_COMMAND: Command name for the CLI (e.g., "nskit")
@@ -61,4 +61,5 @@ RUN --mount=type=secret,id=pypi_username,env=UV_INDEX_USERNAME,required=false \
     --mount=type=bind,src=.git,dst=${PROJECT_DIR}/.git,required=false \
     uv sync --frozen --no-dev || uv sync --no-dev
 
-ENTRYPOINT [ "uv", "run", "--no-sync", "${CLI_COMMAND}" ]
+ENV CLI_COMMAND=${CLI_COMMAND}
+ENTRYPOINT ["sh", "-c", "uv run --no-sync $CLI_COMMAND \"$@\"", "--"]
