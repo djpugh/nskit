@@ -37,8 +37,8 @@ dependencies = [
     "orjson",
     "packaging",
     "pydantic[email]",
-    "pydantic-settings>=2.2.0, <2.3.0",
-    # The issue highlighted in https://github.com/pydantic/pydantic-settings/issues/245 has been mitigated by a wrapper and additional parameter for dotenv_allow in the model config
+    "pydantic-settings>=2.2.0",
+    # The issue highlighted in https://github.com/pydantic/pydantic-settings/issues/245 has been mitigated by a wrapper in nskit.common.configuration
     "python-dotenv",
     "pyyaml",
     "questionary",

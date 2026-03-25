@@ -39,6 +39,7 @@ class BaseConfiguration(PropertyDumpMixin, _BaseSettings):
 
     model_config = SettingsConfigDict(env_file_encoding="utf-8")
 
+    @classmethod
     def settings_customise_sources(
         cls,
         settings_cls: type[_BaseSettings],
