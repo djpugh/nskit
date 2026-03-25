@@ -20,9 +20,11 @@ class RecipeRecipe(PyRecipe):
             ingredients.pre_commit,
             recipe_ingredients.pyproject_toml,
             recipe_ingredients.readme_md,
+            recipe_ingredients.dockerfile,
             ingredients.test_dir,
             recipe_ingredients.src_dir,
             ingredients.docs_dir,
-            LicenseFile()
+            LicenseFile(),
         ],
-        description='The folder contents')
+        description="The folder contents",
+    )

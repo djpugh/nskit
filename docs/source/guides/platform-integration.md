@@ -9,12 +9,19 @@ This guide is for platform engineers setting up nskit for an organisation. It co
 The backend tells nskit where recipes live and how to execute them. It drives the engine:
 
 - **No backend (default):** Recipes discovered from installed packages, executed locally. Not recommended for production — no versioning, no reproducible updates.
+- **`DockerLocalBackend`:** Discovers from locally pulled Docker images (via labels). No registry needed. Good for development with Docker.
 - **`GitHubBackend`:** Discovers recipes from GitHub repos/releases, executes via Docker images from ghcr.io.
 - **`DockerBackend`:** Discovers from a Docker registry, executes via Docker.
 - **`LocalBackend`:** Discovers from a local directory. Useful for development.
 
-```python
-from nskit.client.backends import GitHubBackend
+Users can select a backend via the CLI without a wrapper script:
+
+```bash
+nskit --backend docker-local list     # Local Docker images
+nskit --backend docker-local init --recipe python_package
+```
+
+Or configure programmatically:
 
 backend = GitHubBackend(
     org='myorg',                              # GitHub org
@@ -23,7 +30,9 @@ backend = GitHubBackend(
 )
 ```
 
-The backend also controls what `nskit list` shows — with a `GitHubBackend`, it lists repos and their release tags. With a `DockerBackend`, it lists images and tags. Without a backend, it falls back to locally installed entry points.
+The backend also controls what `nskit list` shows — with a `GitHubBackend`, it lists repos and their release tags. With a `DockerBackend`, it lists images and tags. With `DockerLocalBackend`, it lists locally pulled images. Without a backend, it falls back to locally installed entry points.
+
+All Docker-based backends read the `nskit.recipe.name` label from images to determine the canonical recipe name. The label is read from the registry manifest at list time (no pull needed) and from the pulled image at init time.
 
 ### 2. Entry Point Group (Required for Local Mode)
 

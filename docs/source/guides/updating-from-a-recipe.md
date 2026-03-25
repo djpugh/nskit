@@ -25,6 +25,8 @@ nskit regenerates the base and target from the recipe, then 3-way merges them ag
 
 ## The Steps
 
+![Update Demo](../assets/demo-update.gif)
+
 ```bash
 # 1. Make sure your working tree is clean (nskit will refuse otherwise)
 git status

@@ -77,6 +77,8 @@ class GitHubBackend(RecipeBackend):
 
     def list_recipes(self) -> List[RecipeInfo]:
         """List available recipes from GitHub org."""
+        from nskit.client.backends.image_labels import get_recipe_name, read_remote_labels
+
         github = self._get_client()
 
         repos = github.repos.list_for_org(self.org, type="public")
@@ -90,9 +92,19 @@ class GitHubBackend(RecipeBackend):
             except Exception:
                 versions = []
 
+            # Read recipe name from image label (first version)
+            name = repo.name
+            if versions:
+                image_url = self.get_image_url(name, versions[0])
+                try:
+                    labels = read_remote_labels(image_url, token=self._get_token())
+                    name = get_recipe_name(labels) or name
+                except Exception:  # nosec B110
+                    pass
+
             recipes.append(
                 RecipeInfo(
-                    name=repo.name,
+                    name=name,
                     versions=versions,
                     description=repo.description,
                 )

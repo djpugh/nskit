@@ -17,11 +17,20 @@ This discovers recipes from installed packages. If your platform team has config
 
 ## 2. Initialise Your Project
 
+![YAML Init Demo](../assets/demo-yaml.gif)
+
 ```bash
 nskit init --recipe python_package
 ```
 
-nskit prompts you for each field interactively in your terminal — name, description, owner, etc. Just answer the questions.
+nskit prompts you for each field interactively. Defaults are pre-filled from (in priority order):
+
+1. **Recipe-defined env var** — `RecipeField(env_var="CUSTOM_VAR")` if the recipe author specified one
+2. **Convention env var** — `RECIPE_` + field name, e.g. `RECIPE_NAME`, `RECIPE_REPO_OWNER`, `RECIPE_REPO_EMAIL`
+3. **Template expression** — `RecipeField(template="{{name | lower}}")` evaluated against already-entered values
+4. **Git config** — `user.name` for owner, `user.email` for email
+
+Press Enter to accept a default, or type to override it.
 
 If you'd rather provide inputs as a file (useful for CI or scripting):
 
@@ -32,6 +41,17 @@ nskit init --recipe python_package --input-yaml-path input.yaml
 ### What Happens
 
 nskit runs the recipe from your installed packages and generates the project files. If a backend is configured (see [Platform Integration](platform-integration.md)), it uses the backend's engine instead (typically Docker) for reproducible, versioned execution. See [Docker vs Local Execution](../architecture/docker-execution.md) for the trade-offs.
+
+### Docker mode with local images
+
+If you have Docker recipe images locally, you can use them directly:
+
+![Docker Mode Demo](../assets/demo-docker.gif)
+
+```bash
+nskit --backend docker-local list
+nskit --backend docker-local init --recipe python_package
+```
 
 ## 3. Stay Updated
 

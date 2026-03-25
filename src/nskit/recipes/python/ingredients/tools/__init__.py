@@ -8,7 +8,7 @@ pre_commit = File(
     name=".pre-commit-config.yaml", content="nskit.recipes.python.ingredients.tools:pre-commit-config.yaml.jinja"
 )
 pyproject_toml = File(name="pyproject.toml", content="nskit.recipes.python.ingredients.tools:pyproject.toml.jinja")
-readme_md = File(name="README.md", content="nskit.recipes.python.ingredients.tools:readme.md.jinja")
+readme_md = File(name="README.md", content="nskit.recipes.python.ingredients.tools:README.md.jinja")
 
 taskfiles_folder = taskfiles_folder.model_copy()
 

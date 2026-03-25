@@ -7,6 +7,13 @@ from nskit.client.engines import DockerEngine, RecipeEngine
 from nskit.client.models import RecipeInfo, RecipeResult
 
 
+def _read_recipe_label(image_url: str) -> str | None:
+    """Read nskit.recipe.name label from a pulled Docker image."""
+    from nskit.client.backends.image_labels import get_recipe_name, read_local_labels
+
+    return get_recipe_name(read_local_labels(image_url))
+
+
 class RecipeClient:
     """Pure Python client for recipe operations (no CLI dependencies)."""
 
@@ -82,6 +89,8 @@ class RecipeClient:
                     image_url = self.backend.get_image_url(recipe, version)
                     if hasattr(self.backend, "pull_image"):
                         self.backend.pull_image(image_url)
+                    # Read canonical recipe name from image label
+                    recipe = _read_recipe_label(image_url) or recipe
 
             # Execute using engine
             return self.engine.execute(

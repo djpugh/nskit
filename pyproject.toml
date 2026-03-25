@@ -41,6 +41,7 @@ dependencies = [
     # The issue highlighted in https://github.com/pydantic/pydantic-settings/issues/245 has been mitigated by a wrapper and additional parameter for dotenv_allow in the model config
     "python-dotenv",
     "pyyaml",
+    "questionary",
     "rich",
     "ruamel.yaml",
     "tomlkit",
@@ -50,6 +51,7 @@ dependencies = [
     'importlib_metadata; python_version < "3.11"',
     'importlib_resources; python_version < "3.9"',
     "virtualenv",
+    "questionary>=2.1.0",
 ]
 
 
@@ -92,13 +94,14 @@ docs = [
     "mkdocs-coverage",
     "mkdocs-include-markdown-plugin",
     'mkdocs-github-changelog',
-    'mkdocs-licenseinfo',
+    # 'mkdocs-licenseinfo',  # disabled: depends on licensecheck which pins attrs<24
     # "mkdocs-gen-files",
     # "mkdocs-literate-nav",
     "mike"
 ]
 licenses = [
-    "licensecheck"
+    # "licensecheck",  # disabled: pins attrs<24 which breaks nox
+    # "pip-licenses",
 ]
 build = [
     "build"
@@ -175,6 +178,7 @@ exclude_lines = [
 repository = "https://github.com/djpugh/nskit"
 
 [project.scripts]
+nskit = "nskit.cli:main"
 
 [project.entry-points."nskit.recipes"]
 python_package = "nskit.recipes.python.package:PackageRecipe"

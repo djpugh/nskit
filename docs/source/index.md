@@ -19,6 +19,8 @@ Platform teams maintain shared ingredients centrally. Individual teams compose t
 
 ## Quick Start
 
+![Interactive CLI Demo](assets/demo-local.gif)
+
 ```bash
 pip install nskit
 

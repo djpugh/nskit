@@ -136,6 +136,7 @@ class RecipeRecipeTestCase(unittest.TestCase):
                 },
                 root / "pyproject.toml": None,
                 root / "README.md": None,
+                root / "Dockerfile": None,
                 root / ".gitignore": None,
                 root / "noxfile.py": None,
                 root / ".pre-commit-config.yaml": None,

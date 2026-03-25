@@ -61,6 +61,10 @@
     options:
         show_root_heading: True
 
+### ::: nskit.client.backends.docker_local.DockerLocalBackend
+    options:
+        show_root_heading: True
+
 ## Models
 
 ### ::: nskit.client.models.RecipeResult

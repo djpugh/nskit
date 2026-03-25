@@ -75,4 +75,46 @@ Local mode uses whatever's currently installed. If you:
 |---------|-------------|------------|
 | `GitHubBackend` | ✅ ghcr.io images | ✅ (needs local install) |
 | `DockerBackend` | ✅ Any registry | ✅ (needs local install) |
+| `DockerLocalBackend` | ✅ Local images (label-based) | ❌ |
 | `LocalBackend` | ❌ | ✅ |
+
+### DockerLocalBackend
+
+Discovers recipes from locally pulled Docker images using labels. No registry needed — just build and tag:
+
+```bash
+# Build with nskit labels
+docker build --build-arg RECIPE_NAME=python_package \
+    -t myorg/python_package:v1.0.0 .
+
+# Discover and use via CLI
+nskit --backend docker-local list
+nskit --backend docker-local init --recipe python_package
+```
+
+Images must have these labels:
+
+| Label | Required | Purpose |
+|-------|----------|---------|
+| `nskit.recipe=true` | Yes | Marks image as an nskit recipe |
+| `nskit.recipe.name=<name>` | Yes | Canonical recipe name |
+
+The image tag is the version. One recipe per image — registries deduplicate shared base layers.
+
+The `recipe` recipe generates a Dockerfile that sets these labels automatically:
+
+```dockerfile
+ARG RECIPE_NAME=nskit
+LABEL nskit.recipe="true"
+LABEL nskit.recipe.name="${RECIPE_NAME}"
+```
+
+Build with `--build-arg RECIPE_NAME=python_package`, or add the labels to your own Dockerfile.
+
+The `nskit.recipe.name` label is the **source of truth** for the recipe name across all backends:
+
+- **`DockerLocalBackend`** reads it from local images via `docker inspect`
+- **`GitHubBackend`** and **`DockerBackend`** read it from the registry manifest (no pull needed) to resolve the canonical name at list time
+- **`RecipeClient`** reads it after pulling to pass the correct name to the container
+
+Backends use their naming conventions (repo patterns, image prefixes) to narrow *where to look*, but the label determines *what the recipe is called*.

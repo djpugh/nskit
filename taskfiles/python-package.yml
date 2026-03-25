@@ -70,6 +70,166 @@ tasks:
     cmds:
       - uv run nox -s build
 
+  demo:
+    desc: Run an interactive demo of nskit (local mode).
+    cmds:
+      - cmd: |
+          echo ""
+          echo "╔══════════════════════════════════════════════╗"
+          echo "║         nskit Demo (Local Mode)              ║"
+          echo "╚══════════════════════════════════════════════╝"
+          echo ""
+
+          DEMO_DIR=$(mktemp -d)
+          trap "rm -rf $DEMO_DIR" EXIT
+
+          echo "━━━ Step 1: List available recipes ━━━"
+          echo ""
+          echo "$ nskit list"
+          echo ""
+          uv run nskit list
+          echo ""
+          read -p "Press Enter to continue..."
+          echo ""
+
+          echo "━━━ Step 2: Inspect recipe fields ━━━"
+          echo ""
+          echo "$ nskit get-required-fields --recipe python_package"
+          echo ""
+          uv run nskit get-required-fields --recipe python_package
+          echo ""
+          read -p "Press Enter to continue..."
+          echo ""
+
+          echo "━━━ Step 3: Initialise a project (interactive) ━━━"
+          echo ""
+          echo "$ nskit init --recipe python_package --output-base-path $DEMO_DIR"
+          echo ""
+          uv run nskit init --recipe python_package --output-base-path "$DEMO_DIR"
+          echo ""
+
+          echo "━━━ Step 4: Inspect the generated project ━━━"
+          echo ""
+          PROJECT=$(ls "$DEMO_DIR" | head -1)
+          echo "$ head -20 $PROJECT/pyproject.toml"
+          echo ""
+          head -20 "$DEMO_DIR/$PROJECT/pyproject.toml" 2>/dev/null || echo "(not found)"
+          echo ""
+
+          echo "━━━ Demo complete! ━━━"
+          echo ""
+        silent: true
+
+  demo:docker:
+    desc: Run an interactive demo of nskit (Docker mode). Requires Docker.
+    cmds:
+      - cmd: |
+          echo ""
+          echo "╔══════════════════════════════════════════════╗"
+          echo "║        nskit Demo (Docker Mode)              ║"
+          echo "╚══════════════════════════════════════════════╝"
+          echo ""
+
+          if ! docker info >/dev/null 2>&1; then
+            echo "❌ Docker is not running. Please start Docker and try again."
+            exit 1
+          fi
+
+          DEMO_DIR=$(mktemp -d)
+          trap "rm -rf $DEMO_DIR; docker rmi nskit-demo:latest 2>/dev/null" EXIT
+
+          echo "━━━ Step 1: Build the nskit Docker image ━━━"
+          echo ""
+          echo "Building from the repo root (this may take a minute)..."
+          docker build --target runtime -t nskit-demo:latest . -q
+          echo "✓ Image built: nskit-demo:latest"
+          echo ""
+          read -p "Press Enter to continue..."
+          echo ""
+
+          echo "━━━ Step 2: Run recipe via DockerEngine ━━━"
+          echo ""
+          echo "The recipe runs inside the container."
+          echo "Input is passed as YAML, output is mounted."
+          echo ""
+
+          cat > "$DEMO_DIR/input.yaml" << 'YAML'
+          name: docker-demo
+          repo:
+            owner: Docker Demo
+            email: docker@demo.com
+            description: Project generated inside a Docker container
+            url: https://example.com
+          YAML
+
+          uv run python -c "
+          from nskit.client.engines import DockerEngine
+          from pathlib import Path
+
+          engine = DockerEngine(skip_pull=True)
+          result = engine.execute(
+              recipe='python_package',
+              version='local',
+              parameters={
+                  'name': 'docker-demo',
+                  'repo': {
+                      'owner': 'Docker Demo',
+                      'email': 'docker@demo.com',
+                      'description': 'Generated in Docker',
+                      'url': 'https://example.com',
+                  },
+              },
+              output_dir=Path('$DEMO_DIR/docker-demo'),
+              image_url='nskit-demo:latest',
+          )
+          print(f'Success: {result.success}')
+          print(f'Files created: {len(result.files_created)}')
+          if result.errors:
+              print(f'Errors: {result.errors}')
+          "
+          echo ""
+          read -p "Press Enter to continue..."
+          echo ""
+
+          echo "━━━ Step 3: Inspect Docker-generated project ━━━"
+          echo ""
+          echo "Files:"
+          find "$DEMO_DIR/docker-demo" -maxdepth 2 -not -path '*/.git/*' 2>/dev/null | sort | head -30
+          echo ""
+          echo "pyproject.toml (first 20 lines):"
+          head -20 "$DEMO_DIR/docker-demo/pyproject.toml" 2>/dev/null || echo "(not found)"
+          echo ""
+
+          echo "━━━ Step 4: Compare with local mode ━━━"
+          echo ""
+          uv run python -c "
+          from nskit.client import RecipeClient
+          from nskit.client.engines import LocalEngine
+          from unittest.mock import Mock
+          from pathlib import Path
+
+          backend = Mock()
+          backend.entrypoint = 'nskit.recipes'
+          client = RecipeClient(backend, engine=LocalEngine())
+          result = client.initialize_recipe(
+              recipe='python_package', version='local',
+              parameters={'name': 'local-demo', 'repo': {'owner': 'Local', 'email': 'l@l.com', 'description': 'd', 'url': 'https://l.com'}},
+              output_dir=Path('$DEMO_DIR/local-demo'),
+          )
+          print(f'Local mode - Success: {result.success}, Files: {len(result.files_created)}')
+          "
+          echo ""
+          echo "Docker project files:"
+          ls "$DEMO_DIR/docker-demo/" 2>/dev/null | sort
+          echo ""
+          echo "Local project files:"
+          ls "$DEMO_DIR/local-demo/" 2>/dev/null | sort
+          echo ""
+
+          echo "━━━ Demo complete! ━━━"
+          echo ""
+        silent: true
+
   publish:
     desc: Publish the distribution package to PyPI.
     cmds:

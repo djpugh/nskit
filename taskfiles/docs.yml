@@ -2,18 +2,72 @@ version: '3'
 
 vars:
   MKDOCS_CONFIG: docs/mkdocs.yml
+  VHS_PATH: '{{.PWD}}/.venv/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'
 
 tasks:
 
   serve:
     desc: Serve the documentation locally.
     cmds:
+      - cmd: |
+          if which vhs >/dev/null 2>&1; then
+            for tape in docs/demo-local.tape docs/demo-yaml.tape; do
+              gif="docs/source/assets/$(basename ${tape%.tape}.gif)"
+              [ -f "$gif" ] || PATH="{{.VHS_PATH}}" vhs "$tape"
+            done
+          fi
+        silent: true
       - uv run mkdocs serve --config-file {{.MKDOCS_CONFIG}}
 
   build:
-    desc: Build the documentation.
+    desc: Build the documentation (records demo GIFs if vhs is available).
     cmds:
+      - cmd: |
+          if which vhs >/dev/null 2>&1; then
+            echo "Recording demo GIFs..."
+            PATH="{{.VHS_PATH}}" vhs docs/demo-local.tape
+            PATH="{{.VHS_PATH}}" vhs docs/demo-yaml.tape
+          else
+            echo "vhs not found — skipping GIF recording"
+          fi
+        silent: true
       - uv run mkdocs build --config-file {{.MKDOCS_CONFIG}}
+
+  record:
+    desc: Record all demo GIFs.
+    cmds:
+      - task: record-cli
+      - task: record-yaml
+      - task: record-update
+      - task: record-docker
+
+  record-cli:
+    desc: Record interactive CLI demo GIF.
+    cmds:
+      - cmd: which vhs >/dev/null 2>&1 || brew install charmbracelet/tap/vhs; which ttyd >/dev/null 2>&1 || brew install ttyd
+        silent: true
+      - 'PATH="{{.VHS_PATH}}" vhs docs/demo-local.tape'
+
+  record-yaml:
+    desc: Record YAML input demo GIF.
+    cmds:
+      - cmd: which vhs >/dev/null 2>&1 || brew install charmbracelet/tap/vhs; which ttyd >/dev/null 2>&1 || brew install ttyd
+        silent: true
+      - 'PATH="{{.VHS_PATH}}" vhs docs/demo-yaml.tape'
+
+  record-update:
+    desc: Record update workflow demo GIF.
+    cmds:
+      - cmd: which vhs >/dev/null 2>&1 || brew install charmbracelet/tap/vhs; which ttyd >/dev/null 2>&1 || brew install ttyd
+        silent: true
+      - 'PATH="{{.VHS_PATH}}" vhs docs/demo-update.tape'
+
+  record-docker:
+    desc: Record Docker demo GIF (requires Docker).
+    cmds:
+      - cmd: which vhs >/dev/null 2>&1 || brew install charmbracelet/tap/vhs; which ttyd >/dev/null 2>&1 || brew install ttyd
+        silent: true
+      - 'PATH="{{.VHS_PATH}}" vhs docs/demo-docker.tape'
 
   deploy:
     desc: Deploy the documentation to GitHub Pages.

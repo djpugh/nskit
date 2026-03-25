@@ -6,6 +6,8 @@ pyproject_toml = File(name="pyproject.toml", content="nskit.recipes.python.ingre
 
 readme_md = File(name="README.md", content="nskit.recipes.python.ingredients.recipe:readme.md.jinja")
 
+dockerfile = File(name="Dockerfile", content="nskit.recipes.python.ingredients.recipe:Dockerfile.jinja")
+
 
 src_dir = _src_dir.model_copy(deep=True)
 src_dir["src_path"].contents += [
