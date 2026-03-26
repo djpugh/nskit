@@ -1,6 +1,7 @@
 """Github provider using ghapi."""
+
 from enum import Enum
-from typing import List, Optional
+from typing import Optional
 
 try:
     from fastcore.net import HTTP404NotFoundError
@@ -139,7 +140,7 @@ class GithubRepoClient(RepoClient):
         except HTTP404NotFoundError:
             return False
 
-    def list(self) -> List[str]:
+    def list(self) -> list[str]:
         """List the repos in the project."""
         repos = []
         if self._org_type == GithubOrgType.org:

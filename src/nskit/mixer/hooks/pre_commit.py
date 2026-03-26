@@ -2,10 +2,11 @@
 
 Contains post creation precommit install hooks.
 """
+
 import subprocess  # nosec B404
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from nskit._logging import logger_factory
 from nskit.common.contextmanagers import ChDir
@@ -17,7 +18,7 @@ logger = logger_factory.get(__name__)
 class PrecommitInstall(Hook):
     """Precommit install hook."""
 
-    def call(self, recipe_path: Path, context: Dict[str, Any]):  # noqa: U100
+    def call(self, recipe_path: Path, context: dict[str, Any]):  # noqa: U100
         """Run the pre-commit install and install hooks command."""
         with ChDir(recipe_path):
             if Path(".pre-commit-config.yaml").exists():

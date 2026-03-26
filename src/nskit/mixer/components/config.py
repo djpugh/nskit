@@ -1,7 +1,8 @@
 """Generic configuration classes for recipes."""
+
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import yaml
 from pydantic import BaseModel, Field
@@ -39,8 +40,8 @@ class RecipeConfig(BaseModel):
     """Configuration structure for recipes."""
 
     metadata: Optional[RecipeMetadata] = Field(None, description="Recipe metadata")
-    input: Dict[str, Any] = Field(default_factory=dict, description="Input fields for the recipe")
-    rendered: Dict[str, Any] = Field(default_factory=dict, description="Computed/derived fields")
+    input: dict[str, Any] = Field(default_factory=dict, description="Input fields for the recipe")
+    rendered: dict[str, Any] = Field(default_factory=dict, description="Computed/derived fields")
 
     @classmethod
     def load_from_file(cls, file_path: Path) -> "RecipeConfig":

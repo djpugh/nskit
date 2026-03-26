@@ -1,6 +1,6 @@
 """Local filesystem backend for recipes."""
+
 from pathlib import Path
-from typing import List
 
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.models import RecipeInfo
@@ -24,7 +24,7 @@ class LocalBackend(RecipeBackend):
         """Get the recipe entrypoint."""
         return self._entrypoint
 
-    def list_recipes(self) -> List[RecipeInfo]:
+    def list_recipes(self) -> list[RecipeInfo]:
         """List recipes from local directory."""
         recipes = []
 
@@ -51,7 +51,7 @@ class LocalBackend(RecipeBackend):
 
         return recipes
 
-    def get_recipe_versions(self, recipe: str) -> List[str]:
+    def get_recipe_versions(self, recipe: str) -> list[str]:
         """Get versions for a recipe."""
         recipe_dir = self.recipes_dir / recipe
         if not recipe_dir.exists():

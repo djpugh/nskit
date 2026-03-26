@@ -1,8 +1,9 @@
 """Git utilities for recipe operations."""
+
 import subprocess  # nosec B404
 import tempfile
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 from nskit.client.exceptions import GitStatusError
 
@@ -68,7 +69,7 @@ class GitUtils:
         user_label: str = "USER CHANGES",
         base_label: str = "BASE VERSION",
         template_label: str = "TEMPLATE CHANGES",
-    ) -> Tuple[str, bool]:
+    ) -> tuple[str, bool]:
         """Perform 3-way merge using git merge-file.
 
         Args:

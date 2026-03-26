@@ -1,4 +1,5 @@
 """Repo management class."""
+
 from __future__ import annotations
 
 import shutil
@@ -10,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
-    from typing_extensions import Annotated
+    from typing import Annotated
 else:
     from typing import Annotated
 
@@ -319,7 +320,7 @@ class Repo(_Repo):
             namespace_validator = self.namespace_validation_repo.validator
             result, message = namespace_validator.validate_name(value)
             if not result:
-                message = f'{value} {message.format(key="<root>")}'
+                message = f"{value} {message.format(key='<root>')}"
             value = namespace_validator.to_repo_name(value)
             if self.validation_level == ValidationEnum.strict and not result:
                 raise ValueError(message)

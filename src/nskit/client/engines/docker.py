@@ -1,8 +1,9 @@
 """Docker execution engine."""
+
 import subprocess  # nosec B404
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import yaml
 
@@ -25,7 +26,7 @@ class DockerEngine(RecipeEngine):
         self,
         recipe: str,
         version: str,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         output_dir: Path,
         image_url: Optional[str] = None,
         entrypoint: Optional[str] = None,
@@ -49,8 +50,8 @@ class DockerEngine(RecipeEngine):
         if not image_url:
             raise ValueError("Docker engine requires image_url")
 
-        errors: List[str] = []
-        warnings: List[str] = []
+        errors: list[str] = []
+        warnings: list[str] = []
 
         try:
             if not self.skip_pull:

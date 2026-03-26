@@ -1,7 +1,7 @@
 """Azure Devops provider using azure-cli to manage it."""
+
 import json
 from io import StringIO
-from typing import List
 
 try:
     from azure.cli.core import get_default_cli
@@ -145,7 +145,7 @@ class AzureDevOpsRepoClient(RepoClient):
             repo_info = json.loads(output.getvalue())
             return repo_info["remoteUrl"]
 
-    def list(self) -> List[str]:
+    def list(self) -> list[str]:
         """List the repos in the project."""
         output = StringIO()
         result = self._invoke(

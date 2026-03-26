@@ -1,5 +1,6 @@
 """Discovery client for finding recipes."""
-from typing import List, Optional
+
+from typing import Optional
 
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.models import RecipeInfo
@@ -19,7 +20,7 @@ class DiscoveryClient:
     def discover_recipes(
         self,
         search_term: Optional[str] = None,
-    ) -> List[RecipeInfo]:
+    ) -> list[RecipeInfo]:
         """Discover available recipes.
 
         Args:
@@ -57,7 +58,7 @@ class DiscoveryClient:
 
         return None
 
-    def get_recipe_versions(self, recipe_name: str) -> List[str]:
+    def get_recipe_versions(self, recipe_name: str) -> list[str]:
         """Get available versions for a recipe.
 
         Args:

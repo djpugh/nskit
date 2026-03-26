@@ -1,10 +1,11 @@
 """License file handler."""
+
 import sys
 from datetime import date
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 try:
     from ghapi.all import GhApi
@@ -57,7 +58,7 @@ class LicenseOptionsEnum(Enum):
         return value in cls
 
 
-def get_license_filename(context: Optional[Dict[str, Any]] = None):
+def get_license_filename(context: Optional[dict[str, Any]] = None):
     """Callable to set the default license file name."""
     # Can't do in LicenseOptionsEnum pre 3.12
     if LicenseOptionsEnum.contains(context.get("license", None)):
@@ -103,7 +104,7 @@ def _get_license_content(license: LicenseOptionsEnum):
     return license_content
 
 
-def get_license_content(context: Dict[str, Any]):
+def get_license_content(context: dict[str, Any]):
     """Render the content of the license."""
     # We implement some specifics based on the implementation instructions in Github licenses api get
     # Can't do in LicenseOptionsEnum pre 3.12

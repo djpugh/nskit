@@ -1,9 +1,10 @@
 """The base recipe object."""
+
 import datetime as dt
 import inspect
 import sys
 from pathlib import Path
-from typing import Any, ClassVar, List, Optional
+from typing import Any, ClassVar, Optional
 
 from pydantic import BaseModel, Field
 from pydantic.fields import FieldInfo
@@ -23,8 +24,8 @@ def RecipeField(
     env_var: Optional[str] = None,
     template: Optional[str] = None,
     prompt_text: Optional[str] = None,
-    options: Optional[List[str]] = None,
-    conditional_rules: Optional[List[dict]] = None,
+    options: Optional[list[str]] = None,
+    conditional_rules: Optional[list[dict]] = None,
     description: Optional[str] = None,
     **kwargs: Any,
 ) -> FieldInfo:
@@ -76,12 +77,12 @@ class Recipe(Folder):
 
     name: str = Field(None, validate_default=True, description="The repository name")
     version: Optional[str] = Field(None, description="The recipe version")  # type: ignore
-    pre_hooks: List[Hook] = Field(
+    pre_hooks: list[Hook] = Field(
         default_factory=list,
         validate_default=True,
         description="Hooks that can be used to modify a recipe path and context before writing",
     )
-    post_hooks: List[Hook] = Field(
+    post_hooks: list[Hook] = Field(
         default_factory=list,
         validate_default=True,
         description="Hooks that can be used to modify a recipe path and context after writing",

@@ -1,6 +1,7 @@
 """Local execution engine."""
+
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from nskit.client.engines.base import RecipeEngine
 from nskit.client.models import RecipeResult
@@ -14,7 +15,7 @@ class LocalEngine(RecipeEngine):
         self,
         recipe: str,
         version: str,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         output_dir: Path,
         image_url: str = None,
         entrypoint: str = None,
@@ -36,18 +37,14 @@ class LocalEngine(RecipeEngine):
             raise ValueError("Local engine requires entrypoint")
 
         errors = []
-        warnings: List[str] = []
+        warnings: list[str] = []
 
         try:
-
             # Load recipe from installed package
             recipe_instance = Recipe.load(recipe, entrypoint=entrypoint, **parameters)
 
             # Create the project
-            result = recipe_instance.create(
-                base_path=output_dir.parent,
-                override_path=output_dir.name
-            )
+            result = recipe_instance.create(base_path=output_dir.parent, override_path=output_dir.name)
 
             # Collect created files
             files_created = list(result.keys()) if result else []

@@ -1,7 +1,8 @@
 """Docker backend for recipe management."""
+
 import subprocess  # nosec B404
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.models import RecipeInfo
@@ -71,7 +72,7 @@ class DockerBackend(RecipeBackend):
             capture_output=True,
         )
 
-    def list_recipes(self) -> List[RecipeInfo]:
+    def list_recipes(self) -> list[RecipeInfo]:
         """List available recipes.
 
         Note: Docker registries don't provide easy listing.
@@ -79,7 +80,7 @@ class DockerBackend(RecipeBackend):
         """
         return []
 
-    def get_recipe_versions(self, recipe_name: str) -> List[str]:
+    def get_recipe_versions(self, recipe_name: str) -> list[str]:
         """Get available versions for a recipe.
 
         Note: Requires external API or manifest inspection.

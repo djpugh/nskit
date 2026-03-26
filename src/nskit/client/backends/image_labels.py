@@ -4,6 +4,7 @@ Uses the OCI Distribution Spec:
 1. GET /v2/<name>/manifests/<tag> → manifest with config digest
 2. GET /v2/<name>/blobs/<config_digest> → config JSON with labels
 """
+
 from __future__ import annotations
 
 import json
@@ -42,12 +43,15 @@ def read_local_labels(image_url: str) -> dict[str, str]:
     Returns:
         Dict of labels, or empty dict if image not found.
     """
-    result = subprocess.run(  # nosec B603, B607
-        ["docker", "inspect", image_url, "--format", "{{json .Config.Labels}}"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(  # nosec B603, B607
+            ["docker", "inspect", image_url, "--format", "{{json .Config.Labels}}"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return {}
     if result.returncode == 0 and result.stdout.strip():
         try:
             return json.loads(result.stdout.strip()) or {}

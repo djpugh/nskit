@@ -179,7 +179,13 @@ jobs:
     - name: Install dependencies
       run: task setup
     - name: Run Test Suite
-      run: task test -- unit functional
+      run: |
+        if [ "$RUNNER_OS" = "macOS" ]; then
+          task test -- unit
+        else
+          task test -- unit functional
+        fi
+      shell: bash
       env:
         GITHUB_TOKEN: ${{ github.token}}
     - name: Upload test reports
@@ -378,8 +384,12 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - name: Install Task
+        uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ github.token }}
       - name: Install dependencies
-        run: uv sync
+        run: task setup
 
       - name: Configure Git
         run: |
@@ -388,7 +398,7 @@ jobs:
 
       - name: Build docs
         id: build_docs
-        run: uv run nox -t docs
+        run: task docs:build
 
       - name: Select Branch
         run: git checkout ${{ steps.build_docs.outputs.branch_name}}

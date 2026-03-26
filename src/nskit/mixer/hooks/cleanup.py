@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 from nskit.mixer.components.hook import Hook
 
@@ -13,8 +13,8 @@ class RemoveEmptyFilesHook(Hook):
     skip_gitkeep: bool = True
 
     def call(
-        self, recipe_path: Path, context: Dict[str, Any], skip_gitkeep: bool = True
-    ) -> Optional[Tuple[Path, Dict[str, Any]]]:
+        self, recipe_path: Path, context: dict[str, Any], skip_gitkeep: bool = True
+    ) -> Optional[tuple[Path, dict[str, Any]]]:
         """Remove all empty files from the recipe directory.
 
         Args:
@@ -56,7 +56,7 @@ class RemoveEmptyFilesHook(Hook):
 class RemoveEmptyDirectoriesHook(Hook):
     """Post hook that removes all empty directories from the generated recipe."""
 
-    def call(self, recipe_path: Path, context: Dict[str, Any]) -> Optional[Tuple[Path, Dict[str, Any]]]:
+    def call(self, recipe_path: Path, context: dict[str, Any]) -> Optional[tuple[Path, dict[str, Any]]]:
         """Remove all empty directories from the recipe directory.
 
         Args:
@@ -101,7 +101,7 @@ class CleanupHook(Hook):
     remove_empty_dirs: bool = True
     skip_gitkeep: bool = True
 
-    def call(self, recipe_path: Path, context: Dict[str, Any]) -> Optional[Tuple[Path, Dict[str, Any]]]:
+    def call(self, recipe_path: Path, context: dict[str, Any]) -> Optional[tuple[Path, dict[str, Any]]]:
         """Clean up empty files and/or directories from the recipe directory.
 
         Args:

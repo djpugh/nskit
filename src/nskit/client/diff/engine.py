@@ -1,7 +1,8 @@
 """Diff engine for recipe updates."""
+
 import subprocess  # nosec B404
 from pathlib import Path
-from typing import Optional, Set
+from typing import Optional
 
 from nskit.client.diff.file_discovery import FileDiscovery
 from nskit.client.diff.models import DiffMode, DiffResult, DiffType, FileDiff
@@ -91,7 +92,7 @@ class DiffEngine:
             modified_files=modified,
         )
 
-    def _get_files(self, path: Path) -> Set[str]:
+    def _get_files(self, path: Path) -> set[str]:
         """Get all files in directory recursively."""
         files = set()
         for item in path.rglob("*"):

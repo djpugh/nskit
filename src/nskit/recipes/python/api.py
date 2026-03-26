@@ -1,5 +1,6 @@
 """API Service Recipe."""
-from typing import List, Union
+
+from typing import Union
 
 from pydantic import Field
 
@@ -11,7 +12,7 @@ from nskit.recipes.python.ingredients import api as api_ingredients
 class APIRecipe(PyRecipe):
     """API Service Recipe."""
 
-    contents: List[Union[File, Folder]] = Field(
+    contents: list[Union[File, Folder]] = Field(
         [
             ingredients.gitignore,
             ingredients.noxfile,

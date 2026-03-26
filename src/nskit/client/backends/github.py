@@ -1,9 +1,10 @@
 """GitHub backend for recipe management."""
+
 import subprocess  # nosec B404
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 try:
     from ghapi.core import GhApi
@@ -75,7 +76,7 @@ class GitHubBackend(RecipeBackend):
         """Build repository name from pattern."""
         return self.repo_pattern.format(recipe_name=recipe_name)
 
-    def list_recipes(self) -> List[RecipeInfo]:
+    def list_recipes(self) -> list[RecipeInfo]:
         """List available recipes from GitHub org."""
         from nskit.client.backends.image_labels import get_recipe_name, read_remote_labels
 
@@ -112,7 +113,7 @@ class GitHubBackend(RecipeBackend):
 
         return recipes
 
-    def get_recipe_versions(self, recipe_name: str) -> List[str]:
+    def get_recipe_versions(self, recipe_name: str) -> list[str]:
         """Get available versions for a recipe."""
         github = self._get_client()
         repo_name = self._get_repo_name(recipe_name)

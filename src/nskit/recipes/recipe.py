@@ -1,5 +1,6 @@
 """A Recipe for creating Recipes, meta!"""
-from typing import List, Union
+
+from typing import Union
 
 from pydantic import Field
 
@@ -13,7 +14,7 @@ class RecipeRecipe(PyRecipe):
     """A Recipe for creating Recipes, meta!"""
 
     recipe_entrypoint: str = RECIPE_ENTRYPOINT
-    contents: List[Union[File, Folder]] = Field(
+    contents: list[Union[File, Folder]] = Field(
         [
             ingredients.gitignore,
             ingredients.noxfile,

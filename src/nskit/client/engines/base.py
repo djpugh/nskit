@@ -1,7 +1,8 @@
 """Execution engine interface."""
+
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from nskit.client.models import RecipeResult
 
@@ -14,7 +15,7 @@ class RecipeEngine(ABC):
         self,
         recipe: str,
         version: str,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         output_dir: Path,
         image_url: str = None,
         entrypoint: str = None,

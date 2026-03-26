@@ -1,7 +1,8 @@
 """Backend interface for recipe discovery and fetching."""
+
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from nskit.client.models import RecipeInfo
 
@@ -16,7 +17,7 @@ class RecipeBackend(ABC):
         pass
 
     @abstractmethod
-    def list_recipes(self) -> List[RecipeInfo]:
+    def list_recipes(self) -> list[RecipeInfo]:
         """List all available recipes.
 
         Returns:
@@ -25,7 +26,7 @@ class RecipeBackend(ABC):
         pass
 
     @abstractmethod
-    def get_recipe_versions(self, recipe: str) -> List[str]:
+    def get_recipe_versions(self, recipe: str) -> list[str]:
         """Get available versions for a recipe.
 
         Args:
@@ -50,7 +51,7 @@ class RecipeBackend(ABC):
         """
         pass
 
-    def get_recipe_metadata(self, recipe: str, version: str) -> Dict[str, Any]:
+    def get_recipe_metadata(self, recipe: str, version: str) -> dict[str, Any]:
         """Get metadata for a specific recipe version.
 
         Args:

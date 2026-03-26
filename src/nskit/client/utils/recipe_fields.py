@@ -1,9 +1,9 @@
-from typing import Dict, get_args, get_origin
+from typing import get_args, get_origin
 
 from pydantic import BaseModel
 
 
-def get_required_fields_as_dict(model: BaseModel, prefix: str = "") -> Dict[str, str]:
+def get_required_fields_as_dict(model: BaseModel, prefix: str = "") -> dict[str, str]:
     """Get required fields from a Pydantic model, including functionally required fields.
 
     Functionally required fields are those with non-nullable type annotations (like str)

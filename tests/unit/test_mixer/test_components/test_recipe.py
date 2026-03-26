@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import os
 import unittest
 from pathlib import Path
-from typing import List, Union
 
 from nskit import __version__
 from nskit.common.configuration import BaseConfiguration
@@ -33,7 +34,7 @@ class RecipeTestCase(unittest.TestCase):
 
         class TestRecipe(Recipe):
             x: ExtraModel = ExtraModel()
-            contents: List[Union[File, "Folder"]] = self._recipe.contents
+            contents: list[File | Folder] = self._recipe.contents
 
         self._complex_recipe = TestRecipe(name="test")
         self._complex_recipe_cls = TestRecipe

@@ -1,5 +1,6 @@
 """Package Recipe."""
-from typing import List, Union
+
+from typing import Union
 
 from pydantic import Field
 
@@ -10,7 +11,7 @@ from nskit.recipes.python import PyRecipe, ingredients
 class PackageRecipe(PyRecipe):
     """Package Recipe."""
 
-    contents: List[Union[File, Folder]] = Field(
+    contents: list[Union[File, Folder]] = Field(
         [
             ingredients.gitignore,
             ingredients.noxfile,
@@ -20,6 +21,7 @@ class PackageRecipe(PyRecipe):
             ingredients.test_dir,
             ingredients.src_dir,
             ingredients.docs_dir,
-            LicenseFile()
+            LicenseFile(),
         ],
-        description='The folder contents')
+        description="The folder contents",
+    )

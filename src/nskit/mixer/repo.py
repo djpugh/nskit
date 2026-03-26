@@ -1,5 +1,6 @@
 """A base recipe object for a code (git) repo."""
-from typing import Callable, List, Optional
+
+from typing import Callable, Optional
 
 from pydantic import EmailStr, Field, HttpUrl, field_validator
 
@@ -47,7 +48,7 @@ class CodeRecipe(Recipe):
     """
 
     repo: RepoMetadata
-    post_hooks: Optional[List[Callable]] = Field(
+    post_hooks: Optional[list[Callable]] = Field(
         [hooks.git.GitInit(), hooks.pre_commit.PrecommitInstall()],
         validate_default=True,
         description="Hooks that can be used to modify a recipe path and context after writing",

@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import unittest
 import uuid
 from pathlib import Path
-from typing import List, Union
 
 # Test with custom recipe
 from pydantic import Field
@@ -31,7 +32,7 @@ class CustomRecipeTestCase(unittest.TestCase):
             script_name: str = "abacus"
             extension_name: str = self._test_recipe_entrypoint_name
 
-            contents: List[Union[File, Folder]] = Field(
+            contents: list[File | Folder] = Field(
                 [
                     ingredients.gitignore,
                     ingredients.noxfile,
