@@ -70,6 +70,8 @@ tasks:
     cmds:
       - cmd: which vhs >/dev/null 2>&1 || brew install charmbracelet/tap/vhs; which ttyd >/dev/null 2>&1 || brew install ttyd
         silent: true
+      - cmd: docker rmi nskit/python_package:v1.0.0 2>/dev/null || true; docker builder prune -f 2>/dev/null || true; docker build --no-cache --target runtime --build-arg RECIPE_NAME=python_package -t nskit/python_package:v1.0.0 .
+        silent: true
       - 'PATH="{{.VHS_PATH}}" vhs docs/demo-docker.tape'
 
   deploy:

@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
-from nskit.cli.app import create_cli
+
+def __getattr__(name: str):
+    """Lazy import create_cli to avoid triggering logger setup at import time."""
+    if name == "create_cli":
+        from nskit.cli.app import create_cli
+
+        return create_cli
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = ["create_cli"]
 
@@ -19,9 +27,12 @@ def main():
     import os
     import sys
 
-    # Default to human-readable logs in CLI mode
+    # Default to human-readable logs in CLI mode — must be set before
+    # importing create_cli so loggers pick up the values.
     os.environ.setdefault("LOG_JSON", "false")
     os.environ.setdefault("LOGLEVEL", "WARNING")
+
+    from nskit.cli.app import create_cli
 
     # Parse --backend and --engine before typer sees them
     args = sys.argv[1:]
