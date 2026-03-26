@@ -1,4 +1,5 @@
 """Backend configuration and factory."""
+
 from pathlib import Path
 from typing import Union
 
@@ -8,6 +9,8 @@ from nskit.client.backends.base import RecipeBackend
 from nskit.client.backends.docker import DockerBackend
 from nskit.client.backends.github import GitHubBackend
 from nskit.client.backends.local import LocalBackend
+
+_DEFAULT_ENTRYPOINT = "nskit.recipes"
 
 
 def create_backend_from_config(config: Union[dict, Path, str]) -> RecipeBackend:
@@ -42,7 +45,7 @@ def create_backend_from_config(config: Union[dict, Path, str]) -> RecipeBackend:
     if backend_type == "local":
         return LocalBackend(
             recipes_dir=Path(config["path"]),
-            entrypoint=config.get("entrypoint", "nskit.recipes"),
+            entrypoint=config.get("entrypoint", _DEFAULT_ENTRYPOINT),
         )
 
     elif backend_type == "docker":
@@ -50,7 +53,7 @@ def create_backend_from_config(config: Union[dict, Path, str]) -> RecipeBackend:
             registry_url=config.get("registry_url", "ghcr.io"),
             image_prefix=config.get("image_prefix", ""),
             auth_token=config.get("auth_token"),
-            entrypoint=config.get("entrypoint", "nskit.recipes"),
+            entrypoint=config.get("entrypoint", _DEFAULT_ENTRYPOINT),
         )
 
     elif backend_type == "github":
@@ -58,7 +61,7 @@ def create_backend_from_config(config: Union[dict, Path, str]) -> RecipeBackend:
             org=config["org"],
             repo_pattern=config.get("repo_pattern", "{recipe_name}"),
             token=config.get("token"),
-            entrypoint=config.get("entrypoint", "nskit.recipes"),
+            entrypoint=config.get("entrypoint", _DEFAULT_ENTRYPOINT),
         )
 
     else:

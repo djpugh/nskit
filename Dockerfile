@@ -58,4 +58,10 @@ RUN --mount=type=secret,id=pypi_username,env=UV_INDEX_USERNAME,required=false \
 ENV CLI_COMMAND=${CLI_COMMAND}
 LABEL nskit.recipe="true"
 LABEL nskit.recipe.name="${RECIPE_NAME}"
+
+RUN useradd --create-home nskit \
+    && chown -R nskit:nskit ${PROJECT_DIR}
+USER nskit
+RUN git config --global --add safe.directory '*'
+
 ENTRYPOINT ["sh", "-c", "uv run --no-sync $CLI_COMMAND \"$@\"", "--"]

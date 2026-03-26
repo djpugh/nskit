@@ -36,7 +36,8 @@ class RepoMetadata(BaseConfiguration):
     @field_validator("url", mode="before")
     @classmethod
     def _prepend_scheme(cls, v):
-        if isinstance(v, str) and not v.startswith(("http://", "https://")):
+        if isinstance(v, str) and not v.startswith("https://"):
+            v = v.removeprefix("http://")
             v = f"https://{v}"
         return v
 

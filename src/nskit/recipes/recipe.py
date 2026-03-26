@@ -22,6 +22,7 @@ class RecipeRecipe(PyRecipe):
             recipe_ingredients.pyproject_toml,
             recipe_ingredients.readme_md,
             recipe_ingredients.dockerfile,
+            recipe_ingredients.docker_ignore,
             ingredients.test_dir,
             recipe_ingredients.src_dir,
             ingredients.docs_dir,

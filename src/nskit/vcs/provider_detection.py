@@ -1,7 +1,6 @@
 """VCS provider auto-detection."""
-from __future__ import annotations
 
-from pydantic import ValidationError
+from __future__ import annotations
 
 from nskit._logging import logger_factory
 from nskit.vcs.providers import ProviderEnum
@@ -29,10 +28,10 @@ def get_default_repo_client() -> RepoClient:
                 logger.info(f"{provider.value} configured.")
             else:
                 raise ValueError("Extension not found")
-        except (ImportError, ValueError, ValidationError):
+        except (ImportError, ValueError):
             logger.info(f"{provider.value} not configured.")
     if client is None:
         raise ValueError(
-            "No VCS provider configured. Set appropriate environment variables " "(e.g. GITHUB_TOKEN for GitHub)."
+            "No VCS provider configured. Set appropriate environment variables (e.g. GITHUB_TOKEN for GitHub)."
         )
     return client

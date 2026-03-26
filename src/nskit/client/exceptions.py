@@ -1,4 +1,5 @@
 """Domain-specific exceptions for nskit client operations."""
+
 from __future__ import annotations
 
 
@@ -111,7 +112,7 @@ class FileSystemError(Exception):
 
     def __str__(self) -> str:
         """Format the error message with operation, path, and reason."""
-        return f"File system error during '{self.operation}' on '{self.path}': " f"{self.reason}"
+        return f"File system error during '{self.operation}' on '{self.path}': {self.reason}"
 
 
 class GitStatusError(Exception):

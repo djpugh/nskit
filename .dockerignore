@@ -1,3 +1,5 @@
+# Exclude sensitive and unnecessary files from Docker build context
+
 # Credentials and secrets
 .env
 .env.*
@@ -17,17 +19,17 @@
 # Python artifacts
 __pycache__
 *.pyc
+*.pyo
+*.pyd
+.Python
 *.egg-info
 build
 .venv
 venv
-.nox
 .tox
 
-# Test and coverage
-tests
+# Coverage and reports
 reports
-test-reports
 coverage.xml
 .coverage
 .pytest_cache
@@ -36,6 +38,8 @@ coverage.xml
 
 # Docs and tooling
 docs
+Taskfile.yml
+taskfiles
 noxfile.py
 .pre-commit-config.yaml
 

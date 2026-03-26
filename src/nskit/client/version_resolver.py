@@ -1,4 +1,5 @@
 """Version resolution for recipes from backends."""
+
 from __future__ import annotations
 
 from nskit.client.backends.base import RecipeBackend
@@ -41,7 +42,7 @@ class VersionResolver:
 
         if target_version not in versions:
             raise UpdateError(
-                f"Version '{target_version}' not found for recipe " f"'{recipe_name}'",
+                f"Version '{target_version}' not found for recipe '{recipe_name}'",
                 details=f"Available versions: {', '.join(versions)}",
             )
         return target_version

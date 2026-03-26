@@ -6,7 +6,8 @@ ARG SOURCE_FILES_DIRNAME=src
 ARG APP_ENTRYPOINT=app:app
 
 # Set up uv and other deps first
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates git
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git \
+    && rm -rf /var/lib/apt/lists/*
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
 RUN sh /uv-installer.sh && rm /uv-installer.sh
 ENV PATH="/root/.local/bin/:$PATH"

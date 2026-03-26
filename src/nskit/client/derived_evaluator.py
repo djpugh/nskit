@@ -1,16 +1,14 @@
 """Derived field evaluator using Jinja2 template expressions."""
+
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Callable, ClassVar
+from typing import Any, Callable, ClassVar
 
 from jinja2 import Environment
 
 from nskit.client.context import ContextProvider
 from nskit.mixer.utilities import JINJA_ENVIRONMENT_FACTORY
-
-if TYPE_CHECKING:
-    pass
 
 
 class DerivedFieldEvaluator:

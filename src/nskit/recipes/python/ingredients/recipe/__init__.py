@@ -1,6 +1,8 @@
 """Ingredients for a recipe recipe."""
+
 from nskit.mixer import File
 from nskit.recipes.python.ingredients import src_dir as _src_dir
+from nskit.recipes.python.ingredients.docker import docker_ignore
 
 pyproject_toml = File(name="pyproject.toml", content="nskit.recipes.python.ingredients.recipe:pyproject.toml.jinja")
 

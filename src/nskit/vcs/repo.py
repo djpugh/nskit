@@ -8,12 +8,7 @@ import sys
 import tempfile
 import warnings
 from pathlib import Path
-from typing import Any
-
-if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
-    from typing import Annotated
-else:
-    from typing import Annotated
+from typing import Annotated, Any
 
 import git
 from pydantic import Field, ValidationInfo, field_validator, model_validator
@@ -237,7 +232,7 @@ class NamespaceValidationRepo(_Repo):
     # model_config = ConfigDict(extra='ignore')  noqa: E800
     name: str = ".namespaces"
     namespaces_filename: str | Path = "namespaces.yaml"
-    local_dir: Annotated[Path, Field(validate_default=True)] = None
+    local_dir: Annotated[Path | None, Field(validate_default=True)] = None
 
     _validator: NamespaceValidator = None
 
@@ -270,7 +265,7 @@ class NamespaceValidationRepo(_Repo):
             self._download_namespaces()
         self.pull()
         with (self.local_dir / self.namespaces_filename).open() as f:
-            namespace_validator = NamespaceValidator(**yaml.load(f))
+            namespace_validator = NamespaceValidator(**yaml.safe_load(f))
         return namespace_validator
 
     def create(

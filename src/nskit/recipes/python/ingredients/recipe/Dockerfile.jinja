@@ -16,14 +16,13 @@ COPY src/ /app/src/
 RUN --mount=type=bind,src=.git,dst=/app/.git \
     uv sync --frozen --no-dev || uv sync --no-dev
 
-RUN mkdir -p /app/input /app/output
-
-# Trust all directories for git safe.directory — recipe post-hooks (git init,
-# pre-commit install) run inside Docker volume mounts where ownership metadata
-# may differ from the container user, causing git 2.35.2+ to reject operations.
-RUN git config --global --add safe.directory '*'
+RUN mkdir -p /app/input /app/output \
+    && useradd --create-home nskit \
+    && chown -R nskit:nskit /app
 
 LABEL nskit.recipe="true"
 LABEL nskit.recipe.name="${RECIPE_NAME}"
+USER nskit
+RUN git config --global --add safe.directory '*'
 
 ENTRYPOINT ["uv", "run", "--no-sync", "nskit"]

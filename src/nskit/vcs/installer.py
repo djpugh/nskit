@@ -1,4 +1,5 @@
 """Repository installers."""
+
 from __future__ import annotations
 
 import subprocess  # nosec B404
@@ -15,6 +16,8 @@ from nskit.common.contextmanagers import ChDir
 from nskit.common.extensions import ExtensionsEnum
 
 logger = logger_factory.get_logger(__name__)
+
+_REQUIREMENTS_TXT = "requirements.txt"
 
 ENTRYPOINT = "nskit.vcs.installers"
 InstallersEnum = ExtensionsEnum.from_entrypoint("InstallersEnum", ENTRYPOINT)
@@ -63,7 +66,7 @@ class PythonInstaller(Installer):
         """Check if this is a python repo."""
         logger.debug(f"{self.__class__} enabled, checking for match.")
         result = (
-            (path / "setup.py").exists() or (path / "pyproject.toml").exists() or (path / "requirements.txt").exists()
+            (path / "setup.py").exists() or (path / "pyproject.toml").exists() or (path / _REQUIREMENTS_TXT).exists()
         )
         logger.info(f"Matched repo to {self.__class__}.")
         return result
@@ -82,8 +85,8 @@ class PythonInstaller(Installer):
         with ChDir(path):
             if Path("setup.py").exists() or Path("pyproject.toml").exists():
                 subprocess.check_call([str(executable), "-m", "pip", "install", "-e", ".[dev]"] + args)  # nosec B603, B607
-            elif deps and Path("requirements.txt").exists():
-                subprocess.check_call([str(executable), "-m", "pip", "install", "-r", "requirements.txt"])  # nosec B603, B607
+            elif deps and Path(_REQUIREMENTS_TXT).exists():
+                subprocess.check_call([str(executable), "-m", "pip", "install", "-r", _REQUIREMENTS_TXT])  # nosec B603, B607
 
     def _get_virtualenv(self, full_virtualenv_dir: Path):
         """Get the virtualenv executable.

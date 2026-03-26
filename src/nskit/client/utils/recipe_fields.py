@@ -18,10 +18,7 @@ def get_required_fields_as_dict(model: BaseModel, prefix: str = "") -> dict[str,
         Dictionary mapping field names to type names
     """
     # Handle both instances and classes
-    if isinstance(model, type):
-        fields = model.model_fields
-    else:
-        fields = model.model_fields
+    fields = model.model_fields
 
     required_fields = {}
 
