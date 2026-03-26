@@ -41,7 +41,7 @@ class TestRemoveEmptyFilesHook(unittest.TestCase):
             (root / ".gitkeep").write_text("")
 
             hook = RemoveEmptyFilesHook(skip_gitkeep=False)
-            hook.call(root, {}, skip_gitkeep=False)
+            hook.call(root, {})
 
             self.assertFalse((root / ".gitkeep").exists())
 
@@ -145,3 +145,14 @@ class TestCleanupHook(unittest.TestCase):
         hook = CleanupHook()
         result = hook.call(Path("/nonexistent"), {})
         self.assertIsNone(result)
+
+    def test_skip_gitkeep_false_propagation(self) -> None:
+        """CleanupHook(skip_gitkeep=False) removes .gitkeep files."""
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / ".gitkeep").write_text("")
+
+            hook = CleanupHook(skip_gitkeep=False)
+            hook.call(root, {})
+
+            self.assertFalse((root / ".gitkeep").exists())

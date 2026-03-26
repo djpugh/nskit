@@ -62,6 +62,20 @@ class TestRepositoryClient(unittest.TestCase):
             self.assertTrue(any("remote" in str(c) for c in calls))
             self.assertTrue(any("push" in str(c) for c in calls))
 
+    def test_create_and_push_subprocess_error(self) -> None:
+        """Raises CalledProcessError when git push fails."""
+        from nskit.recipes.repository_client import RepositoryClient
+
+        vcs = MagicMock()
+        vcs.get_remote_url.return_value = "https://github.com/org/my-repo"
+        vcs.get_clone_url.return_value = "https://github.com/org/my-repo.git"
+
+        client = RepositoryClient(vcs_client=vcs)
+        with patch("nskit.recipes.repository_client.subprocess.run") as mock_run:
+            mock_run.side_effect = subprocess.CalledProcessError(1, "git push")
+            with self.assertRaises(subprocess.CalledProcessError):
+                client.create_and_push("my-repo", Path("/tmp/fake"))
+
     def test_configure_repository_no_client_raises(self) -> None:
         """Raises ValueError when no VCS client is configured."""
         from nskit.recipes.repository_client import RepositoryClient
@@ -149,6 +163,62 @@ class TestRecipeClientCreateRepository(unittest.TestCase):
         mock_vcs.create.assert_called_once()
 
 
+class TestRecipeClientCreateRepositoryWithProjectPath(unittest.TestCase):
+    """Tests for RecipeClient.create_repository with project_path set."""
+
+    @patch("nskit.client.recipes._detect_repo_client")
+    def test_create_repository_with_project_path_calls_create_and_push(self, mock_detect) -> None:
+        """Calls create_and_push when project_path has a .git directory."""
+        mock_vcs = MagicMock()
+        mock_vcs.get_remote_url.return_value = "https://github.com/org/my-project"
+        mock_vcs.get_clone_url.return_value = "https://github.com/org/my-project.git"
+        mock_detect.return_value = (mock_vcs, "GitHub")
+
+        from nskit.client.recipes import RecipeClient
+
+        backend = MagicMock()
+        client = RecipeClient(backend)
+
+        with TemporaryDirectory() as tmp:
+            project = Path(tmp)
+            (project / ".git").mkdir()
+
+            with patch("nskit.recipes.repository_client.RepositoryClient") as mock_rc_cls:
+                mock_rc = mock_rc_cls.return_value
+                mock_rc.create_and_push.return_value = MagicMock(url="https://github.com/org/my-project")
+
+                ok, msg = client.create_repository("my-project", project_path=project, description="desc")
+
+            self.assertTrue(ok)
+            self.assertIn("pushed", msg)
+            mock_rc.create_and_push.assert_called_once_with("my-project", project, description="desc", private=True)
+
+
+class TestRecipeClientInitializeRecipeForce(unittest.TestCase):
+    """Tests for RecipeClient.initialize_recipe with force=True."""
+
+    def test_force_true_on_non_empty_dir_proceeds(self) -> None:
+        """Succeeds when force=True even if output_dir is non-empty."""
+        from nskit.client.recipes import RecipeClient
+
+        backend = MagicMock()
+        engine = MagicMock()
+        engine.__class__.__name__ = "LocalEngine"
+        expected = MagicMock()
+        engine.execute.return_value = expected
+
+        client = RecipeClient(backend, engine=engine)
+
+        with TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            (output / "existing.txt").write_text("data")
+
+            result = client.initialize_recipe(recipe="r", version="v1", parameters={}, output_dir=output, force=True)
+
+        self.assertIs(result, expected)
+        engine.execute.assert_called_once()
+
+
 class TestDetectRepoClient(unittest.TestCase):
     """Tests for _detect_repo_client."""
 
@@ -166,7 +236,7 @@ class TestDetectRepoClient(unittest.TestCase):
         self.assertEqual(name, "Github")
 
     @patch("nskit.vcs.provider_detection.get_default_repo_client", side_effect=ValueError("no provider"))
-    def test_returns_none_on_failure(self, mock_get) -> None:
+    def test_returns_none_on_value_error(self, mock_get) -> None:
         """Returns (None, None) when no provider is configured."""
         from nskit.client.recipes import _detect_repo_client
 

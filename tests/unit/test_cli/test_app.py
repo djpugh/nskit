@@ -7,6 +7,7 @@ import pytest
 from typer.testing import CliRunner
 
 from nskit.cli import create_cli
+from nskit.common.contextmanagers import Env
 
 
 @pytest.fixture
@@ -109,18 +110,20 @@ class TestCreateCLI:
         input_file = tmp_path / "input.yaml"
         input_file.write_text("name: test\n")
 
-        runner.invoke(
-            app,
-            [
-                "init",
-                "--recipe",
-                "test_recipe",
-                "--input-yaml-path",
-                str(input_file),
-                "--output-base-path",
-                str(tmp_path),
-            ],
-        )
+        # Remove VCS tokens so _detect_repo_client doesn't trigger questionary
+        with Env(remove=["GITHUB_TOKEN", "AZURE_DEVOPS_TOKEN"]):
+            runner.invoke(
+                app,
+                [
+                    "init",
+                    "--recipe",
+                    "test_recipe",
+                    "--input-yaml-path",
+                    str(input_file),
+                    "--output-base-path",
+                    str(tmp_path),
+                ],
+            )
 
         mock_load.assert_called_once()
         mock_recipe.create.assert_called_once()
@@ -179,8 +182,7 @@ class TestCommitAndMaybePush:
         # Should not raise
         _commit_and_maybe_push(project, "proj", "", False, None, console)
 
-    @patch("nskit.recipes.repository_client.subprocess.run")
-    def test_creates_remote_and_pushes(self, mock_subprocess, tmp_path):
+    def test_creates_remote_and_pushes(self, tmp_path):
         """Creates remote and pushes when create_repo is True."""
         import subprocess
         from unittest.mock import MagicMock
@@ -199,10 +201,10 @@ class TestCommitAndMaybePush:
         mock_vcs = MagicMock()
         mock_vcs.get_remote_url.return_value = "https://github.com/org/proj"
         mock_vcs.get_clone_url.return_value = "https://github.com/org/proj.git"
-        mock_subprocess.return_value = MagicMock(returncode=0)
 
         console = Console()
-        _commit_and_maybe_push(project, "proj", "desc", True, mock_vcs, console)
+        with patch("nskit.recipes.repository_client.subprocess.run", return_value=MagicMock(returncode=0)):
+            _commit_and_maybe_push(project, "proj", "desc", True, mock_vcs, console)
 
         mock_vcs.create.assert_called_once_with("proj")
 

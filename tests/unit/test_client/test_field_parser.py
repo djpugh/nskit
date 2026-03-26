@@ -1,4 +1,5 @@
 """Unit tests for FieldParser."""
+
 from __future__ import annotations
 
 import json
@@ -75,6 +76,16 @@ class TestFieldParserCreateNestedDict(unittest.TestCase):
         """Empty input returns empty dict."""
         self.assertEqual(self.parser.create_nested_dict({}), {})
 
+    def test_deeply_nested(self) -> None:
+        """Four-level dotted key produces four-level nesting."""
+        result = self.parser.create_nested_dict({"a.b.c.d": 42})
+        self.assertEqual(result, {"a": {"b": {"c": {"d": 42}}}})
+
+    def test_mixed_dotted_and_flat(self) -> None:
+        """Flat and dotted keys coexist correctly."""
+        result = self.parser.create_nested_dict({"x": 1, "a.b": 2, "a.c.d": 3})
+        self.assertEqual(result, {"x": 1, "a": {"b": 2, "c": {"d": 3}}})
+
 
 class TestFieldParserGetFieldPrompt(unittest.TestCase):
     """Tests for FieldParser.get_field_prompt."""
@@ -97,6 +108,46 @@ class TestFieldParserGetFieldPrompt(unittest.TestCase):
         """Field name is used as last resort."""
         field = FieldSpec(name="project_name")
         self.assertEqual(self.parser.get_field_prompt(field), "project_name")
+
+
+class TestFieldParserResolveFieldType(unittest.TestCase):
+    """Tests for FieldParser._resolve_field_type."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.parser = FieldParser()
+
+    def test_none_annotation(self) -> None:
+        """None annotation defaults to STR."""
+        self.assertEqual(self.parser._resolve_field_type(None), FieldType.STR)
+
+    def test_optional_unwraps(self) -> None:
+        """Optional[X] unwraps to the inner type."""
+        from typing import Optional
+
+        self.assertEqual(self.parser._resolve_field_type(Optional[int]), FieldType.INT)
+
+    def test_enum_subclass(self) -> None:
+        """Enum subclass maps to ENUM."""
+        from enum import Enum
+
+        class Colour(Enum):
+            RED = "red"
+
+        self.assertEqual(self.parser._resolve_field_type(Colour), FieldType.ENUM)
+
+    def test_basemodel_subclass(self) -> None:
+        """BaseModel subclass maps to OBJECT."""
+        from pydantic import BaseModel
+
+        class Nested(BaseModel):
+            x: int = 0
+
+        self.assertEqual(self.parser._resolve_field_type(Nested), FieldType.OBJECT)
+
+    def test_unknown_type_defaults_to_str(self) -> None:
+        """Unmapped type falls back to STR."""
+        self.assertEqual(self.parser._resolve_field_type(bytes), FieldType.STR)
 
 
 if __name__ == "__main__":

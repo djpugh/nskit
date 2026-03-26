@@ -1,4 +1,5 @@
 """Tests for CLI interactive init logic — default resolution chain and field prompting."""
+
 import os
 import unittest
 from contextlib import ExitStack
@@ -10,6 +11,7 @@ from pydantic import Field
 from typer.testing import CliRunner
 
 from nskit.cli import create_cli
+from nskit.common.contextmanagers import Env
 from nskit.mixer.components.recipe import Recipe
 
 
@@ -195,18 +197,20 @@ class TestInteractiveInitDefaults(unittest.TestCase):
 
             app = _make_app()
             runner = CliRunner()
-            runner.invoke(
-                app,
-                [
-                    "init",
-                    "--recipe",
-                    "python_package",
-                    "--input-yaml-path",
-                    str(input_file),
-                    "--output-base-path",
-                    str(tmp_path),
-                ],
-            )
+            # Remove VCS tokens so _detect_repo_client doesn't trigger questionary
+            with Env(remove=["GITHUB_TOKEN", "AZURE_DEVOPS_TOKEN"]):
+                runner.invoke(
+                    app,
+                    [
+                        "init",
+                        "--recipe",
+                        "python_package",
+                        "--input-yaml-path",
+                        str(input_file),
+                        "--output-base-path",
+                        str(tmp_path),
+                    ],
+                )
 
             mock_load.assert_called_once()
             call_kwargs = mock_load.call_args[1]

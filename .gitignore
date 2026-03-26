@@ -72,3 +72,8 @@ licenses*.json
 
 # Generated demo GIFs (built by task docs:build)
 docs/source/assets/*.gif
+
+# Coverage
+htmlcov/
+coverage.xml
+.coverage

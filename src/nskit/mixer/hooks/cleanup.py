@@ -12,15 +12,12 @@ class RemoveEmptyFilesHook(Hook):
 
     skip_gitkeep: bool = True
 
-    def call(
-        self, recipe_path: Path, context: dict[str, Any], skip_gitkeep: bool = True
-    ) -> Optional[tuple[Path, dict[str, Any]]]:
+    def call(self, recipe_path: Path, context: dict[str, Any]) -> Optional[tuple[Path, dict[str, Any]]]:
         """Remove all empty files from the recipe directory.
 
         Args:
             recipe_path: Path to the generated recipe directory
             context: Recipe context dictionary
-            skip_gitkeep: If True, do not remove empty .gitkeep files
 
         Returns:
             Tuple of (recipe_path, context) or None if no changes needed
@@ -36,7 +33,7 @@ class RemoveEmptyFilesHook(Hook):
                 file_path = Path(root) / file
                 try:
                     # Check if file is empty (0 bytes)
-                    if file_path.stat().st_size == 0 and not (skip_gitkeep and file_path.name == ".gitkeep"):
+                    if file_path.stat().st_size == 0 and not (self.skip_gitkeep and file_path.name == ".gitkeep"):
                         file_path.unlink()  # Remove the empty file
                         empty_files_removed.append(str(file_path.relative_to(recipe_path)))
                 except OSError as e:

@@ -35,11 +35,12 @@ myrecipes update
 ### For Recipe Builders
 
 ```python
-from nskit.mixer.components import Recipe
+from nskit.mixer.components import Recipe, File, Folder
 
 class MyRecipe(Recipe):
-    def mix(self):
-        self.render_template('template.j2', output_path=self.output_path / 'file.py')
+    contents = [
+        File(name="README.md", content="# {{name}}\n"),
+    ]
 ```
 
 ### For Platform Engineers

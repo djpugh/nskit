@@ -98,7 +98,7 @@ The `input` is replayed to regenerate the base and target states. The `docker_im
 
 ```python
 from nskit.client import UpdateClient
-from nskit.client.diff.models import DiffMode
+from nskit.common.models.diff import DiffMode
 from pathlib import Path
 
 update_client = UpdateClient(backend, engine=engine)
