@@ -1,5 +1,6 @@
 """Repository client for managing recipe repositories."""
-from typing import Optional
+
+from __future__ import annotations
 
 from nskit.client.models import RepositoryInfo
 from nskit.vcs.providers.abstract import RepoClient
@@ -19,7 +20,7 @@ class RepositoryClient:
     def create_repository(
         self,
         repo_name: str,
-        description: Optional[str] = None,
+        description: str | None = None,
         private: bool = True,
     ) -> RepositoryInfo:
         """Create a new repository.
@@ -63,7 +64,7 @@ class RepositoryClient:
         # This is a placeholder for future implementation
         pass
 
-    def get_repository_info(self, repo_name: str) -> Optional[RepositoryInfo]:
+    def get_repository_info(self, repo_name: str) -> RepositoryInfo | None:
         """Get repository information.
 
         Args:

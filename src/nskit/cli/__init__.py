@@ -1,4 +1,7 @@
 """CLI module for nskit."""
+
+from __future__ import annotations
+
 from nskit.cli.app import create_cli
 
 __all__ = ["create_cli"]
