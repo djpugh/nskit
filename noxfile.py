@@ -1,4 +1,5 @@
 """Nox configuration — test sessions only."""
+
 import os
 from pathlib import Path
 from platform import platform, python_version
@@ -19,18 +20,20 @@ def test(session):
     else:
         test_folder = ["tests/unit"]
     session.run("uv", "sync", external=True)
+    env_name = f"py-{python_version()}-os-{platform()}"
+    # Clear any previous coverage data
+    session.run("coverage", "erase")
     for folder in test_folder:
-        env_name = f"py-{python_version()}-os-{platform()}"
         session.run(
             "pytest",
             "--log-level=WARNING",
             "--cov=nskit",
-            "--cov-report",
-            "xml:reports/coverage.xml",
-            "--cov-report",
-            "html:reports/htmlcov",
+            "--cov-append",
             "--junitxml",
             f"reports/{env_name}-test.xml",
             "-rs",
             folder,
         )
+    # Generate combined coverage reports after all test folders
+    session.run("coverage", "xml", "-o", "reports/coverage.xml")
+    session.run("coverage", "html", "-d", "reports/htmlcov")
