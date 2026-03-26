@@ -1,4 +1,5 @@
 """End-to-end CLI tests using actual command execution."""
+
 import json
 from pathlib import Path
 

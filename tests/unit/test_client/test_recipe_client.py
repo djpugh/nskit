@@ -1,4 +1,5 @@
 """Functional tests for RecipeClient with mocked backends."""
+
 from pathlib import Path
 from unittest.mock import MagicMock, Mock
 

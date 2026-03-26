@@ -1,4 +1,5 @@
 """End-to-end integration tests for complete user workflows."""
+
 import subprocess
 from pathlib import Path
 

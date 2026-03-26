@@ -1,4 +1,5 @@
 """Functional tests for UpdateClient with mocked backends."""
+
 from pathlib import Path
 from unittest.mock import Mock, patch
 

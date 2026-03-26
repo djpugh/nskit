@@ -1,4 +1,5 @@
 """Integration tests for the complete recipe workflow."""
+
 import subprocess
 from pathlib import Path
 

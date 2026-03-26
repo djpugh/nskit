@@ -1,4 +1,5 @@
 """Tests for GitUtils uncovered functions."""
+
 from pathlib import Path
 
 import pytest

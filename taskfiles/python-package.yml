@@ -50,6 +50,16 @@ tasks:
     cmds:
       - uv run nox -s test -- functional
 
+  test:integration:
+    desc: Run the integration tests.
+    cmds:
+      - uv run nox -s test -- integration
+
+  test:smoke:
+    desc: Run the smoke tests.
+    cmds:
+      - uv run nox -s test -- smoke
+
   test:
     desc: Run tests. Pass folders as args, e.g. task test -- unit functional
     cmds:

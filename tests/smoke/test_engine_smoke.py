@@ -4,6 +4,7 @@ Verifies that both engine paths produce correct results through
 the RecipeClient orchestration layer. The Docker tests build a real
 image from the nskit Dockerfile and execute a recipe inside it.
 """
+
 from __future__ import annotations
 
 import subprocess

@@ -1,4 +1,5 @@
 """Unit tests for LocalBackend."""
+
 from __future__ import annotations
 
 import unittest

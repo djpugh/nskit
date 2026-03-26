@@ -1,4 +1,5 @@
 """Unit tests for GitUtils."""
+
 from __future__ import annotations
 
 import subprocess

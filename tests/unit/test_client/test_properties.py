@@ -1,4 +1,5 @@
 """Property-based tests using Hypothesis."""
+
 from pathlib import Path
 
 import pytest

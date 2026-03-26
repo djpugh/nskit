@@ -179,12 +179,7 @@ jobs:
     - name: Install dependencies
       run: task setup
     - name: Run Test Suite
-      run: |
-        if [ "$RUNNER_OS" = "macOS" ]; then
-          task test -- unit
-        else
-          task test -- unit functional
-        fi
+      run: task test -- unit functional integration smoke
       shell: bash
       env:
         GITHUB_TOKEN: ${{ github.token}}
@@ -456,6 +451,10 @@ jobs:
         run: pytest ./repo/tests/unit
       - shell: bash
         run: pytest ./repo/tests/functional
+      - shell: bash
+        run: pytest ./repo/tests/integration
+      - shell: bash
+        run: pytest ./repo/tests/smoke
         env:
           GITHUB_TOKEN: ${{ github.token}}
 

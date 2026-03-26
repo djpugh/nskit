@@ -1,11 +1,12 @@
 """Comprehensive tests for 3-way merge behavior."""
+
 import subprocess
 from pathlib import Path
 
 import pytest
 
-from nskit.mixer.update import DiffMode
-from nskit.mixer.utils import GitUtils
+from nskit.client.diff.models import DiffMode
+from nskit.client.utils.git import GitUtils
 
 
 @pytest.fixture
