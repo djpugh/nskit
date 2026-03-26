@@ -82,6 +82,7 @@ markdown_extensions:
       alternate_style: true
   - toc:
       permalink: true
+      toc_depth: 6
 
 plugins:
   - search
@@ -104,6 +105,7 @@ plugins:
         - coverage.md
       type: iso_date
   - include-markdown
+  - mkdocs_licenseinfo
   - mkdocs_github_changelog:
       match: '[0-9+].[0-9+].[0-9]+'
 

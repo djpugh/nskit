@@ -140,56 +140,90 @@ class TestCreateCLI:
             assert "field1" in result.stdout
 
 
-class TestPromptCreateRepo:
-    """Tests for _prompt_create_repo."""
+class TestCommitAndMaybePush:
+    """Tests for _commit_and_maybe_push."""
 
-    @patch("nskit.cli.app._detect_repo_client", return_value=(None, None))
-    def test_no_provider_skips_silently(self, mock_detect):
-        """No prompt shown when no VCS provider detected."""
+    def test_commits_files(self, tmp_path):
+        """Always commits generated files."""
+        import subprocess
+
         from rich.console import Console
 
-        from nskit.cli.app import _prompt_create_repo
+        from nskit.cli.app import _commit_and_maybe_push
+
+        project = tmp_path / "proj"
+        project.mkdir()
+        subprocess.run(["git", "init"], cwd=project, capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "t@t.com"], cwd=project, capture_output=True)
+        subprocess.run(["git", "config", "user.name", "T"], cwd=project, capture_output=True)
+        (project / "file.txt").write_text("content")
 
         console = Console()
-        # Should not raise or prompt
-        _prompt_create_repo("my-project", "desc", None, console)
-        mock_detect.assert_called_once()
+        _commit_and_maybe_push(project, "proj", "", False, None, console)
 
-    @patch("nskit.cli.app.questionary")
-    @patch("nskit.cli.app._detect_repo_client")
-    def test_user_declines(self, mock_detect, mock_q):
-        """No repo created when user says no."""
+        # Verify commit happened
+        result = subprocess.run(["git", "log", "--oneline"], cwd=project, capture_output=True, text=True)
+        assert "Initial commit from recipe" in result.stdout
+
+    def test_skips_without_git(self, tmp_path):
+        """Does nothing if project has no .git directory."""
+        from rich.console import Console
+
+        from nskit.cli.app import _commit_and_maybe_push
+
+        project = tmp_path / "proj"
+        project.mkdir()
+        (project / "file.txt").write_text("content")
+
+        console = Console()
+        # Should not raise
+        _commit_and_maybe_push(project, "proj", "", False, None, console)
+
+    @patch("nskit.recipes.repository_client.subprocess.run")
+    def test_creates_remote_and_pushes(self, mock_subprocess, tmp_path):
+        """Creates remote and pushes when create_repo is True."""
+        import subprocess
         from unittest.mock import MagicMock
 
         from rich.console import Console
 
-        from nskit.cli.app import _prompt_create_repo
+        from nskit.cli.app import _commit_and_maybe_push
+
+        project = tmp_path / "proj"
+        project.mkdir()
+        subprocess.run(["git", "init"], cwd=project, capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "t@t.com"], cwd=project, capture_output=True)
+        subprocess.run(["git", "config", "user.name", "T"], cwd=project, capture_output=True)
+        (project / "file.txt").write_text("content")
 
         mock_vcs = MagicMock()
-        mock_detect.return_value = (mock_vcs, "GitHub")
-        mock_q.confirm.return_value.ask.return_value = False
+        mock_vcs.get_remote_url.return_value = "https://github.com/org/proj"
+        mock_vcs.get_clone_url.return_value = "https://github.com/org/proj.git"
+        mock_subprocess.return_value = MagicMock(returncode=0)
 
         console = Console()
-        _prompt_create_repo("my-project", "desc", None, console)
+        _commit_and_maybe_push(project, "proj", "desc", True, mock_vcs, console)
+
+        mock_vcs.create.assert_called_once_with("proj")
+
+    def test_no_push_when_declined(self, tmp_path):
+        """Does not create remote when create_repo is False."""
+        import subprocess
+        from unittest.mock import MagicMock
+
+        from rich.console import Console
+
+        from nskit.cli.app import _commit_and_maybe_push
+
+        project = tmp_path / "proj"
+        project.mkdir()
+        subprocess.run(["git", "init"], cwd=project, capture_output=True, check=True)
+        subprocess.run(["git", "config", "user.email", "t@t.com"], cwd=project, capture_output=True)
+        subprocess.run(["git", "config", "user.name", "T"], cwd=project, capture_output=True)
+        (project / "file.txt").write_text("content")
+
+        mock_vcs = MagicMock()
+        console = Console()
+        _commit_and_maybe_push(project, "proj", "", False, mock_vcs, console)
+
         mock_vcs.create.assert_not_called()
-
-    @patch("nskit.cli.app.questionary")
-    @patch("nskit.cli.app._detect_repo_client")
-    def test_user_accepts_with_client(self, mock_detect, mock_q):
-        """Repo created via RecipeClient when user says yes."""
-        from unittest.mock import MagicMock
-
-        from rich.console import Console
-
-        from nskit.cli.app import _prompt_create_repo
-
-        mock_vcs = MagicMock()
-        mock_detect.return_value = (mock_vcs, "GitHub")
-        mock_q.confirm.return_value.ask.return_value = True
-
-        mock_client = MagicMock()
-        mock_client.create_repository.return_value = (True, "Created repository at https://github.com/my-project")
-
-        console = Console()
-        _prompt_create_repo("my-project", "desc", mock_client, console)
-        mock_client.create_repository.assert_called_once_with("my-project", description="desc")

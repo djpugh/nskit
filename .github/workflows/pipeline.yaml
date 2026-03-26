@@ -1,39 +1,26 @@
 
 name: Pipeline
 on:
-  push:
-    branches-ignore:
-      - gh-pages
-    tags-ignore:
-      - docs-*
   pull_request:
+    types: [opened, synchronize, reopened]
   release:
     types: [published]
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 env:
   ON_CI: 1
 
 jobs:
-  concurrency:
-    name: Show Concurrency Group
-    runs-on: ubuntu-latest
-    steps:
-      - name: Concurrency Group
-        run: |
-          echo "$CONCURRENCY_GROUP"
-        env:
-          CONCURRENCY_GROUP: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
-
   changes:
     name: Get Changed Files
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v6
       with:
-        fetch-depth: 0  # OR "2" -> To retrieve the preceding commit.
+        fetch-depth: 0
     - name: Get changed files in the src folder
       id: src-changed
       uses: tj-actions/changed-files@v47
@@ -54,7 +41,6 @@ jobs:
       run: |
         echo "One or more files in the tests folder has changed."
         echo "List all the files that have changed: ${{ steps.tests-changed.outputs.all_changed_files }}"
-
     - name: Get changed files in the root folder
       id: root-changed
       uses: tj-actions/changed-files@v47
@@ -67,7 +53,6 @@ jobs:
       run: |
         echo "One or more config files in the root folder has changed."
         echo "List all the files that have changed: ${{ steps.root-changed.outputs.all_changed_files }}"
-
     - name: Get changed files in the docs folder
       id: docs-changed
       uses: tj-actions/changed-files@v47
@@ -78,7 +63,6 @@ jobs:
       run: |
         echo "One or more files in the docs folder has changed."
         echo "List all the files that have changed: ${{ steps.docs-changed.outputs.all_changed_files }}"
-
     - name: Get changed files in the workflows folder
       id: workflows-changed
       uses: tj-actions/changed-files@v47
@@ -89,7 +73,6 @@ jobs:
       run: |
         echo "One or more files in the .github/workflows folder has changed."
         echo "List all the files that have changed: ${{ steps.workflows-changed.outputs.all_changed_files }}"
-
     - name: Get changed files in the .github folder
       id: tools-changed
       uses: tj-actions/changed-files@v47
@@ -100,27 +83,26 @@ jobs:
       run: |
         echo "One or more tool configurations in the .github folder has changed."
         echo "List all the files that have changed: ${{ steps.tools-changed.outputs.all_changed_files }}"
-
     outputs:
       src: ${{ steps.src-changed.outputs.any_changed == 'true'}}
       tests: ${{ steps.tests-changed.outputs.any_changed  == 'true'}}
       root: ${{ steps.root-changed.outputs.any_changed  == 'true'}}
-      tools: ${{ steps.tools-changed.outputs.any_changed  == 'true'}}
       workflows: ${{ steps.workflows-changed.outputs.any_changed  == 'true'}}
+      tools: ${{ steps.tools-changed.outputs.any_changed  == 'true'}}
+      docs: ${{ steps.docs-changed.outputs.any_changed  == 'true'}}
+
+  # ── PR-only jobs ──────────────────────────────────────────────
 
   lint:
-    name: Lint (${{ github.event_name }})
-    runs-on: ubuntu-latest
-    needs:
-      - changes
+    name: Lint
     if: >
-      (needs.changes.outputs.src || needs.changes.outputs.tools || needs.changes.outputs.root) ||
-      (github.event_name == 'pull_request' ) ||
-      (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') || contains(github.ref, 'main'))) ||
-      (github.event_name == 'release')
-
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.src || needs.changes.outputs.tools || needs.changes.outputs.root || needs.changes.outputs.workflows)
+    runs-on: ubuntu-latest
+    needs: [changes]
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
       - name: Install uv
         uses: astral-sh/setup-uv@v7
       - name: Set up Python
@@ -137,20 +119,16 @@ jobs:
         run: task lint
 
   test:
-    name: Test Python ${{ matrix.py }} - ${{ matrix.os }} (${{ github.event_name }})
+    name: Test Python ${{ matrix.py }} - ${{ matrix.os }}
+    if: >
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.src || needs.changes.outputs.tests || needs.changes.outputs.root || needs.changes.outputs.workflows)
     runs-on: ${{ matrix.os }}-latest
     permissions:
       checks: write
       pull-requests: write
       contents: read
-    needs:
-      - changes
-    if: >
-      (needs.changes.outputs.src || needs.changes.outputs.tests || needs.changes.outputs.root || needs.changes.outputs.workflows) ||
-      (github.event_name == 'pull_request' ) ||
-      (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') || contains(github.ref, 'main'))) ||
-      (github.event_name == 'release')
-
+    needs: [changes]
     strategy:
       fail-fast: false
       matrix:
@@ -165,7 +143,8 @@ jobs:
           - "3.12"
           - "3.13"
     steps:
-    - uses: actions/checkout@v6
+    - name: Checkout repository
+      uses: actions/checkout@v6
     - name: Install uv
       uses: astral-sh/setup-uv@v7
     - name: Set up Python ${{ matrix.py }}
@@ -228,42 +207,30 @@ jobs:
         check_name: Unit Tests (${{ matrix.py }} - ${{ matrix.os }})
     - name: Coverage Comment
       uses: orgoro/coverage@v3.2
-      if: github.event_name == 'pull_request' && matrix.os == 'ubuntu' && matrix.py == '3.12'
+      if: matrix.os == 'ubuntu' && matrix.py == '3.12'
       with:
         coverageFile: reports/coverage.xml
         token: ${{ github.token }}
         thresholdAll: 0.80
         thresholdNew: 0.90
         thresholdModified: 0.80
-    - name: Configure testspace
-      uses: testspace-com/setup-testspace@v1
-      with:
-        domain: ${{ github.repository_owner }}
-      if: always()
-    - name: Push result to Testspace server
-      run: |
-        testspace reports/*-test.xml
-      if: always()
 
   sonarcloud:
-    name: SonarCloud (${{ github.event_name }})
-    runs-on: ubuntu-latest
-    needs:
-      - changes
+    name: SonarCloud
     if: >
-      (needs.changes.outputs.src || needs.changes.outputs.root || needs.changes.outputs.workflows) ||
-      (github.event_name == 'pull_request' ) ||
-      (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') || contains(github.ref, 'main'))) ||
-      (github.event_name == 'release')
-
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.src || needs.changes.outputs.root || needs.changes.outputs.workflows)
+    runs-on: ubuntu-latest
+    needs: [changes]
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
@@ -271,19 +238,14 @@ jobs:
             -Dsonar.organization=djpugh
             -Dsonar.coverage.exclusions=**/*.*
             -Dsonar.sources=src
-          # No coverage as handled separately
 
   license-scan:
-    name: Scan Licenses (${{ github.event_name }})
-    runs-on: ubuntu-latest
-    needs:
-      - changes
+    name: Scan Licenses
     if: >
-      (needs.changes.outputs.root || needs.changes.outputs.workflows) ||
-      (github.event_name == 'pull_request' && contains(github.base_ref, 'main')) ||
-      (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') || contains(github.ref, 'main'))) ||
-      (github.event_name == 'release')
-
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.root || needs.changes.outputs.workflows)
+    runs-on: ubuntu-latest
+    needs: [changes]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -291,13 +253,11 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-
       - name: compile requirements.txt
         run: |
           python -m pip install --upgrade pip pip-tools
           pip-compile -o requirements.txt
           cat requirements.txt
-
       - name: Run FOSSA scan and upload build data
         uses: fossa-contrib/fossa-action@v3
         with:
@@ -305,15 +265,12 @@ jobs:
           github-token: ${{ github.token }}
 
   codeql-analyze:
-    name: CodeQL Analyze (${{ github.event_name }})
-    runs-on: ubuntu-latest
-    needs:
-      - changes
+    name: CodeQL Analyze
     if: >
-      (needs.changes.outputs.src || needs.changes.outputs.root || needs.changes.outputs.workflows) ||
-      (github.event_name == 'pull_request' ) ||
-      (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') || contains(github.ref, 'main'))) ||
-      (github.event_name == 'release')
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.src || needs.changes.outputs.root || needs.changes.outputs.workflows)
+    runs-on: ubuntu-latest
+    needs: [changes]
     permissions:
       actions: read
       contents: read
@@ -321,28 +278,60 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v6
-
-    # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4
       with:
         languages: python
-
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
 
-  build:
-    name: Build Package (${{ github.event_name }})
-    runs-on: ubuntu-latest
-    needs:
-      - changes
+  docs:
+    name: Build docs
     if: >
-      (needs.changes.outputs.src || needs.changes.outputs.root || needs.changes.outputs.workflows) ||
-      (github.event_name == 'pull_request' && contains(github.base_ref, 'main')) ||
-      (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') || contains(github.ref, 'main'))) ||
-      (github.event_name == 'release')
+      github.event_name == 'pull_request' &&
+      (needs.changes.outputs.src || needs.changes.outputs.root || needs.changes.outputs.docs || needs.changes.outputs.workflows)
+    runs-on: ubuntu-latest
+    needs: [changes]
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install Task
+        uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ github.token }}
+      - name: Install dependencies
+        run: task setup
+      - name: Configure Git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      - name: Build docs
+        id: build_docs
+        run: task docs:build
+      - name: Select Branch
+        run: git checkout ${{ steps.build_docs.outputs.branch_name}}
+      - name: Store Docs Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs
+          path: .
+
+  # ── Shared jobs (PR + release) ────────────────────────────────
+
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           clean: true
           fetch-depth: 0
@@ -358,69 +347,15 @@ jobs:
           repo-token: ${{ github.token }}
       - name: Build nskit
         run: task build
-
       - name: Store build artifact
         uses: actions/upload-artifact@v7
         with:
           name: build
-          path: |
-            dist/*
-
-  docs:
-    name: Build docs (${{ github.event_name }})
-    needs:
-      - changes
-    if: >
-      (needs.changes.outputs.src || needs.changes.outputs.root || needs.changes.outputs.docs || needs.changes.outputs.workflows) ||
-      (github.event_name == 'pull_request' && contains(github.base_ref, 'main')) ||
-      (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') || contains(github.ref, 'main'))) ||
-      (github.event_name == 'release')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install Task
-        uses: go-task/setup-task@v2
-        with:
-          repo-token: ${{ github.token }}
-      - name: Install dependencies
-        run: task setup
-
-      - name: Configure Git
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-
-      - name: Build docs
-        id: build_docs
-        run: task docs:build
-
-      - name: Select Branch
-        run: git checkout ${{ steps.build_docs.outputs.branch_name}}
-
-      - name: Store Docs Artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: docs
-          path: |
-            .
+          path: dist/*
 
   test-build:
-    name: Test Build Python ${{ matrix.py }} - ${{ matrix.os }} (${{ github.event_name }})
-    needs:
-      - build
-      - test
-    if: >
-      (github.event_name == 'pull_request' && contains(github.base_ref, 'main')) ||
-      (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags') || contains(github.ref, 'main'))) ||
-      (github.event_name == 'release')
+    name: Test Build Python ${{ matrix.py }} - ${{ matrix.os }}
+    needs: [build, test]
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
@@ -436,7 +371,8 @@ jobs:
           - "3.12"
           - "3.13"
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           path: ./repo
       - name: Install uv
@@ -450,58 +386,54 @@ jobs:
         with:
           name: build
           path: dist
-      - shell: bash
+      - name: Install wheel and test dependencies
+        shell: bash
         run: |
           uv pip install --system $(ls -t dist/*.whl | head -n1)
           cd repo && uv pip install --system --group test
-      - shell: bash
+      - name: Run unit tests
+        shell: bash
         run: pytest ./repo/tests/unit
-      - shell: bash
+      - name: Run functional tests
+        shell: bash
         run: pytest ./repo/tests/functional
-      - shell: bash
+      - name: Run integration tests
+        shell: bash
         run: pytest ./repo/tests/integration
-      - shell: bash
+      - name: Run smoke tests
+        shell: bash
         run: pytest ./repo/tests/smoke
         env:
           GITHUB_TOKEN: ${{ github.token}}
 
+  # ── PR aggregator ─────────────────────────────────────────────
+
   ci:
     name: CI
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
-    needs:
-      - lint
-      - test
-      - build
-      - test-build
-      - docs
+    needs: [lint, test, build, test-build, docs]
     steps:
       - run: |
           result="${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}"
           echo "result: $result"
           exit $( [ "$result" = "success" ] && echo 0 || echo 1 )
 
+  # ── Release-only jobs ─────────────────────────────────────────
+
   publish-package:
     name: Publish Package
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
-    needs:
-      - lint
-      - test
-      - build
-      - sonarcloud
-      - license-scan
-      - codeql-analyze
-      - test-build
-    if: >
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !contains(github.ref, 'dev-')) ||
-      github.event_name == 'release'
+    needs: [build, test-build]
     environment:
       name: pypi
       url: https://pypi.org/p/nskit
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -514,52 +446,46 @@ jobs:
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
 
-
   publish-docs:
     name: Publish Docs
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
-    needs:
-      - docs
-      - publish-package
-    if: >
-      (github.event_name == 'push' &&
-        startsWith(github.ref, 'refs/tags')  && !(contains(github.ref, 'gh-pages') || contains(github.ref, 'docs') || contains(github.ref, 'dev-'))
-      ) || github.event_name == 'release'
+    permissions:
+      contents: write
+    needs: [docs, publish-package]
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - name: Install Task
+        uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ github.token }}
       - name: Get Version
         id: get_version
-        # Cut is not zero indexed
-        # > cut: fields are numbered from 1
-        # > Try 'cut --help' for more information.
         run: |
-          tag_name=$(echo ${{github.ref}} | cut -d/ -f2)
+          tag_name="${{ github.event.release.tag_name }}"
           echo "tag_name=$tag_name" >> $GITHUB_OUTPUT
-          major=$(echo $tag_name | cut -d. -f1)
-          echo "major=$major" >> $GITHUB_OUTPUT
-          minor=$(echo $tag_name | cut -d. -f2)
-          echo "minor=$minor" >> $GITHUB_OUTPUT
-          patch=$(echo $tag_name | cut -d. -f3)
-          echo "patch=$patch" >> $GITHUB_OUTPUT
+          echo "major=$(echo $tag_name | cut -d. -f1)" >> $GITHUB_OUTPUT
+          echo "minor=$(echo $tag_name | cut -d. -f2)" >> $GITHUB_OUTPUT
+          echo "patch=$(echo $tag_name | cut -d. -f3)" >> $GITHUB_OUTPUT
       - name: Check Tag doesn't exist
         id: check_tag
         run: |
           if git show-ref --tags docs-${{ steps.get_version.outputs.tag_name }} --quiet; then
-            echo "::set-output name=tag_exists::true"
             echo "tag_exists=true" >> $GITHUB_OUTPUT
           else
             echo "tag_exists=false" >> $GITHUB_OUTPUT
           fi
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
       - name: Install dependencies
-        run: uv sync
+        run: task setup
       - name: Deploy
         run: |
           git config user.name github-actions

@@ -27,34 +27,52 @@ from nskit.mixer.components.recipe import Recipe
 TREE_IGNORE = {".git", "__pycache__", ".venv", "node_modules"}
 
 
-def _prompt_create_repo(project_name: str, description: str, client: RecipeClient | None, console: Console) -> None:
-    """Prompt the user to create a remote repository after project init."""
-    from nskit.client.recipes import _detect_repo_client
+def _commit_and_maybe_push(
+    project_path: Path,
+    repo_name: str,
+    description: str,
+    create_repo: bool,
+    vcs_client,
+    console: Console,
+) -> None:
+    """Commit generated files and optionally create a remote repo and push.
 
-    repo_client, provider = _detect_repo_client()
-    if repo_client is None:
+    Args:
+        project_path: Path to the generated project.
+        repo_name: Repository name.
+        description: Repository description.
+        create_repo: Whether the user opted to create a remote repo.
+        vcs_client: Detected VCS repo client (or ``None``).
+        console: Rich console for output.
+    """
+    import subprocess  # nosec B404
+
+    if not (project_path / ".git").is_dir():
         return
 
-    create = questionary.confirm(f"Create repository in {provider}?", default=True).ask()
-    if not create:
-        return
+    subprocess.run(  # nosec B603, B607
+        ["git", "add", "."],
+        cwd=project_path,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(  # nosec B603, B607
+        ["git", "commit", "-m", "Initial commit from recipe", "--author", "nskit <nskit@noreply>", "--no-verify"],
+        cwd=project_path,
+        capture_output=True,
+        check=True,
+    )
+    console.print("[green]✓ Committed initial files[/green]")
 
-    if client:
-        ok, msg = client.create_repository(project_name, description=description)
-    else:
-        from nskit.recipes.repository_client import RepositoryClient
-
+    if create_repo and vcs_client is not None:
         try:
-            rc = RepositoryClient(vcs_client=repo_client)
-            info = rc.create_repository(project_name, description=description)
-            ok, msg = True, f"Created repository at {info.url}"
-        except Exception as e:
-            ok, msg = False, str(e)
+            from nskit.recipes.repository_client import RepositoryClient
 
-    if ok:
-        console.print(f"[green]✓ {msg}[/green]")
-    else:
-        console.print(f"[yellow]⚠ {msg}[/yellow]")
+            rc = RepositoryClient(vcs_client=vcs_client)
+            info = rc.create_and_push(repo_name, project_path, description=description)
+            console.print(f"[green]✓ Created and pushed to {info.url}[/green]")
+        except Exception as e:
+            console.print(f"[yellow]⚠ Failed to create repository: {e}[/yellow]")
 
 
 def _print_tree(directory: Path, console: Console, prefix: str = "") -> None:
@@ -231,6 +249,14 @@ def create_cli(
                 console.print()
                 input_data = FieldParser().create_nested_dict(input_data)
 
+        # Detect VCS provider and ask about repo creation
+        create_repo = False
+        from nskit.client.recipes import _detect_repo_client
+
+        vcs_client, vcs_provider = _detect_repo_client()
+        if vcs_client is not None:
+            create_repo = questionary.confirm(f"Create repository in {vcs_provider}?", default=True).ask()
+
         # Use client if available
         if client:
             # Override engine based on --local flag
@@ -264,7 +290,9 @@ def create_cli(
             console.print(f"\n[green bold]✓ Created {recipe}[/green bold] at [cyan]{output_dir}[/cyan]\n")
             _print_tree(output_dir, console)
             console.print()
-            _prompt_create_repo(recipe, input_data.get("description", ""), client, console)
+            _commit_and_maybe_push(
+                output_dir, recipe, input_data.get("description", ""), create_repo, vcs_client, console
+            )
         else:
             # Fallback: no backend, use Recipe.load directly
             try:
@@ -288,7 +316,9 @@ def create_cli(
                 console.print(f"\n[green bold]✓ Created {recipe}[/green bold] at [cyan]{project_path}[/cyan]\n")
                 _print_tree(Path(project_path), console)
                 console.print()
-                _prompt_create_repo(recipe, input_data.get("description", ""), None, console)
+                _commit_and_maybe_push(
+                    Path(project_path), recipe, input_data.get("description", ""), create_repo, vcs_client, console
+                )
             except Exception as exc:
                 # Format validation errors nicely
                 msg = str(exc)

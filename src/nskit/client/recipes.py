@@ -130,15 +130,19 @@ class RecipeClient:
     def create_repository(
         self,
         repo_name: str,
+        project_path: Path | None = None,
         description: str | None = None,
         private: bool = True,
     ) -> tuple[bool, str]:
-        """Create a remote repository for the project.
+        """Create a remote repository and optionally push the project.
 
         Auto-detects the VCS provider from environment variables.
+        If *project_path* is provided and contains a git repo, the
+        project is committed and pushed to the new remote.
 
         Args:
             repo_name: Repository name.
+            project_path: Local project directory to push.
             description: Repository description.
             private: Whether the repository should be private.
 
@@ -153,7 +157,16 @@ class RecipeClient:
 
         try:
             repo_client = RepositoryClient(vcs_client=client)
-            info = repo_client.create_repository(repo_name, description=description, private=private)
-            return True, f"Created repository at {info.url}"
+            if project_path and (project_path / ".git").is_dir():
+                info = repo_client.create_and_push(
+                    repo_name,
+                    project_path,
+                    description=description,
+                    private=private,
+                )
+                return True, f"Created and pushed to {info.url}"
+            else:
+                info = repo_client.create_repository(repo_name, description=description, private=private)
+                return True, f"Created repository at {info.url}"
         except Exception as e:
             return False, f"Failed to create repository: {e}"

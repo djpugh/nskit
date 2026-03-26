@@ -68,7 +68,28 @@ export AZURE_DEVOPS_PROJECT=myproject
 export AZURE_DEVOPS_PAT=...
 ```
 
-You can use the VCS provider directly with namespace validation:
+When a VCS provider is configured, `nskit init` prompts during field collection whether to create a remote repository. After generating the project, nskit always commits the initial files. If the user accepted, it creates the remote and pushes:
+
+```
+name: my-project
+repo.owner: Joe Bloggs
+repo.email: joe@example.com
+Create repository in GitHub? [Y/n]
+
+✓ Created python_package at ./my-project
+✓ Committed initial files
+✓ Created and pushed to https://github.com/myorg/my-project
+```
+
+This also works programmatically:
+
+```python
+result = client.initialize_recipe(recipe='python_package', ...)
+if result.success:
+    ok, msg = client.create_repository('my-project', description='My new project')
+```
+
+You can also use the VCS provider directly with namespace validation:
 
 ```python
 from nskit.vcs.repo import Repo, NamespaceValidationRepo

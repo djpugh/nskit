@@ -42,6 +42,14 @@ nskit init --recipe python_package --input-yaml-path input.yaml
 
 nskit runs the recipe from your installed packages and generates the project files. If a backend is configured (see [Platform Integration](platform-integration.md)), it uses the backend's engine instead (typically Docker) for reproducible, versioned execution. See [Docker vs Local Execution](../architecture/docker-execution.md) for the trade-offs.
 
+If a VCS provider is configured (e.g. `GITHUB_TOKEN` is set), nskit prompts during field collection:
+
+```
+Create repository in GitHub? [Y/n]
+```
+
+After generating the project, nskit always commits the initial files. If you accepted the repo prompt, it also creates the remote repository and pushes. Declining skips the remote — you can always create it manually later.
+
 ### Docker mode with local images
 
 If you have Docker recipe images locally, you can use them directly:
@@ -82,4 +90,8 @@ result = client.initialize_recipe(
     parameters={'name': 'my-project', 'repo': {...}},
     output_dir=Path('./my-project'),
 )
+
+# Optionally create a remote repository (auto-detects VCS provider)
+if result.success:
+    ok, msg = client.create_repository('my-project', description='My new project')
 ```
