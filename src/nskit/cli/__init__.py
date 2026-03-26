@@ -21,6 +21,7 @@ def main():
 
     # Default to human-readable logs in CLI mode
     os.environ.setdefault("LOG_JSON", "false")
+    os.environ.setdefault("LOGLEVEL", "WARNING")
 
     # Parse --backend and --engine before typer sees them
     args = sys.argv[1:]
