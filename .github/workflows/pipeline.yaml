@@ -452,8 +452,8 @@ jobs:
           path: dist
       - shell: bash
         run: |
-          pip install $(ls -t dist/*.whl | head -n1)
-          pip install pytest pytest-cov pytest-subtests pytest-xdist coverage
+          uv pip install --system $(ls -t dist/*.whl | head -n1)
+          cd repo && uv pip install --system --group test
       - shell: bash
         run: pytest ./repo/tests/unit
       - shell: bash

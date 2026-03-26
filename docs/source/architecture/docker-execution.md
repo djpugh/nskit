@@ -111,6 +111,16 @@ LABEL nskit.recipe.name="${RECIPE_NAME}"
 
 Build with `--build-arg RECIPE_NAME=python_package`, or add the labels to your own Dockerfile.
 
+### Git Safe Directory
+
+Recipe post-hooks (e.g. `git init`, `pre-commit install`) run inside the container against a Docker volume mount. Since git 2.35.2, git rejects operations in directories owned by a different user — and the mounted output directory will typically have different ownership metadata from the container's root user. To avoid this, recipe Dockerfiles must include:
+
+```dockerfile
+RUN git config --global --add safe.directory '*'
+```
+
+The generated `recipe` Dockerfile includes this automatically. If you write a custom Dockerfile, add this line after installing git.
+
 The `nskit.recipe.name` label is the **source of truth** for the recipe name across all backends:
 
 - **`DockerLocalBackend`** reads it from local images via `docker inspect`

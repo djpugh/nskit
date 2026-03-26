@@ -18,6 +18,11 @@ RUN --mount=type=bind,src=.git,dst=/app/.git \
 
 RUN mkdir -p /app/input /app/output
 
+# Trust all directories for git safe.directory — recipe post-hooks (git init,
+# pre-commit install) run inside Docker volume mounts where ownership metadata
+# may differ from the container user, causing git 2.35.2+ to reject operations.
+RUN git config --global --add safe.directory '*'
+
 LABEL nskit.recipe="true"
 LABEL nskit.recipe.name="${RECIPE_NAME}"
 
