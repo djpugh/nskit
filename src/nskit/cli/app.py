@@ -266,6 +266,8 @@ def create_cli(
         vcs_client, vcs_provider = _detect_repo_client()
         if vcs_client is not None:
             create_repo = questionary.confirm(f"Create repository in {vcs_provider}?", default=True).ask()
+        else:
+            Console().print("[dim]No VCS provider detected — skipping repository creation[/dim]")
 
         # Use client if available
         if client:

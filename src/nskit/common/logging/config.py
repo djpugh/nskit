@@ -19,7 +19,11 @@ class LoggingConfig(BaseConfiguration):
     """This is a basic config for logging."""
 
     # TODO setup as settings
-    level: str = Field(DEFAULT_LOGLEVEL, description="Set the log level for the logger")
+    level: str = Field(
+        DEFAULT_LOGLEVEL,
+        validation_alias=AliasChoices("level", LOGLEVEL_ENV_VAR),
+        description="Set the log level for the logger",
+    )
     logfile: Optional[Path] = Field(
         None, validation_alias=AliasChoices("logfile", LOGFILE_ENV_VAR), description="Set the log file for the logger"
     )
