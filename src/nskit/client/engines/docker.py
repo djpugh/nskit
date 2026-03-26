@@ -1,5 +1,6 @@
 """Docker execution engine."""
 
+import os
 import subprocess  # nosec B404
 import tempfile
 from pathlib import Path
@@ -73,6 +74,8 @@ class DockerEngine(RecipeEngine):
                     "docker",
                     "run",
                     "--rm",
+                    "-e",
+                    f"LOG_JSON={os.environ.get('LOG_JSON', 'true')}",
                     "-v",
                     f"{output_dir.absolute()}:/app/output",
                     "-v",
