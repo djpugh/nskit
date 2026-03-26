@@ -205,9 +205,16 @@ jobs:
         path: reports/*-test.xml
         reporter: java-junit
         fail-on-error: false
-    - name: Publish Test Results
+    - name: Publish Test Results (Linux)
       uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always() && runner.os != 'Windows'
+      if: always() && runner.os == 'Linux'
+      with:
+        files: reports/*-test.xml
+        comment_mode: "off"
+        check_name: Unit Tests (${{ matrix.py }} - ${{ matrix.os }})
+    - name: Publish Test Results (macOS)
+      uses: EnricoMi/publish-unit-test-result-action/macos@v2
+      if: always() && runner.os == 'macOS'
       with:
         files: reports/*-test.xml
         comment_mode: "off"

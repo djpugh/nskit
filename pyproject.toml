@@ -6,8 +6,8 @@ build-backend = "pdm.backend"
 [project]
 name = "nskit"
 dynamic = ["version"]
-authors = [{name = "djpugh@gmail.com", email="djpugh@gmail.com"}]
-maintainers = [{ name = "djpugh@gmail.com", email="djpugh@gmail.com" }]
+authors = [{name = "David J Pugh", email="djpugh@gmail.com"}]
+maintainers = [{ name = "David J Pugh", email="djpugh@gmail.com" }]
 description = "Namespace Development Kit, providing a set of useful utilities for building software (in python namespaces)"
 readme = {file="README.md", content-type = "text/markdown"}
 keywords = []
