@@ -122,7 +122,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -167,7 +167,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Install uv
-      uses: astral-sh/setup-uv@v5
+      uses: astral-sh/setup-uv@v7
     - name: Set up Python ${{ matrix.py }}
       uses: actions/setup-python@v6
       with:
@@ -261,7 +261,7 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -347,7 +347,7 @@ jobs:
           clean: true
           fetch-depth: 0
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
@@ -381,7 +381,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
@@ -440,7 +440,7 @@ jobs:
         with:
           path: ./repo
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
       - name: Set up Python ${{ matrix.py }}
         uses: actions/setup-python@v6
         with:
@@ -464,6 +464,22 @@ jobs:
         run: pytest ./repo/tests/smoke
         env:
           GITHUB_TOKEN: ${{ github.token}}
+
+  ci:
+    name: CI
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - test
+      - build
+      - test-build
+      - docs
+    steps:
+      - run: |
+          result="${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}"
+          echo "result: $result"
+          exit $( [ "$result" = "success" ] && echo 0 || echo 1 )
 
   publish-package:
     name: Publish Package
@@ -541,7 +557,7 @@ jobs:
             echo "tag_exists=false" >> $GITHUB_OUTPUT
           fi
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
       - name: Install dependencies
         run: uv sync
       - name: Deploy
