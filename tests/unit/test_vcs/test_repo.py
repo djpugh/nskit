@@ -51,7 +51,7 @@ class _RepoTestCase(unittest.TestCase):
         entrypoint = "nskit.vcs.providers"
         with ChDir():  # Make sure theres no .env file when running tests
             with TestExtension("dummy", entrypoint, DummyVCSProviderSettings):
-                with Env(override={"TEST_ABACUS": "A"}):
+                with Env(override={"TEST_ABACUS": "A"}, remove=["GITHUB_TOKEN", "AZURE_DEVOPS_TOKEN"]):
                     from nskit.vcs.providers import ProviderEnum
 
                     ProviderEnum._patch()
