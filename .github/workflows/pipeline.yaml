@@ -1,7 +1,7 @@
 
 name: Pipeline
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened]
   release:
     types: [published]
@@ -14,7 +14,7 @@ env:
 jobs:
   changes:
     name: Get Changed Files
-    if: github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -97,7 +97,7 @@ jobs:
   lint:
     name: Lint
     if: >
-      github.event_name == 'pull_request_target' &&
+      github.event_name == 'pull_request' &&
       (needs.changes.outputs.src || needs.changes.outputs.tools || needs.changes.outputs.root || needs.changes.outputs.workflows)
     runs-on: ubuntu-latest
     needs: [changes]
@@ -124,7 +124,7 @@ jobs:
   test:
     name: Test Python ${{ matrix.py }} - ${{ matrix.os }}
     if: >
-      github.event_name == 'pull_request_target' &&
+      github.event_name == 'pull_request' &&
       (needs.changes.outputs.src || needs.changes.outputs.tests || needs.changes.outputs.root || needs.changes.outputs.workflows)
     runs-on: ${{ matrix.os }}-latest
     permissions:
@@ -223,7 +223,7 @@ jobs:
   sonarcloud:
     name: SonarCloud
     if: >
-      github.event_name == 'pull_request_target' &&
+      github.event_name == 'pull_request' &&
       (needs.changes.outputs.src || needs.changes.outputs.root || needs.changes.outputs.workflows)
     runs-on: ubuntu-latest
     needs: [changes]
@@ -248,7 +248,7 @@ jobs:
   license-scan:
     name: Scan Licenses
     if: >
-      github.event_name == 'pull_request_target' &&
+      github.event_name == 'pull_request' &&
       (needs.changes.outputs.root || needs.changes.outputs.workflows)
     runs-on: ubuntu-latest
     needs: [changes]
@@ -275,7 +275,7 @@ jobs:
   codeql-analyze:
     name: CodeQL Analyze
     if: >
-      github.event_name == 'pull_request_target' &&
+      github.event_name == 'pull_request' &&
       (needs.changes.outputs.src || needs.changes.outputs.root || needs.changes.outputs.workflows)
     runs-on: ubuntu-latest
     needs: [changes]
@@ -298,7 +298,7 @@ jobs:
   docs:
     name: Build docs
     if: >
-      github.event_name == 'pull_request_target' &&
+      github.event_name == 'pull_request' &&
       (needs.changes.outputs.src || needs.changes.outputs.root || needs.changes.outputs.docs || needs.changes.outputs.workflows)
     runs-on: ubuntu-latest
     needs: [changes]
@@ -423,7 +423,7 @@ jobs:
 
   ci:
     name: CI
-    if: ${{ !cancelled() && github.event_name == 'pull_request_target' }}
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     needs: [lint, test, build, test-build, docs]
     steps:
