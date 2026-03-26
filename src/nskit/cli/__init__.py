@@ -16,7 +16,11 @@ def main():
         nskit --backend docker-local --engine docker list
         nskit --backend docker-local --engine docker init --recipe python_package
     """
+    import os
     import sys
+
+    # Default to human-readable logs in CLI mode
+    os.environ.setdefault("LOG_JSON", "false")
 
     # Parse --backend and --engine before typer sees them
     args = sys.argv[1:]

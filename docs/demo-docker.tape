@@ -25,7 +25,7 @@ Type "# Step 1: Build a recipe image with nskit labels"
 Enter
 Type "docker build --target runtime --build-arg RECIPE_NAME=python_package -t nskit/python_package:v1.0.0 . -q"
 Enter
-Sleep 15s
+Sleep 8s
 
 Enter
 
@@ -58,7 +58,7 @@ Sleep 1s
 
 Type "github.com/company/docker-project"
 Enter
-Sleep 5s
+Sleep 10s
 
 Enter
 

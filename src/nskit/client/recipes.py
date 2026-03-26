@@ -40,7 +40,11 @@ class RecipeClient:
             engine: Execution engine (defaults to DockerEngine)
         """
         self.backend = backend
-        self.engine = engine or DockerEngine()
+        if engine is None:
+            from nskit.client.backends.docker_local import DockerLocalBackend
+
+            engine = DockerEngine(skip_pull=isinstance(backend, DockerLocalBackend))
+        self.engine = engine
 
     def list_recipes(self) -> list[RecipeInfo]:
         """List all available recipes from the backend.

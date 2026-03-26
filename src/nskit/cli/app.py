@@ -127,6 +127,7 @@ def create_cli(
             backend = create_backend_from_config(backend)
 
         client = RecipeClient(backend)
+        engine = client.engine
     else:
         client = None
         backend = None
@@ -369,7 +370,7 @@ def create_cli(
         ):
             """Update a recipe-based project to newer version."""
 
-            update_client = UpdateClient(backend)
+            update_client = UpdateClient(backend, engine=engine)
             proj_path = project_path or Path.cwd()
             mode = DiffMode.TWO_WAY if diff_mode == "two-way" else DiffMode.THREE_WAY
 
@@ -409,7 +410,7 @@ def create_cli(
         ):
             """Check if updates are available for the project."""
 
-            update_client = UpdateClient(backend)
+            update_client = UpdateClient(backend, engine=engine)
             proj_path = project_path or Path.cwd()
 
             latest = update_client.check_update_available(proj_path)

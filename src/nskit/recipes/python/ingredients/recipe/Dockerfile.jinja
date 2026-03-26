@@ -5,8 +5,7 @@ ARG RECIPE_NAME={{name}}
 
 RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
-RUN sh /uv-installer.sh && rm /uv-installer.sh
-ENV PATH="/root/.local/bin/:$PATH"
+RUN sh /uv-installer.sh && rm /uv-installer.sh && cp /root/.local/bin/uv /usr/local/bin/uv
 
 WORKDIR /app
 COPY pyproject.toml uv.lock* README.md /app/

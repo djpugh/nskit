@@ -15,6 +15,7 @@ def mock_gh_api(func):
     @patch.object(_license_file, "GhApi", autospec=True)
     @wraps(func)
     def mocked_call(self, GhApi):
+        _get_license_content.cache_clear()
         licenses = MagicMock()
         license_content_mit = MagicMock()
         license_content_mit.body = "[year] [fullname] abc"

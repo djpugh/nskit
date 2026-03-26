@@ -13,8 +13,7 @@ ARG RECIPE_NAME=nskit
 # Set up uv and other deps first
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates git && rm -rf /var/lib/apt/lists/*
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
-RUN sh /uv-installer.sh && rm /uv-installer.sh
-ENV PATH="/root/.local/bin/:$PATH"
+RUN sh /uv-installer.sh && rm /uv-installer.sh && cp /root/.local/bin/uv /usr/local/bin/uv
 
 # Trust all directories for git safe.directory — recipe post-hooks (git init,
 # pre-commit install) run inside Docker volume mounts where ownership metadata
