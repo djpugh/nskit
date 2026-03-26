@@ -28,8 +28,10 @@ class _RepoTestCase(unittest.TestCase):
         return expected
 
     def test_init_no_client(self):
-        with self.assertRaises((ValidationError, ValueError)):
-            _Repo(name="test")
+        with ChDir():
+            with Env(remove=["GITHUB_TOKEN", "AZURE_DEVOPS_TOKEN"]):
+                with self.assertRaises((ValidationError, ValueError)):
+                    _Repo(name="test")
 
     @patch.object(RepoClient, "__abstractmethods__", set())
     def test_init_with_client(self):

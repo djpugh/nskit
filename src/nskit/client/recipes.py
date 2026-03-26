@@ -1,6 +1,8 @@
 """Recipe client for programmatic recipe operations."""
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.engines import DockerEngine, RecipeEngine
@@ -17,7 +19,7 @@ def _read_recipe_label(image_url: str) -> str | None:
 class RecipeClient:
     """Pure Python client for recipe operations (no CLI dependencies)."""
 
-    def __init__(self, backend: RecipeBackend, engine: Optional[RecipeEngine] = None):
+    def __init__(self, backend: RecipeBackend, engine: RecipeEngine | None = None):
         """Initialize the recipe client.
 
         Args:
@@ -27,7 +29,7 @@ class RecipeClient:
         self.backend = backend
         self.engine = engine or DockerEngine()
 
-    def list_recipes(self) -> List[RecipeInfo]:
+    def list_recipes(self) -> list[RecipeInfo]:
         """List all available recipes from the backend.
 
         Returns:
@@ -35,7 +37,7 @@ class RecipeClient:
         """
         return self.backend.list_recipes()
 
-    def get_recipe_versions(self, recipe: str) -> List[str]:
+    def get_recipe_versions(self, recipe: str) -> list[str]:
         """Get available versions for a specific recipe.
 
         Args:
@@ -50,7 +52,7 @@ class RecipeClient:
         self,
         recipe: str,
         version: str,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         output_dir: Path,
         force: bool = False,
     ) -> RecipeResult:

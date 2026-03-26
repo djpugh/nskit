@@ -210,12 +210,14 @@ jobs:
       with:
         files: reports/*-test.xml
         comment_mode: "off"
+        check_name: Unit Tests (${{ matrix.py }} - ${{ matrix.os }})
     - name: Publish Test Results (Windows)
       uses: EnricoMi/publish-unit-test-result-action/windows@v2
       if: always() && runner.os == 'Windows'
       with:
         files: reports/*-test.xml
         comment_mode: "off"
+        check_name: Unit Tests (${{ matrix.py }} - ${{ matrix.os }})
     - name: Coverage Comment
       uses: orgoro/coverage@v3.2
       if: github.event_name == 'pull_request' && matrix.os == 'ubuntu' && matrix.py == '3.12'
