@@ -98,7 +98,7 @@ plugins:
   - mike:
       canonical_version: latest
   - coverage:
-      page_name: coverage
+      page_path: coverage
       html_report_dir: reports/htmlcov
   - git-revision-date-localized:
       exclude:

@@ -3,6 +3,7 @@
 Tests the full CLI surface: list, get-required-fields, init (YAML mode),
 and the interactive default resolution chain (via mocked questionary).
 """
+
 import json
 import os
 import unittest
@@ -14,6 +15,7 @@ from unittest.mock import MagicMock, Mock, patch
 from typer.testing import CliRunner
 
 from nskit.cli.app import create_cli
+from nskit.common.contextmanagers import Env
 
 
 class TestCLIListCommand(unittest.TestCase):
@@ -59,7 +61,7 @@ class TestCLIInitYAML(unittest.TestCase):
     """Test nskit init with --input-yaml-path (no interactive prompting)."""
 
     def test_creates_project_from_yaml(self):
-        with TemporaryDirectory() as tmp:
+        with Env(remove=["GITHUB_TOKEN"]), TemporaryDirectory() as tmp:
             input_file = Path(tmp) / "input.yaml"
             input_file.write_text(
                 "name: cli-yaml-test\n"
@@ -90,7 +92,7 @@ class TestCLIInitYAML(unittest.TestCase):
             self.assertTrue((project / ".git").is_dir())
 
     def test_fails_on_missing_fields(self):
-        with TemporaryDirectory() as tmp:
+        with Env(remove=["GITHUB_TOKEN"]), TemporaryDirectory() as tmp:
             input_file = Path(tmp) / "input.yaml"
             input_file.write_text("name: incomplete\n")
             app = create_cli(recipe_entrypoint="nskit.recipes")
@@ -133,6 +135,7 @@ class TestCLIInitInteractive(unittest.TestCase):
         mock_recipe.model_fields = model_fields or {}
 
         with ExitStack() as stack:
+            stack.enter_context(Env(remove=["GITHUB_TOKEN"]))
             mock_q = stack.enter_context(patch("nskit.cli.app.questionary"))
             stack.enter_context(patch("nskit.cli.app.Recipe.load", return_value=mock_recipe))
             stack.enter_context(
@@ -234,6 +237,7 @@ class TestCLIInitInteractive(unittest.TestCase):
         mock_recipe.model_fields = {"name": name_info, "slug": slug_info}
 
         with ExitStack() as stack:
+            stack.enter_context(Env(remove=["GITHUB_TOKEN"]))
             mock_q = stack.enter_context(patch("nskit.cli.app.questionary"))
             stack.enter_context(patch("nskit.cli.app.Recipe.load", return_value=mock_recipe))
             stack.enter_context(
@@ -273,6 +277,7 @@ class TestCLIInitInteractive(unittest.TestCase):
         mock_recipe.model_fields = {}
 
         with ExitStack() as stack:
+            stack.enter_context(Env(remove=["GITHUB_TOKEN"]))
             mock_q = stack.enter_context(patch("nskit.cli.app.questionary"))
             stack.enter_context(patch("nskit.cli.app.Recipe.load", return_value=mock_recipe))
             stack.enter_context(patch("nskit.cli.app.get_required_fields_as_dict", return_value={"flag": "bool"}))
