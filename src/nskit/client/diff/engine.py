@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 from nskit.client.diff.file_discovery import FileDiscovery
-from nskit.client.diff.models import DiffMode, DiffResult, DiffType, FileDiff
+from nskit.common.models.diff import DiffMode, DiffResult, DiffType, FileDiff
 
 
 class DiffEngine:

@@ -1,4 +1,5 @@
 """Generic CLI for nskit recipes."""
+
 import json
 from pathlib import Path
 from typing import Annotated, Optional, Union
@@ -15,12 +16,12 @@ from nskit.client.backends import create_backend_from_config
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.context import ContextProvider
 from nskit.client.derived_evaluator import DerivedFieldEvaluator
-from nskit.client.diff.models import DiffMode
 from nskit.client.engines import LocalEngine
 from nskit.client.env_resolver import EnvVarResolver
 from nskit.client.field_parser import FieldParser
 from nskit.client.models import RecipeInfo
 from nskit.client.utils import get_required_fields_as_dict
+from nskit.common.models.diff import DiffMode
 from nskit.mixer.components.recipe import Recipe
 
 TREE_IGNORE = {".git", "__pycache__", ".venv", "node_modules"}

@@ -7,7 +7,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from nskit.client.diff.engine import DiffEngine
-from nskit.client.diff.models import DiffMode, DiffType
+from nskit.common.models.diff import DiffMode, DiffType
 
 
 class TestDiffEngineExtractDiff(unittest.TestCase):

@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from nskit.client.diff.models import DiffMode
 from nskit.client.utils.git import GitUtils
+from nskit.common.models.diff import DiffMode
 
 
 @pytest.fixture
@@ -177,7 +177,8 @@ class TestDiffModes:
 
     def test_two_way_diff(self, tmp_path):
         """Test 2-way diff mode."""
-        from nskit.mixer.update import DiffEngine, DiffMode
+        from nskit.client.diff import DiffEngine
+        from nskit.common.models.diff import DiffMode
 
         old_dir = tmp_path / "old"
         old_dir.mkdir()
@@ -198,7 +199,8 @@ class TestDiffModes:
 
     def test_three_way_diff(self, tmp_path):
         """Test 3-way diff mode."""
-        from nskit.mixer.update import DiffEngine, DiffMode
+        from nskit.client.diff import DiffEngine
+        from nskit.common.models.diff import DiffMode
 
         base_dir = tmp_path / "base"
         base_dir.mkdir()

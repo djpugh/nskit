@@ -9,10 +9,10 @@ from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, patch
 
 from nskit.client.config import ConfigManager, RecipeConfig, RecipeMetadata
-from nskit.client.diff.models import DiffMode
 from nskit.client.exceptions import GitStatusError
 from nskit.client.models import RecipeInfo, RecipeResult, UpdateResult
 from nskit.client.update import UpdateClient
+from nskit.common.models.diff import DiffMode
 
 
 def _init_git_repo(path: Path) -> None:

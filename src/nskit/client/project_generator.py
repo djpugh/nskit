@@ -1,4 +1,5 @@
 """Project generator for diff comparison."""
+
 from __future__ import annotations
 
 import re
@@ -9,9 +10,9 @@ from typing import Any
 
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.config import RecipeConfig
-from nskit.client.diff.models import DiffMode
 from nskit.client.engines.base import RecipeEngine
 from nskit.client.exceptions import UpdateError
+from nskit.common.models.diff import DiffMode
 
 
 class ProjectGenerator:

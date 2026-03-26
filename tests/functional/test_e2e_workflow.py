@@ -3,6 +3,7 @@
 Exercises the full user journey through the RecipeClient and UpdateClient
 with real recipe execution (LocalEngine) and mocked Docker execution.
 """
+
 from __future__ import annotations
 
 import subprocess
@@ -13,11 +14,11 @@ from unittest.mock import Mock, patch
 
 from nskit.client.backends.local import LocalBackend
 from nskit.client.config import ConfigManager, RecipeConfig, RecipeMetadata
-from nskit.client.diff.models import DiffMode
 from nskit.client.engines import DockerEngine, LocalEngine
 from nskit.client.models import RecipeResult
 from nskit.client.recipes import RecipeClient
 from nskit.client.update import UpdateClient
+from nskit.common.models.diff import DiffMode
 
 # ---------------------------------------------------------------------------
 # Helpers

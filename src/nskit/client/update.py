@@ -1,4 +1,5 @@
 """Update client for recipe updates with 3-way merge."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -7,13 +8,13 @@ from nskit.client.backends.base import RecipeBackend
 from nskit.client.config import ConfigManager
 from nskit.client.diff.engine import DiffEngine
 from nskit.client.diff.file_discovery import FileDiscovery
-from nskit.client.diff.models import DiffMode, MergeResult
 from nskit.client.engines.base import RecipeEngine
 from nskit.client.exceptions import GitStatusError, UpdateError
 from nskit.client.models import UpdateResult
 from nskit.client.project_generator import ProjectGenerator
 from nskit.client.utils.git import GitUtils
 from nskit.client.version_resolver import VersionResolver
+from nskit.common.models.diff import DiffMode, MergeResult
 
 
 class UpdateClient:

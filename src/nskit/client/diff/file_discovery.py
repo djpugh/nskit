@@ -1,11 +1,12 @@
 """File discovery with ignore-pattern support."""
+
 from __future__ import annotations
 
 import fnmatch
 from pathlib import Path
 from typing import ClassVar
 
-from nskit.client.diff.models import DiffMode
+from nskit.common.models.diff import DiffMode
 
 
 class FileDiscovery:
