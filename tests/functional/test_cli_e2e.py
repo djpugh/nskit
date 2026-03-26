@@ -6,6 +6,7 @@ and the interactive default resolution chain (via mocked questionary).
 import json
 import os
 import unittest
+from contextlib import ExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, Mock, patch
@@ -131,13 +132,15 @@ class TestCLIInitInteractive(unittest.TestCase):
         mock_recipe = Mock()
         mock_recipe.model_fields = model_fields or {}
 
-        with (
-            patch("nskit.cli.app.questionary") as mock_q,
-            patch("nskit.cli.app.Recipe.load", return_value=mock_recipe),
-            patch("nskit.cli.app.get_required_fields_as_dict", return_value=fields or {"name": "str"}),
-            patch("nskit.cli.app.ContextProvider") as mock_ctx_cls,
-            patch("nskit.cli.app.EnvVarResolver") as mock_resolver_cls,
-        ):
+        with ExitStack() as stack:
+            mock_q = stack.enter_context(patch("nskit.cli.app.questionary"))
+            stack.enter_context(patch("nskit.cli.app.Recipe.load", return_value=mock_recipe))
+            stack.enter_context(
+                patch("nskit.cli.app.get_required_fields_as_dict", return_value=fields or {"name": "str"})
+            )
+            mock_ctx_cls = stack.enter_context(patch("nskit.cli.app.ContextProvider"))
+            mock_resolver_cls = stack.enter_context(patch("nskit.cli.app.EnvVarResolver"))
+
             mock_q.text = fake_text
             mock_q.confirm = fake_confirm
             mock_q.select = lambda p, choices=None, default=None: MagicMock(
@@ -230,13 +233,15 @@ class TestCLIInitInteractive(unittest.TestCase):
         mock_recipe = Mock()
         mock_recipe.model_fields = {"name": name_info, "slug": slug_info}
 
-        with (
-            patch("nskit.cli.app.questionary") as mock_q,
-            patch("nskit.cli.app.Recipe.load", return_value=mock_recipe),
-            patch("nskit.cli.app.get_required_fields_as_dict", return_value={"name": "str", "slug": "str"}),
-            patch("nskit.cli.app.ContextProvider") as mock_ctx_cls,
-            patch("nskit.cli.app.EnvVarResolver") as mock_resolver_cls,
-        ):
+        with ExitStack() as stack:
+            mock_q = stack.enter_context(patch("nskit.cli.app.questionary"))
+            stack.enter_context(patch("nskit.cli.app.Recipe.load", return_value=mock_recipe))
+            stack.enter_context(
+                patch("nskit.cli.app.get_required_fields_as_dict", return_value={"name": "str", "slug": "str"})
+            )
+            mock_ctx_cls = stack.enter_context(patch("nskit.cli.app.ContextProvider"))
+            mock_resolver_cls = stack.enter_context(patch("nskit.cli.app.EnvVarResolver"))
+
             mock_q.text = fake_text
             mock_q.confirm = lambda p, default=False: MagicMock(ask=Mock(return_value=default))
             mock_resolver_cls.return_value = Mock(resolve=Mock(return_value=None))
@@ -267,13 +272,13 @@ class TestCLIInitInteractive(unittest.TestCase):
         mock_recipe = Mock()
         mock_recipe.model_fields = {}
 
-        with (
-            patch("nskit.cli.app.questionary") as mock_q,
-            patch("nskit.cli.app.Recipe.load", return_value=mock_recipe),
-            patch("nskit.cli.app.get_required_fields_as_dict", return_value={"flag": "bool"}),
-            patch("nskit.cli.app.ContextProvider") as mock_ctx_cls,
-            patch("nskit.cli.app.EnvVarResolver") as mock_resolver_cls,
-        ):
+        with ExitStack() as stack:
+            mock_q = stack.enter_context(patch("nskit.cli.app.questionary"))
+            stack.enter_context(patch("nskit.cli.app.Recipe.load", return_value=mock_recipe))
+            stack.enter_context(patch("nskit.cli.app.get_required_fields_as_dict", return_value={"flag": "bool"}))
+            mock_ctx_cls = stack.enter_context(patch("nskit.cli.app.ContextProvider"))
+            mock_resolver_cls = stack.enter_context(patch("nskit.cli.app.EnvVarResolver"))
+
             mock_q.text = lambda p, default="": MagicMock(ask=Mock(return_value="x"))
             mock_q.confirm = fake_confirm
             mock_resolver_cls.return_value = Mock(resolve=Mock(return_value=None))

@@ -1,6 +1,7 @@
 """Tests for CLI interactive init logic — default resolution chain and field prompting."""
 import os
 import unittest
+from contextlib import ExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, Mock, patch
@@ -57,13 +58,13 @@ class TestInteractiveInitDefaults(unittest.TestCase):
         mock_recipe = Mock()
         mock_recipe.model_fields = model_fields_dict or {}
 
-        with (
-            patch("nskit.cli.app.questionary") as mock_q,
-            patch("nskit.cli.app.Recipe.load", return_value=mock_recipe),
-            patch("nskit.cli.app.get_required_fields_as_dict", return_value=fields_dict),
-            patch("nskit.cli.app.ContextProvider") as mock_ctx_cls,
-            patch("nskit.cli.app.EnvVarResolver") as mock_resolver_cls,
-        ):
+        with ExitStack() as stack:
+            mock_q = stack.enter_context(patch("nskit.cli.app.questionary"))
+            stack.enter_context(patch("nskit.cli.app.Recipe.load", return_value=mock_recipe))
+            stack.enter_context(patch("nskit.cli.app.get_required_fields_as_dict", return_value=fields_dict))
+            mock_ctx_cls = stack.enter_context(patch("nskit.cli.app.ContextProvider"))
+            mock_resolver_cls = stack.enter_context(patch("nskit.cli.app.EnvVarResolver"))
+
             mock_q.text = fake_text
             mock_q.confirm = fake_confirm
             mock_q.select = fake_select
