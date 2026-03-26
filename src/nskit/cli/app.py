@@ -27,6 +27,36 @@ from nskit.mixer.components.recipe import Recipe
 TREE_IGNORE = {".git", "__pycache__", ".venv", "node_modules"}
 
 
+def _prompt_create_repo(project_name: str, description: str, client: RecipeClient | None, console: Console) -> None:
+    """Prompt the user to create a remote repository after project init."""
+    from nskit.client.recipes import _detect_repo_client
+
+    repo_client, provider = _detect_repo_client()
+    if repo_client is None:
+        return
+
+    create = questionary.confirm(f"Create repository in {provider}?", default=True).ask()
+    if not create:
+        return
+
+    if client:
+        ok, msg = client.create_repository(project_name, description=description)
+    else:
+        from nskit.recipes.repository_client import RepositoryClient
+
+        try:
+            rc = RepositoryClient(vcs_client=repo_client)
+            info = rc.create_repository(project_name, description=description)
+            ok, msg = True, f"Created repository at {info.url}"
+        except Exception as e:
+            ok, msg = False, str(e)
+
+    if ok:
+        console.print(f"[green]✓ {msg}[/green]")
+    else:
+        console.print(f"[yellow]⚠ {msg}[/yellow]")
+
+
 def _print_tree(directory: Path, console: Console, prefix: str = "") -> None:
     """Print a directory tree to the console."""
     from rich.markup import escape
@@ -234,6 +264,7 @@ def create_cli(
             console.print(f"\n[green bold]✓ Created {recipe}[/green bold] at [cyan]{output_dir}[/cyan]\n")
             _print_tree(output_dir, console)
             console.print()
+            _prompt_create_repo(recipe, input_data.get("description", ""), client, console)
         else:
             # Fallback: no backend, use Recipe.load directly
             try:
@@ -257,6 +288,7 @@ def create_cli(
                 console.print(f"\n[green bold]✓ Created {recipe}[/green bold] at [cyan]{project_path}[/cyan]\n")
                 _print_tree(Path(project_path), console)
                 console.print()
+                _prompt_create_repo(recipe, input_data.get("description", ""), None, console)
             except Exception as exc:
                 # Format validation errors nicely
                 msg = str(exc)

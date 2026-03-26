@@ -1,4 +1,5 @@
 """Tests for CLI factory."""
+
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -137,3 +138,58 @@ class TestCreateCLI:
 
             assert result.exit_code == 0
             assert "field1" in result.stdout
+
+
+class TestPromptCreateRepo:
+    """Tests for _prompt_create_repo."""
+
+    @patch("nskit.cli.app._detect_repo_client", return_value=(None, None))
+    def test_no_provider_skips_silently(self, mock_detect):
+        """No prompt shown when no VCS provider detected."""
+        from rich.console import Console
+
+        from nskit.cli.app import _prompt_create_repo
+
+        console = Console()
+        # Should not raise or prompt
+        _prompt_create_repo("my-project", "desc", None, console)
+        mock_detect.assert_called_once()
+
+    @patch("nskit.cli.app.questionary")
+    @patch("nskit.cli.app._detect_repo_client")
+    def test_user_declines(self, mock_detect, mock_q):
+        """No repo created when user says no."""
+        from unittest.mock import MagicMock
+
+        from rich.console import Console
+
+        from nskit.cli.app import _prompt_create_repo
+
+        mock_vcs = MagicMock()
+        mock_detect.return_value = (mock_vcs, "GitHub")
+        mock_q.confirm.return_value.ask.return_value = False
+
+        console = Console()
+        _prompt_create_repo("my-project", "desc", None, console)
+        mock_vcs.create.assert_not_called()
+
+    @patch("nskit.cli.app.questionary")
+    @patch("nskit.cli.app._detect_repo_client")
+    def test_user_accepts_with_client(self, mock_detect, mock_q):
+        """Repo created via RecipeClient when user says yes."""
+        from unittest.mock import MagicMock
+
+        from rich.console import Console
+
+        from nskit.cli.app import _prompt_create_repo
+
+        mock_vcs = MagicMock()
+        mock_detect.return_value = (mock_vcs, "GitHub")
+        mock_q.confirm.return_value.ask.return_value = True
+
+        mock_client = MagicMock()
+        mock_client.create_repository.return_value = (True, "Created repository at https://github.com/my-project")
+
+        console = Console()
+        _prompt_create_repo("my-project", "desc", mock_client, console)
+        mock_client.create_repository.assert_called_once_with("my-project", description="desc")

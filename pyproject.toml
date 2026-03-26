@@ -93,7 +93,7 @@ docs = [
     "mkdocs-coverage",
     "mkdocs-include-markdown-plugin",
     'mkdocs-github-changelog',
-    # 'mkdocs-licenseinfo',  # disabled: depends on licensecheck which pins attrs<24
+    "mkdocs-licenseinfo>=1.0.0",
     # "mkdocs-gen-files",
     # "mkdocs-literate-nav",
     "mike"

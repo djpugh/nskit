@@ -1,4 +1,5 @@
 """Recipe client for programmatic recipe operations."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -14,6 +15,18 @@ def _read_recipe_label(image_url: str) -> str | None:
     from nskit.client.backends.image_labels import get_recipe_name, read_local_labels
 
     return get_recipe_name(read_local_labels(image_url))
+
+
+def _detect_repo_client():
+    """Try to auto-detect a VCS provider. Returns (client, provider_name) or (None, None)."""
+    try:
+        from nskit.vcs.provider_detection import get_default_repo_client
+
+        client = get_default_repo_client()
+        provider_name = type(client).__name__.replace("RepoClient", "")
+        return client, provider_name
+    except (ValueError, ImportError):
+        return None, None
 
 
 class RecipeClient:
@@ -113,3 +126,34 @@ class RecipeClient:
                 recipe_version=version,
                 errors=errors,
             )
+
+    def create_repository(
+        self,
+        repo_name: str,
+        description: str | None = None,
+        private: bool = True,
+    ) -> tuple[bool, str]:
+        """Create a remote repository for the project.
+
+        Auto-detects the VCS provider from environment variables.
+
+        Args:
+            repo_name: Repository name.
+            description: Repository description.
+            private: Whether the repository should be private.
+
+        Returns:
+            Tuple of (success, message).
+        """
+        from nskit.recipes.repository_client import RepositoryClient
+
+        client, provider = _detect_repo_client()
+        if client is None:
+            return False, "No VCS provider detected. Set appropriate environment variables (e.g. GITHUB_TOKEN)."
+
+        try:
+            repo_client = RepositoryClient(vcs_client=client)
+            info = repo_client.create_repository(repo_name, description=description, private=private)
+            return True, f"Created repository at {info.url}"
+        except Exception as e:
+            return False, f"Failed to create repository: {e}"
