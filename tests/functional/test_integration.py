@@ -108,7 +108,7 @@ class TestIntegrationWorkflow:
         config_dir.mkdir()
         config_content = """metadata:
   recipe_name: v1.0.0
-  recipe_version: v1.0.0
+  docker_image: test/python_package:v1.0.0
 """
         (config_dir / "config.yml").write_text(config_content)
 
@@ -153,10 +153,10 @@ class TestIntegrationWorkflow:
         config_dir.mkdir()
         (config_dir / "config.yml").write_text(
             """
-metadata:
-  recipe_name: python_package
-  recipe_version: v1.0.0
-"""
+            metadata:
+              recipe_name: python_package
+              docker_image: test/python_package:v1.0.0
+            """
         )
 
         # Commit
@@ -191,10 +191,10 @@ metadata:
         config_dir.mkdir()
         (config_dir / "config.yml").write_text(
             """
-metadata:
-  recipe_name: python_package
-  recipe_version: v1.0.0
-"""
+            metadata:
+              recipe_name: python_package
+              docker_image: test/python_package:v1.0.0
+            """
         )
 
         subprocess.run(["git", "add", "."], cwd=project_path, capture_output=True)

@@ -28,7 +28,9 @@ def test_backend(tmp_path):
     (v1 / "README.md").write_text("# {{name}}\n\nTest recipe")
     recipe_config_dir = v1 / ".recipe"
     recipe_config_dir.mkdir(parents=True)
-    (recipe_config_dir / "config.yml").write_text("metadata:\n  recipe_name: test_recipe\n  recipe_version: v1.0.0\n")
+    (recipe_config_dir / "config.yml").write_text(
+        "metadata:\n  recipe_name: test_recipe\n  docker_image: test/test_recipe:v1.0.0\n"
+    )
 
     return LocalBackend(recipes_dir=recipes_dir)
 
@@ -158,7 +160,9 @@ class TestCLIEndToEnd:
         project_dir.mkdir()
         recipe_dir = project_dir / ".recipe"
         recipe_dir.mkdir()
-        (recipe_dir / "config.yml").write_text("metadata:\n  recipe_name: test_recipe\n  recipe_version: v1.0.0\n")
+        (recipe_dir / "config.yml").write_text(
+            "metadata:\n  recipe_name: test_recipe\n  docker_image: test/test_recipe:v1.0.0\n"
+        )
 
         result = cli_runner.invoke(app, ["check", "--project-path", str(project_dir)])
 

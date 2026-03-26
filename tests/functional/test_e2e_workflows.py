@@ -69,9 +69,9 @@ class TestEndToEndWorkflows:
         recipe_dir.mkdir()
         (recipe_dir / "config.yml").write_text(
             """metadata:
-  recipe_name: test_recipe
-  recipe_version: v1.0.0
-"""
+              recipe_name: test_recipe
+              docker_image: test/test_recipe:v1.0.0
+            """
         )
 
         # Commit initial state
@@ -118,9 +118,9 @@ class TestEndToEndWorkflows:
         recipe_dir.mkdir()
         (recipe_dir / "config.yml").write_text(
             """metadata:
-  recipe_name: test_recipe
-  recipe_version: v1.0.0
-"""
+              recipe_name: test_recipe
+              docker_image: test/test_recipe:v1.0.0
+            """
         )
 
         subprocess.run(["git", "add", "."], cwd=project_dir, capture_output=True, check=True)
@@ -158,9 +158,9 @@ class TestEndToEndWorkflows:
         recipe_dir.mkdir()
         (recipe_dir / "config.yml").write_text(
             """metadata:
-  recipe_name: test_recipe
-  recipe_version: v1.0.0
-"""
+              recipe_name: test_recipe
+              docker_image: test/test_recipe:v1.0.0
+            """
         )
 
         subprocess.run(["git", "add", "."], cwd=project_dir, capture_output=True, check=True)
@@ -196,9 +196,9 @@ class TestEndToEndWorkflows:
         recipe_dir.mkdir()
         (recipe_dir / "config.yml").write_text(
             """metadata:
-  recipe_name: test_recipe
-  recipe_version: v1.0.0
-"""
+              recipe_name: test_recipe
+              docker_image: test/test_recipe:v1.0.0
+            """
         )
 
         subprocess.run(["git", "add", "."], cwd=project_dir, capture_output=True, check=True)
@@ -225,9 +225,9 @@ class TestEndToEndWorkflows:
         recipe_dir.mkdir()
         (recipe_dir / "config.yml").write_text(
             """metadata:
-  recipe_name: test_recipe
-  recipe_version: v1.0.0
-"""
+              recipe_name: test_recipe
+              docker_image: test/test_recipe:v1.0.0
+            """
         )
 
         client = UpdateClient(recipe_backend)
@@ -245,7 +245,7 @@ class TestEndToEndWorkflows:
         (recipe_dir / "config.yml").write_text(
             """metadata:
   recipe_name: test_recipe
-  recipe_version: v2.0.0
+  docker_image: test/test_recipe:v2.0.0
 """
         )
 
