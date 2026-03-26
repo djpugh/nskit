@@ -58,7 +58,7 @@ Sleep 1s
 
 Type "github.com/company/docker-project"
 Enter
-Sleep 10s
+Sleep 20s
 
 Enter
 
