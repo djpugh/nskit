@@ -265,7 +265,7 @@ class NamespaceValidationRepo(_Repo):
             self._download_namespaces()
         self.pull()
         with (self.local_dir / self.namespaces_filename).open() as f:
-            namespace_validator = NamespaceValidator(**yaml.safe_load(f))
+            namespace_validator = NamespaceValidator(**yaml.load(f))
         return namespace_validator
 
     def create(
