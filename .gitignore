@@ -71,7 +71,7 @@ mypy
 licenses*.json
 
 # Generated demo GIFs (built by task docs:build)
-docs/source/assets/*.gif
+# docs/source/assets/*.gif
 
 # Coverage
 htmlcov/

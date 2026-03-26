@@ -7,6 +7,8 @@ repos:
       - id: check-yaml
         args: [--unsafe]
       - id: check-added-large-files
+        args: ['--maxkb=500']
+        exclude: 'docs/source/assets/.*\.gif$'
       - id: check-merge-conflict
       - id: check-toml
 

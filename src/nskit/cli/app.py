@@ -1,6 +1,7 @@
 """Generic CLI for nskit recipes."""
 
 import json
+import os
 from pathlib import Path
 from typing import Annotated, Optional, Union
 
@@ -50,6 +51,13 @@ def _commit_and_maybe_push(
     if not (project_path / ".git").is_dir():
         return
 
+    env = {
+        **os.environ,
+        "GIT_AUTHOR_NAME": "nskit",
+        "GIT_AUTHOR_EMAIL": "nskit@noreply",
+        "GIT_COMMITTER_NAME": "nskit",
+        "GIT_COMMITTER_EMAIL": "nskit@noreply",
+    }
     subprocess.run(  # nosec B603, B607
         ["git", "add", "."],
         cwd=project_path,
@@ -57,10 +65,11 @@ def _commit_and_maybe_push(
         check=True,
     )
     subprocess.run(  # nosec B603, B607
-        ["git", "commit", "-m", "Initial commit from recipe", "--author", "nskit <nskit@noreply>", "--no-verify"],
+        ["git", "commit", "-m", "Initial commit from recipe", "--no-verify"],
         cwd=project_path,
         capture_output=True,
         check=True,
+        env=env,
     )
     console.print("[green]✓ Committed initial files[/green]")
 

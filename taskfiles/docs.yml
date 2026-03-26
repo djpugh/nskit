@@ -35,6 +35,9 @@ tasks:
 
   record:
     desc: Record all demo GIFs.
+    preconditions:
+      - sh: docker info >/dev/null 2>&1
+        msg: "Docker is not running. Please start Docker before recording demo GIFs."
     cmds:
       - task: record-cli
       - task: record-yaml
