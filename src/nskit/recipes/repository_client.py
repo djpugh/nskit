@@ -52,6 +52,8 @@ class RepositoryClient:
     ) -> None:
         """Configure repository settings.
 
+        Not yet implemented — placeholder for future configuration logic.
+
         Args:
             repo_name: Repository name
             branch_protection: Enable branch protection
@@ -59,10 +61,6 @@ class RepositoryClient:
         """
         if not self.vcs_client:
             raise ValueError("VCS client not configured")
-
-        # Repository configuration would go here
-        # This is a placeholder for future implementation
-        pass
 
     def get_repository_info(self, repo_name: str) -> RepositoryInfo | None:
         """Get repository information.
