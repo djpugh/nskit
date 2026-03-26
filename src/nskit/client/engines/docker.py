@@ -106,6 +106,17 @@ class DockerEngine(RecipeEngine):
             finally:
                 input_file.unlink(missing_ok=True)
 
+        except subprocess.CalledProcessError as e:
+            detail = e.stderr.strip() if e.stderr else str(e)
+            errors.append(detail)
+            return RecipeResult(
+                success=False,
+                project_path=output_dir,
+                recipe_name=recipe,
+                recipe_version=version,
+                errors=errors,
+                warnings=warnings,
+            )
         except Exception as e:
             errors.append(str(e))
             return RecipeResult(

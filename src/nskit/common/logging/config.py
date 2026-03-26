@@ -33,7 +33,6 @@ class LoggingConfig(BaseConfiguration):
         validation_alias=AliasChoices("json_format", JSON_ENV_VAR),
         serialization_alias="json",
         description="Output JSON Logs",
-        alias="json",
     )
     extra: dict[str, Any] = Field(default_factory=dict, description="Extra kwargs")
 

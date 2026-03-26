@@ -7,7 +7,10 @@ image from the nskit Dockerfile and execute a recipe inside it.
 
 from __future__ import annotations
 
+import contextlib
+import shutil
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -37,6 +40,26 @@ def _docker_available() -> bool:
         return False
 
 
+def _fix_docker_permissions(path: Path) -> None:
+    """Fix root-owned files created by Docker so the host user can delete them."""
+    subprocess.run(  # nosec B603, B607
+        ["docker", "run", "--rm", "-v", f"{path.absolute()}:/fix", "busybox", "chmod", "-R", "a+rwX", "/fix"],
+        capture_output=True,
+        timeout=30,
+    )
+
+
+@contextlib.contextmanager
+def _docker_tmpdir():
+    """Temporary directory that cleans up root-owned Docker output."""
+    tmp = tempfile.mkdtemp()
+    try:
+        yield Path(tmp)
+    finally:
+        _fix_docker_permissions(Path(tmp))
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def _build_nskit_image() -> bool:
     """Build the nskit runtime Docker image from the repo root.
 
@@ -49,6 +72,8 @@ def _build_nskit_image() -> bool:
             "build",
             "--target",
             "runtime",
+            "--build-arg",
+            "RECIPE_NAME=python_package",
             "-t",
             DOCKER_IMAGE_TAG,
             ".",
@@ -178,8 +203,8 @@ class TestDockerEngineSmoke(unittest.TestCase):
 
     def test_docker_engine_creates_project(self) -> None:
         """DockerEngine generates a project via the containerised CLI."""
-        with TemporaryDirectory() as tmp:
-            output_dir = Path(tmp) / "docker-project"
+        with _docker_tmpdir() as tmp:
+            output_dir = tmp / "docker-project"
             output_dir.mkdir()
 
             engine = DockerEngine(skip_pull=True)
@@ -208,8 +233,8 @@ class TestDockerEngineSmoke(unittest.TestCase):
 
     def test_docker_engine_returns_files_created(self) -> None:
         """DockerEngine result lists the files produced by the container."""
-        with TemporaryDirectory() as tmp:
-            output_dir = Path(tmp) / "docker-files"
+        with _docker_tmpdir() as tmp:
+            output_dir = tmp / "docker-files"
             output_dir.mkdir()
 
             engine = DockerEngine(skip_pull=True)
@@ -338,8 +363,8 @@ class TestRecipeClientWithDockerEngine(unittest.TestCase):
         """Full flow: RecipeClient → DockerEngine → container → files on disk."""
         backend = self._make_backend()
 
-        with TemporaryDirectory() as tmp:
-            output_dir = Path(tmp) / "client-docker"
+        with _docker_tmpdir() as tmp:
+            output_dir = tmp / "client-docker"
             client = RecipeClient(backend, engine=DockerEngine(skip_pull=True))
 
             result = client.initialize_recipe(
