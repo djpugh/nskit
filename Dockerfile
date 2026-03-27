@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Generic Dockerfile for nskit-based recipe CLIs
 
-FROM python:3.12-slim-bookworm AS base
+FROM python:3.14-slim-bookworm AS base
 
 LABEL org.opencontainers.image.source="https://github.com/djpugh/nskit"
 
