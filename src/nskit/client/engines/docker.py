@@ -76,6 +76,8 @@ class DockerEngine(RecipeEngine):
                     "--rm",
                     "-e",
                     f"LOG_JSON={os.environ.get('LOG_JSON', 'true')}",
+                    "-e",
+                    f"LOGLEVEL={os.environ.get('LOGLEVEL', 'INFO')}",
                     "-v",
                     f"{output_dir.absolute()}:/app/output",
                     "-v",
