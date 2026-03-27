@@ -75,7 +75,3 @@
 ### ::: nskit.vcs.providers.github.GithubSettings
     options:
         show_root_heading: True
-
-### ::: nskit.vcs.providers.azure_devops.AzureDevOpsSettings
-    options:
-        show_root_heading: True

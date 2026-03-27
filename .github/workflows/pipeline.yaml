@@ -403,7 +403,7 @@ jobs:
       - name: Install wheel and test dependencies
         shell: bash
         run: |
-          uv pip install --system "$(ls -t dist/*.whl | head -n1)[github,azure_devops]"
+          uv pip install --system "$(ls -t dist/*.whl | head -n1)[github]"
           cd repo && uv pip install --system --group test
       - name: Run unit tests
         shell: bash

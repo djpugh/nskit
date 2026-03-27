@@ -56,10 +56,6 @@ dependencies = [
 
 
 [project.optional-dependencies]
-azure_devops = [
-    "azure-cli",
-    "azure_devops_artifacts_helpers",
-]
 github = [
     "ghapi"
 ]
@@ -112,6 +108,7 @@ dev = [
     "nox",
     'tomli; python_version < "3.11"',
     "pre-commit",
+    "setuptools",
     {include-group = "test"},
     {include-group = "lint"},
     {include-group = "types"},
@@ -186,7 +183,6 @@ python_api_service = "nskit.recipes.python.api:APIRecipe"
 recipe = "nskit.recipes.recipe:RecipeRecipe"
 
 [project.entry-points."nskit.vcs.providers"]
-azure_devops = "nskit.vcs.providers.azure_devops:AzureDevOpsSettings"
 github = "nskit.vcs.providers.github:GithubSettings"
 
 [project.entry-points."nskit.vcs.installers"]

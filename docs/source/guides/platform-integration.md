@@ -61,11 +61,6 @@ If you want nskit to create repos and push code, configure a VCS provider. Provi
 ```bash
 # GitHub
 export GITHUB_TOKEN=ghp_...
-
-# Azure DevOps
-export AZURE_DEVOPS_ORG=myorg
-export AZURE_DEVOPS_PROJECT=myproject
-export AZURE_DEVOPS_PAT=...
 ```
 
 When a VCS provider is configured, `nskit init` prompts during field collection whether to create a remote repository. After generating the project, nskit always commits the initial files. If the user accepted, it creates the remote and pushes:
