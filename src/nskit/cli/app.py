@@ -64,14 +64,21 @@ def _commit_and_maybe_push(
         capture_output=True,
         check=True,
     )
-    subprocess.run(  # nosec B603, B607
-        ["git", "commit", "-m", "Initial commit from recipe", "--no-verify"],
+    # Skip commit if nothing staged (e.g. Docker engine already committed)
+    status = subprocess.run(  # nosec B603, B607
+        ["git", "diff", "--cached", "--quiet"],
         cwd=project_path,
         capture_output=True,
-        check=True,
-        env=env,
     )
-    console.print("[green]✓ Committed initial files[/green]")
+    if status.returncode != 0:
+        subprocess.run(  # nosec B603, B607
+            ["git", "commit", "-m", "Initial commit from recipe", "--no-verify"],
+            cwd=project_path,
+            capture_output=True,
+            check=True,
+            env=env,
+        )
+        console.print("[green]✓ Committed initial files[/green]")
 
     if create_repo and vcs_client is not None:
         try:
