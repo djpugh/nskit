@@ -1,0 +1,15 @@
+version: '3'
+
+vars:
+  ARTIFACT_INDEX_NAME: pypi
+
+dotenv: ['.env']
+
+tasks:
+  publish:
+    desc: Publish the distribution package to the configured PyPI registry.
+    requires:
+      vars: [UV_INDEX_PASSWORD, UV_INDEX_NAME]
+    cmds:
+      - uv publish --index {{.UV_INDEX_NAME}} --token {% raw %}{{.UV_INDEX_PASSWORD}}{% endraw %}
+    interactive: true

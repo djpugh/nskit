@@ -1,6 +1,6 @@
 """Common extension helpers."""
-from enum import Enum
 import sys
+from enum import Enum
 
 if sys.version_info.major >= 3 and sys.version_info.minor >= 10:
     from importlib.metadata import entry_points
@@ -25,7 +25,7 @@ def load_extension(entrypoint: str, extension: str):
     """Load a given extension for a given entrypoint."""
     for ep in entry_points().select(group=entrypoint, name=extension):
         return ep.load()
-    logger_factory.get_logger(__name__).warn(f'Entrypoint {extension} not found for {entrypoint}')
+    logger_factory.get_logger(__name__).warning(f'Entrypoint {extension} not found for {entrypoint}')
 
 
 def get_extensions(entrypoint: str):

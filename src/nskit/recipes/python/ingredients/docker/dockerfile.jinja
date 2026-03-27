@@ -1,0 +1,51 @@
+# syntax=docker/dockerfile:1
+FROM python:3.14-slim-bookworm AS base
+
+ARG PROJECT_DIR=/app
+ARG SOURCE_FILES_DIRNAME=src
+ARG APP_ENTRYPOINT=app:app
+
+# Set up uv and other deps first
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git \
+    && rm -rf /var/lib/apt/lists/*
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+ENV PATH="/root/.local/bin/:$PATH"
+
+# Copy dependency files
+WORKDIR ${PROJECT_DIR}
+COPY pyproject.toml uv.lock README.md ${PROJECT_DIR}/
+
+# Use secret from env vars for dependency installation
+RUN --mount=type=secret,id=pypi_username,env=UV_INDEX_PYTHON_ARTIFACTS_USERNAME \
+    --mount=type=secret,id=pypi_password,env=UV_INDEX_PYTHON_ARTIFACTS_PASSWORD \
+    uv sync --frozen --no-install-project --no-dev
+
+###### Test image stage ######
+FROM base AS test
+
+# Install the test dependencies
+RUN --mount=type=secret,id=pypi_username,env=UV_INDEX_PYTHON_ARTIFACTS_USERNAME \
+    --mount=type=secret,id=pypi_password,env=UV_INDEX_PYTHON_ARTIFACTS_PASSWORD \
+    uv sync --frozen --no-install-project
+
+COPY tests ${PROJECT_DIR}/tests
+
+# Install the project itself
+COPY ${SOURCE_FILES_DIRNAME}/ ${PROJECT_DIR}/${SOURCE_FILES_DIRNAME}
+RUN --mount=type=secret,id=pypi_username,env=UV_INDEX_PYTHON_ARTIFACTS_USERNAME \
+    --mount=type=secret,id=pypi_password,env=UV_INDEX_PYTHON_ARTIFACTS_PASSWORD \
+    --mount=type=bind,src=.git,dst=${PROJECT_DIR}/.git \
+    uv build && uv sync --frozen
+
+###### Runtime image stage ######
+FROM base AS runtime
+
+# Install the project itself
+COPY ${SOURCE_FILES_DIRNAME}/ ${PROJECT_DIR}/${SOURCE_FILES_DIRNAME}
+RUN --mount=type=secret,id=pypi_username,env=UV_INDEX_PYTHON_ARTIFACTS_USERNAME \
+    --mount=type=secret,id=pypi_password,env=UV_INDEX_PYTHON_ARTIFACTS_PASSWORD \
+    --mount=type=bind,src=.git,dst=${PROJECT_DIR}/.git \
+    uv sync --frozen --no-dev
+
+CMD ["uv", "run", "--no-sync", "uvicorn", "{{ namespace }}.${APP_ENTRYPOINT}", "--port", "80", "--host", "0.0.0.0"]

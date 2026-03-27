@@ -1,0 +1,30 @@
+version: '3'
+
+tasks:
+
+  test:
+    desc: Run the chosen type of tests (default to all) with coverage report in your local environment.
+    vars:
+      TEST_TYPE: '{% raw %}{{default "all" .TEST_TYPE}}{% endraw %}'
+    cmds:
+      - |
+        if [ {% raw %}{{.TEST_TYPE}}{% endraw %} = "all" ]; then export TEST_ROOT_FOLDER="tests/"; else export TEST_ROOT_FOLDER="tests/{% raw %}{{.TEST_TYPE}}{% endraw %}/"; fi
+        nox -s tests
+      - uv run coverage combine .coverage-*
+      - uv run coverage report -m && uv run coverage xml && uv run coverage json --pretty-print && uv run coverage html -d reports/htmlcov
+      - rm .coverage
+
+  test:*:
+    desc: Run specific tests with coverage report in your local environment.
+    vars:
+      TEST_TYPE: '{{index .MATCH 0}}'
+
+    cmds:
+      - task: test
+        vars:
+          TEST_TYPE: {{.TEST_TYPE}}
+
+  build:
+    desc: Build the distribution package.
+    cmds:
+      - uv build

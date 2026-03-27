@@ -1,0 +1,34 @@
+{%- extends "nskit.recipes.common.ingredients:README.md.jinja" %}
+
+{% block Contributing %}
+To see the contribution guidelines, see [docs/source/developing/index.md](docs/source/developing/index.md).
+
+{{super()}}
+{% endblock Contributing %}
+
+{% block LocalDevelopment %}
+
+Then add code to the package as appropriate - submodules can be created under ``src/{{repo.src_path}}``
+Tests can be added to the tests folder
+
+{% endblock LocalDevelopment %}
+
+{% block CI %}
+### CI
+There are a set of CI checks:
+
+* lint: ``task lint``
+* test: ``task test``
+* build: ``task build``
+
+specific subfolders can be passed to the testing: ``task test:unit`` or ``task test:functional``
+
+{% endblock CI %}
+
+{% block Versioning %}
+It is important to track and version code - in this repo, ``pdm.version`` is used for dynamic versioning.
+This links the version reported at ``__version__`` to the git tag (+ commit hash if appropriate), to reduce the amount of
+places that need editing when changing versions.
+
+{{super()}}
+{% endblock Versioning %}

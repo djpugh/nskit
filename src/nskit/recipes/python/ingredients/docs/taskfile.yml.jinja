@@ -1,0 +1,41 @@
+version: '3'
+
+tasks:
+
+  deploy:
+    desc: Deploy the docs to the GitHub Pages branch
+    requires:
+      vars: [ DOC_VERSION_NAME ]
+    vars:
+      IS_LATEST: '{% raw %}{{default "false" .IS_LATEST }}{% endraw %}'
+    cmds:
+      - |
+        export GITHUB_TOKEN=$(gh auth token)
+        if [ "{% raw %}{{.IS_LATEST}}{% endraw %}" = "true" ]; then
+          cd docs && uv run mike deploy --push --update-aliases $DOC_VERSION_NAME latest
+        else
+          cd docs && uv run mike deploy --push $DOC_VERSION_NAME
+        fi
+
+  serve:
+    desc: Serve the docs locally
+    cmds:
+      - |
+        export GITHUB_TOKEN=$(gh auth token)
+        cd docs && uv run mkdocs serve
+
+  build:
+    desc: Build the docs locally
+    cmds:
+      - |
+        export GITHUB_TOKEN=$(gh auth token)
+        cd docs && uv run mkdocs build
+
+  delete-version:
+    desc: Delete a version of the docs
+    requires:
+      vars: [ DOC_VERSION_NAME ]
+    cmds:
+      - |
+        export GITHUB_TOKEN=$(gh auth token)
+        cd docs && uv run mike delete --push $DOC_VERSION_NAME

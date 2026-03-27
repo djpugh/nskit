@@ -10,16 +10,11 @@ These are the dependencies used for running ``nskit``:
 
 ### ::licenseinfo
 
-### Extras:
+## Extras:
 
-#### Github
-##### ::licenseinfo
+### Github
+#### ::licenseinfo
     using: PEP631:github
-    diff: PEP631
-
-#### Azure Devops
-##### ::licenseinfo
-    using: PEP631:azure_devops
     diff: PEP631
 
 ## Development Dependencies
@@ -30,27 +25,27 @@ These are dependencies used for development (e.g. testing, linting etc.) of ``ns
     using: PEP631:dev
     diff: PEP631
 
-### Test Dependencies
-#### ::licenseinfo
-    using: PEP631:dev;dev-test
+## Test Dependencies
+### ::licenseinfo
+    using: PEP631:dev;test
     diff: PEP631:dev
 
-### Lint Dependencies
-#### ::licenseinfo
-    using: PEP631:dev;dev-lint
+## Lint Dependencies
+### ::licenseinfo
+    using: PEP631:dev;lint
     diff: PEP631:dev
 
-### Security Dependencies
-#### ::licenseinfo
-    using: PEP631:dev;dev-security
+## Security Dependencies
+### ::licenseinfo
+    using: PEP631:dev;security
     diff: PEP631:dev
 
-### Docs Dependencies
-#### ::licenseinfo
-    using: PEP631:dev;dev-docs
+## Docs Dependencies
+### ::licenseinfo
+    using: PEP631:dev;docs
     diff: PEP631:dev
 
-### Build Dependencies
-#### ::licenseinfo
-    using: PEP631:dev;dev-build
+## Build Dependencies
+### ::licenseinfo
+    using: PEP631:dev;build
     diff: PEP631:dev

@@ -1,7 +1,8 @@
 """Context manager for running in a specific directory."""
-from contextlib import ContextDecorator
+
 import os
-from typing import Dict, List, Optional
+from contextlib import ContextDecorator
+from typing import Optional
 
 from nskit._logging import logger_factory
 
@@ -13,11 +14,11 @@ class Env(ContextDecorator):
     """
 
     def __init__(
-            self,
-            environ: Optional[Dict[str, str]] = None,
-            override: Optional[Dict[str, str]] = None,
-            remove: Optional[List[str]] = None
-            ):
+        self,
+        environ: Optional[dict[str, str]] = None,
+        override: Optional[dict[str, str]] = None,
+        remove: Optional[list[str]] = None,
+    ):
         """Initialise the context manager.
 
         The parameters are applied in the following order (so can be combined): 1st - environ, 2nd - override, 3rd - remove
@@ -28,11 +29,11 @@ class Env(ContextDecorator):
             remove (Optional[List[str]]): a set of environment values to remove (removes values if found in os.environ )
         """
         if environ is not None and not isinstance(environ, dict):
-            raise TypeError('environ should be a dict')
+            raise TypeError("environ should be a dict")
         if override is not None and not isinstance(override, dict):
-            raise TypeError('override should be a dict')
+            raise TypeError("override should be a dict")
         if remove is not None and not isinstance(remove, (list, tuple, set)):
-            raise TypeError('remove should be a (list, tuple, set)')
+            raise TypeError("remove should be a (list, tuple, set)")
         self._environ = environ
         self._override = override
         self._remove = remove
@@ -53,10 +54,10 @@ class Env(ContextDecorator):
             if self._remove:
                 for key in list(self._remove):
                     os.environ.pop(key, None)
-            logger.info('Changing env variables')
-            logger.debug(f'New env variables: {os.environ}')
+            logger.info("Changing env variables")
+            logger.debug(f"New env variables: {os.environ}")
         else:
-            logger.info('No arguments set (environ, override, remove)')
+            logger.info("No arguments set (environ, override, remove)")
 
     def __exit__(self, *args, **kwargs):  # noqa: U100
         """Reset to the original environment variables."""

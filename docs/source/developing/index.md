@@ -1,67 +1,68 @@
 # Contributing to NSKit
 
-We love contributions to NSKit
+We love contributions to NSKit.
 
 ## Issues
 
 Please raise issues, queries or discussions [here](https://github.com/djpugh/nskit/issues).
 
-## Contributing to the codebase
+## Contributing to the Codebase
 
-### Installation and setup
+### Prerequisites
 
-Fork the repository on [Github](https://github.com/djpugh/nskit), and clone your fork to your local machine.
-
-Make sure you have the prerequisites installed (for adding code):
-* Python (Versions from 3.8)
-* virtualenv or another virtual environment tool
+* Python 3.8+
+* [uv](https://docs.astral.sh/uv/) (package manager)
+* [Task](https://taskfile.dev/) (task runner)
 * git
 
-Create and activate a virtual environment.
+### Setup
 
-Install ``nskit``:
-
+```bash
+git clone https://github.com/djpugh/nskit.git
+cd nskit
+task setup
 ```
-# Install nskit as an editable install with the dev dependencies
-pip install -e ".[dev]"
-```
 
-The codebase uses ``pre-commit``, so please use ``pre-commit install`` and ``pre-commit install-hooks`` to make sure the pre-commit hooks are installed correctly.
+This installs dependencies with `uv` and sets up pre-commit hooks.
 
-#### Checkout a branch and make changes
+### Make Changes
 
-Create a branch to make  your changes in:
-```
-# Checkout a new branch and make your changes
+```bash
 git checkout -b my-branch
 # Make your changes...
 ```
 
-#### Run tests and linting
+### Run Tests
 
-``nskit`` uses [``nox``](https://nox.thea.codes/en/stable/) for running tests.
-```
-# You can either use session tags with the -s flag
-nox -s test lint
-# There are also sessions: security, types, pre-commit
-
-# or the -t lint and test tags
-nox -t lint
-# This includes lint, pre-commit, security (bandit and pipenv check), types
-
-nox -t test
+```bash
+task test                    # Run all tests (unit by default)
+task test -- unit            # Unit tests only
+task test -- functional      # Functional tests only
+task test:unit               # Unit tests
+task test:integration        # Integration/functional tests
 ```
 
-#### Build docs
+### Lint and Format
 
-If you have edited the docs (or signatures/classes), please check the docs:
+```bash
+task lint                    # Run linter
+task format                  # Auto-format code (ruff + isort)
+task check                   # Run all checks (pre-commit, security, licences)
 ```
-nox -t docs
+
+### Build Docs
+
+```bash
+task docs:serve              # Serve docs locally
+task docs:build              # Build docs
 ```
 
-They will be output to ``build/docs``
+### Build Package
 
+```bash
+task build                   # Build distribution package
+```
 
-#### Commit and push your changes
+### Commit and Push
 
-Commit your changes, push your branch to GitHub, and create a pull request to the main [nskit repo](https://github.com/djpugh/nskit), and please include clear information in the pull request for review.
+Commit your changes, push your branch to GitHub, and create a pull request to the main [nskit repo](https://github.com/djpugh/nskit). Please include clear information in the pull request for review.

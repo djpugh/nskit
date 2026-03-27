@@ -1,0 +1,7 @@
+# GitHub releases backend configuration
+type: github
+org: myorg
+# Pattern for repository names (use {recipe_name} placeholder)
+repo_pattern: recipe-{recipe_name}
+# Optional: token (uses gh CLI if not provided)
+# token: ${GITHUB_TOKEN}

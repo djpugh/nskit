@@ -1,0 +1,44 @@
+version: '3'
+
+tasks:
+
+  setup:
+    desc: Install the project dependencies (with uv) and pre-commit hooks.
+    cmds:
+      - uv sync
+      - uv run pre-commit install
+
+  lint:
+    desc: Run the linter (Ruff) to check for code style issues (with tentative to fix).
+    cmds:
+      - uv run ruff check --fix .
+
+  format:
+    desc: Run the formatter (Ruff) and isort to format the code.
+    cmds:
+      - uv run isort src tests
+      - uv run ruff format .
+
+  check:
+    desc: Run all the checks on the codebase.
+    cmds:
+      - task: check:precommit
+      - task: check:security
+      - task: check:licences
+
+  check:precommit:
+    desc: Run all the precommit checks on all files.
+    cmds:
+      - uv run pre-commit run -a
+
+  check:security:
+    desc: Run the security checks on the codebase.
+    cmds:
+      - uv run bandit -r src
+
+  check:licences:
+    desc: Check the licences of the dependencies.
+    cmds:
+      - mkdir -p reports
+      - uv run licensecheck --format json --file reports/licenses.json
+      - uv run licensecheck --format ansi

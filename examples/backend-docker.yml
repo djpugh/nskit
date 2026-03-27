@@ -1,0 +1,6 @@
+# Docker registry backend configuration
+type: docker
+registry_url: ghcr.io
+image_prefix: myorg/recipes
+# Optional: auth_token for private registries
+# auth_token: ${GITHUB_TOKEN}

@@ -1,6 +1,6 @@
 """Abstract classes for the provider."""
+
 from abc import ABC, abstractmethod, abstractproperty
-from typing import List
 
 from pydantic import HttpUrl
 
@@ -38,7 +38,7 @@ class RepoClient(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def list(self) -> List[str]:
+    def list(self) -> list[str]:
         """List all repos on the remote."""
         raise NotImplementedError()
 

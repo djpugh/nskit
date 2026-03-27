@@ -1,7 +1,4 @@
-"""VCS and Codebase handlers for creating repo (and build) infrastructure."""
-from nskit.vcs.codebase import Codebase  # noqa: F401
-from nskit.vcs.namespace_validator import (  # noqa: F401
-    NamespaceOptionsType,
-    NamespaceValidator,
-)
+"""VCS handlers for repository infrastructure."""
+from nskit.vcs.namespace_validator import NamespaceOptionsType, NamespaceValidator  # noqa: F401
+from nskit.vcs.provider_detection import get_default_repo_client  # noqa: F401
 from nskit.vcs.repo import Repo  # noqa: F401
