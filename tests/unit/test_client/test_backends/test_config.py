@@ -1,9 +1,9 @@
 """Tests for backend configuration factory."""
 
-import os
-import tempfile
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from nskit.client.backends import LocalBackend
 from nskit.client.backends.config import create_backend_from_config
@@ -19,7 +19,8 @@ class TestCreateBackendFromConfig(unittest.TestCase):
         result = create_backend_from_config({"type": "local", "path": "/tmp"})
         self.assertIsInstance(result, LocalBackend)
 
-    def test_docker_from_dict(self):
+    @patch("nskit.client.backends.docker.DockerBackend._check_docker")
+    def test_docker_from_dict(self, _mock_check):
         """Create DockerBackend from dict config."""
         result = create_backend_from_config(
             {
@@ -42,29 +43,23 @@ class TestCreateBackendFromConfig(unittest.TestCase):
 
     def test_from_yaml_file(self):
         """Create backend from YAML file path."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
-            f.write("type: local\npath: /tmp\n")
-            f.flush()
-            try:
-                result = create_backend_from_config(f.name)
-                self.assertIsInstance(result, LocalBackend)
-            finally:
-                os.unlink(f.name)
+        with TemporaryDirectory() as tmp:
+            cfg = Path(tmp) / "backend.yml"
+            cfg.write_text("type: local\npath: /tmp\n")
+            result = create_backend_from_config(str(cfg))
+            self.assertIsInstance(result, LocalBackend)
 
     def test_from_path_object(self):
         """Create backend from Path object."""
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
-            f.write("type: local\npath: /tmp\n")
-            f.flush()
-            try:
-                result = create_backend_from_config(Path(f.name))
-                self.assertIsInstance(result, LocalBackend)
-            finally:
-                os.unlink(f.name)
+        with TemporaryDirectory() as tmp:
+            cfg = Path(tmp) / "backend.yml"
+            cfg.write_text("type: local\npath: /tmp\n")
+            result = create_backend_from_config(cfg)
+            self.assertIsInstance(result, LocalBackend)
 
     def test_unknown_type_raises(self):
         """Unknown backend type raises ValueError."""
-        with self.assertRaises(ValueError, msg="Unknown backend type"):
+        with self.assertRaises(ValueError):
             create_backend_from_config({"type": "unknown"})
 
     def test_default_type_is_local(self):

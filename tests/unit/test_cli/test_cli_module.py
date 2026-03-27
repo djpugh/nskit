@@ -30,20 +30,17 @@ class TestResolveBackend(unittest.TestCase):
         result = _resolve_backend("local")
         self.assertIsInstance(result, LocalBackend)
 
-    def test_config_file(self, tmp_path=None):
+    def test_config_file(self):
         """Config file path returns configured backend."""
         import tempfile
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
-            f.write("type: local\npath: /tmp\n")
-            f.flush()
-            try:
-                result = _resolve_backend(f.name)
-                from nskit.client.backends import LocalBackend
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = Path(tmp) / "backend.yml"
+            cfg.write_text("type: local\npath: /tmp\n")
+            result = _resolve_backend(str(cfg))
+            from nskit.client.backends import LocalBackend
 
-                self.assertIsInstance(result, LocalBackend)
-            finally:
-                os.unlink(f.name)
+            self.assertIsInstance(result, LocalBackend)
 
     def test_unknown_raises(self):
         """Unknown backend raises SystemExit."""
