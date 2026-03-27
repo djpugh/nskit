@@ -1,0 +1,48 @@
+# Exclude sensitive and unnecessary files from Docker build context
+
+# Credentials and secrets
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+**/.netrc
+**/.aws
+**/.ssh
+
+# Version control
+.gitignore
+.gitattributes
+
+# Python artifacts
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+build
+.venv
+venv
+.tox
+
+# Coverage and reports
+reports
+coverage.xml
+.coverage
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Docs and tooling
+docs
+Taskfile.yml
+taskfiles
+noxfile.py
+.pre-commit-config.yaml
+
+# IDE
+.vscode
+.idea
+*.swp

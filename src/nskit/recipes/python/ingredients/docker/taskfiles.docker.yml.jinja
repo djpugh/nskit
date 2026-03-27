@@ -1,0 +1,109 @@
+version: '3'
+
+vars:
+  DOCKER_REGISTRY:
+  DOCKER_IMAGE:
+
+env:
+  {%- raw %}
+  DOCKER_IMAGE_VERSION:
+    sh: git describe --match=NeVeRmAtCh --always --dirty
+  DOCKER_IMAGE_REMOTE: "{{.DOCKER_REGISTRY}}/{{.DOCKER_IMAGE}}"
+  VERSIONED_DOCKER_IMAGE_REMOTE: "{{.DOCKER_IMAGE_REMOTE}}:{{.DOCKER_IMAGE_VERSION}}"
+  LOCAL_RUN_PORT: 1994
+  INTERNAL_SERVICE_PORT: 80
+
+tasks:
+
+  get-image-fullname:
+    desc: Get the Docker image version.
+    silent: true
+    cmds:
+      - echo $VERSIONED_DOCKER_IMAGE_REMOTE
+
+  build:
+    desc: Build the application Docker image.
+    vars:
+      TARGET: '{{default "runtime" .TARGET}}'
+    cmds:
+      - |
+        if [ -n "$GITHUB_ACTIONS" ]; then
+          echo "Building with registry cache"
+          ARGS="--cache-from type=registry,ref=$DOCKER_IMAGE_REMOTE:buildcache --cache-to mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=$DOCKER_IMAGE_REMOTE:buildcache"
+        else
+          ARGS=""
+        fi
+
+        docker buildx build \
+          --platform linux/amd64 \
+          --target {{.TARGET}} \
+          --secret type=env,id=pypi_username,src=UV_INDEX_PYTHON_ARTIFACTS_USERNAME \
+          --secret type=env,id=pypi_password,src=UV_INDEX_PYTHON_ARTIFACTS_PASSWORD \
+          --load \
+          $ARGS \
+          -t $DOCKER_IMAGE:$DOCKER_IMAGE_VERSION \
+          -t $VERSIONED_DOCKER_IMAGE_REMOTE .
+
+  publish:
+    desc: Push the Docker image to the registry.
+    cmds:
+      - task: login
+      - task: build
+      - docker push $VERSIONED_DOCKER_IMAGE_REMOTE
+
+  test:
+    desc: Run the unit tests with coverage report in Docker.
+    vars:
+      EXPORT_COVERAGE: '{{default "false" .EXPORT_COVERAGE}}'
+      TEST_TYPE: '{{default "all" .TEST_TYPE}}'
+    cmds:
+      - task: build
+        vars: { TARGET: test }
+      - |
+        if [ {{.TEST_TYPE}} = "all" ]; then TEST_ROOT_FOLDER="tests/"; else TEST_ROOT_FOLDER="tests/{{.TEST_TYPE}}/"; fi
+
+        docker run \
+          $ARGS \
+          --entrypoint=/bin/bash $VERSIONED_DOCKER_IMAGE_REMOTE \
+          -c "uv run --no-sync coverage run --source src -m pytest -s -v $TEST_ROOT_FOLDER && uv run --no-sync coverage report -m && uv run --no-sync coverage xml && uv run --no-sync coverage json --pretty-print && uv run --no-sync coverage html -d reports/htmlcov"
+
+        if [ {{.EXPORT_COVERAGE}} = true ]; then
+          docker cp $(docker ps -lq):/app/coverage.xml coverage.xml
+          docker cp $(docker ps -lq):/app/coverage.json coverage.json
+          if [ ! -d reports ]; then mkdir reports; fi
+          docker cp $(docker ps -lq):/app/reports/htmlcov reports/htmlcov
+        fi
+
+  test:*
+    desc: Run the unit tests with coverage report in Docker.
+    vars:
+      TEST_TYPE: '{{index .MATCH 0}}'
+    cmds:
+      - task: test
+        vars:
+          TEST_TYPE: {{.TEST_TYPE}}
+          EXPORT_COVERAGE: '{{default "false" .EXPORT_COVERAGE}}'
+
+  serve:
+    aliases:
+      - dev
+    desc: Serve the application in Docker.
+    cmds:
+      - task: build-docker
+      - echo "🚀 Running the application on http://localhost:$LOCAL_RUN_PORT ..."
+      - |
+        docker run \
+        -it --rm -p $LOCAL_RUN_PORT:$INTERNAL_SERVICE_PORT \
+        $VERSIONED_DOCKER_IMAGE_REMOTE
+
+  entrypoint:
+    desc: Run a bash shell in the runtime Docker container.
+    cmds:
+      - task: build-docker
+        vars: { TARGET: runtime }
+      - |
+        docker run \
+        -it --rm --entrypoint=/bin/bash \
+        $VERSIONED_DOCKER_IMAGE_REMOTE
+
+{% endraw %}

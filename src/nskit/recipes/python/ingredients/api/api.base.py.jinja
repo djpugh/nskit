@@ -1,0 +1,15 @@
+import logging
+
+from fastapi import APIRouter
+
+from {{repo.py_name}}.auth import auth_provider
+
+logger = logging.get_logger('{{repo.py_name}}')
+router = APIRouter()
+
+
+@router.get('/health')
+async def health_check():
+    """Check service health."""
+    logger.debug('Health status OK')
+    return {'status': 'ok'}

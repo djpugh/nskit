@@ -1,0 +1,30 @@
+{% extends "nskit.recipes.common.ingredients:pre_commit_config.yaml.jinja" %}
+
+{% block AdditionalHooks %}
+{{super()}}
+
+- repo: https://github.com/pycqa/isort
+  rev: 5.13.2
+  hooks:
+    - id: isort
+      name: isort (python)
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.1.14
+  hooks:
+    - id: ruff
+      args: [ --fix ]
+    - id: ruff-format
+
+- repo: https://github.com/asottile/pyupgrade
+  rev: v2.31.0
+  hooks:
+    - id: pyupgrade
+      args: [--py36-plus]
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.1.0
+  hooks:
+    - id: debug-statements
+
+{% endblock %}

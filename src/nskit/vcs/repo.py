@@ -1,42 +1,30 @@
 """Repo management class."""
+
 from __future__ import annotations
 
-from pathlib import Path
 import shutil
 import subprocess  # nosec B404
 import sys
 import tempfile
-from typing import Any, Optional, TYPE_CHECKING, Union
 import warnings
-
-if sys.version_info.major <= 3 and sys.version_info.minor <= 8:
-    from typing_extensions import Annotated
-else:
-    from typing import Annotated
+from pathlib import Path
+from typing import Annotated, Any
 
 import git
-from pydantic import Field, field_validator, model_validator, ValidationInfo
+from pydantic import Field, ValidationInfo, field_validator, model_validator
 
 from nskit._logging import logger_factory
 from nskit.common.configuration import BaseConfiguration
 from nskit.common.contextmanagers import ChDir
 from nskit.common.io import yaml
 from nskit.vcs.installer import InstallersEnum
-from nskit.vcs.namespace_validator import (
-    NamespaceOptionsType,
-    NamespaceValidator,
-    ValidationEnum,
-)
+from nskit.vcs.namespace_validator import NamespaceOptionsType, NamespaceValidator, ValidationEnum
 from nskit.vcs.providers import RepoClient
-
-if TYPE_CHECKING:
-    from nskit.vcs.codebase import Codebase
-
 
 logger = logger_factory.get_logger(__name__)
 
 
-DEFAULT_REMOTE = 'origin'
+DEFAULT_REMOTE = "origin"
 # We should set the default dir in some form of env var/other logic in the cli
 
 _NAMESPACE_README = """
@@ -77,21 +65,21 @@ The separator is set by the repo_separator parameter, in this example "-".
 
 
 class _Repo(BaseConfiguration):
-
     name: str
     local_dir: Path = Field(default_factory=Path.cwd)
-    default_branch: str = 'main'
+    default_branch: str = "main"
     provider_client: Annotated[RepoClient, Field(validate_default=True)] = None
 
     __git_repo = None
     _git_repo_cls = git.Repo
 
-    @field_validator('provider_client', mode='before')
+    @field_validator("provider_client", mode="before")
     @classmethod
     def _validate_client(cls, value):
         if value is None:
-            from nskit.vcs.settings import CodebaseSettings
-            value = CodebaseSettings().provider_settings.repo_client
+            from nskit.vcs.provider_detection import get_default_repo_client
+
+            value = get_default_repo_client()
         return value
 
     @property
@@ -127,13 +115,14 @@ class _Repo(BaseConfiguration):
             def on_exc(function, path, exc_info):  # noqa: U100
                 """Log errors when deleting."""
                 errors.append((path, exc_info))
+
             if sys.version_info.major <= 3 and sys.version_info.minor < 12:
                 shutil.rmtree(self.local_dir, onerror=on_exc)
             else:
                 shutil.rmtree(self.local_dir, onexc=on_exc)
             if errors:
                 error_info = "\n".join([str(u) for u in errors])
-                warnings.warn(f'Unable to delete some paths due to errors:\n{error_info}', stacklevel=2)
+                warnings.warn(f"Unable to delete some paths due to errors:\n{error_info}", stacklevel=2)
 
     def clone(self):
         """Clone the repo."""
@@ -149,30 +138,32 @@ class _Repo(BaseConfiguration):
         if self._git_repo.remotes:
             getattr(self._git_repo.remotes, remote).pull()
         else:
-            warnings.warn('No Remotes found', stacklevel=2)
+            warnings.warn("No Remotes found", stacklevel=2)
 
-    def commit(self, message: str, paths: list[str | Path] | str | Path = '*', hooks=True):
+    def commit(self, message: str, paths: list[str | Path] | str | Path = "*", hooks=True):
         """Commit the paths with given message.
 
         hooks=False disables running pre-commit hooks.
         """
         # Because GitPython add cannot be set to use the .gitignore, we use subprocess here
         if not isinstance(paths, (list, tuple)):
-            paths = [paths,]
+            paths = [
+                paths,
+            ]
         with ChDir(self._git_repo.working_tree_dir):
-            subprocess.check_call(['git', 'add']+paths)  # nosec B603, B607
+            subprocess.check_call(["git", "add"] + paths)  # nosec B603, B607
             if hooks:
                 hook_args = []
             else:
-                hook_args = ['--no-verify']
-            subprocess.check_call(['git', 'commit'] + hook_args + ['-m', message])  # nosec B603, B607
+                hook_args = ["--no-verify"]
+            subprocess.check_call(["git", "commit"] + hook_args + ["-m", message])  # nosec B603, B607
 
     def push(self, remote=DEFAULT_REMOTE):
         """Push the repo to the remote (defaults to origin)."""
         if self._git_repo.remotes:
             getattr(self._git_repo.remotes, remote).push()
         else:
-            warnings.warn('No Remotes found', stacklevel=2)
+            warnings.warn("No Remotes found", stacklevel=2)
 
     def tag(self, tag, message: str | None = None, force: bool = False):
         """Tag the repo (with a given name, and optional message."""
@@ -202,15 +193,15 @@ class _Repo(BaseConfiguration):
     @property
     def exists_locally(self):
         """Check if the repo exists locally (and .git initialised)."""
-        return self.local_dir.exists() and (self.local_dir/'.git').exists()
+        return self.local_dir.exists() and (self.local_dir / ".git").exists()
 
     @property
     def exists(self):
         """Check if the repo exists on the remote."""
         return self.provider_client.check_exists(self.name)
 
-    def install(self, codebase: Codebase | None = None, deps: bool = True):
-        """Install the repo into a codebase.
+    def install(self, deps: bool = True):
+        """Install the repo.
 
         To make it easy to extend to new languages/installation methods, this uses an entrypoint to handle it.
 
@@ -221,16 +212,17 @@ class _Repo(BaseConfiguration):
         """
         # Loop through available installers and check - if they check True, then install them
         for installer in InstallersEnum:
-            logger.info(f'Trying {installer.value}, all matching languages will be installed.')
+            logger.info(f"Trying {installer.value}, all matching languages will be installed.")
             if installer.extension:
                 language_installer = installer.extension()
                 if language_installer.check(self.local_dir):
-                    logger.info(f'Matched {installer.value}, installing.')
-                    language_installer.install(path=self.local_dir, codebase=codebase, deps=deps)
+                    logger.info(f"Matched {installer.value}, installing.")
+                    language_installer.install(path=self.local_dir, deps=deps)
 
 
 class NamespaceValidationRepo(_Repo):
     """Repo for managing namespace validation."""
+
     # # This is not ideal behaviour, but due to the issue highlighted in
     # # https://github.com/pydantic/pydantic-settings/issues/245 and the
     # # non-semver compliant versioning in pydantic-settings, we need to add this behaviour
@@ -238,9 +230,9 @@ class NamespaceValidationRepo(_Repo):
     # # also ignore additional inputs in the python initialisation
     # # We will pin to version < 2.1.0 instead of allowing 2.2.0+ as it requires the code below:
     # model_config = ConfigDict(extra='ignore')  noqa: E800
-    name: str = '.namespaces'
-    namespaces_filename: Union[str, Path] = 'namespaces.yaml'
-    local_dir: Annotated[Path, Field(validate_default=True)] = None
+    name: str = ".namespaces"
+    namespaces_filename: str | Path = "namespaces.yaml"
+    local_dir: Annotated[Path | None, Field(validate_default=True)] = None
 
     _validator: NamespaceValidator = None
 
@@ -256,11 +248,11 @@ class NamespaceValidationRepo(_Repo):
         return self.validator.validate_name(proposed_name)
 
     # Validate default for local_dir
-    @field_validator('local_dir', mode='before')
+    @field_validator("local_dir", mode="before")
     @classmethod
     def _validate_local_dir(cls, value: Any, info: ValidationInfo):
         if value is None:
-            value = Path(tempfile.gettempdir())/info.data['name']
+            value = Path(tempfile.gettempdir()) / info.data["name"]
         return value
 
     def _download_namespaces(self):
@@ -272,28 +264,26 @@ class NamespaceValidationRepo(_Repo):
         if not self.exists_locally:
             self._download_namespaces()
         self.pull()
-        with (self.local_dir/self.namespaces_filename).open() as f:
+        with (self.local_dir / self.namespaces_filename).open() as f:
             namespace_validator = NamespaceValidator(**yaml.load(f))
         return namespace_validator
 
     def create(
-            self,
-            *,
-            namespace_options: NamespaceOptionsType | NamespaceValidator,
-            delimiters: list[str] | None = None,
-            repo_separator: str | None = None):
+        self,
+        *,
+        namespace_options: NamespaceOptionsType | NamespaceValidator,
+        delimiters: list[str] | None = None,
+        repo_separator: str | None = None,
+    ):
         """Create and populate the validator repo."""
         # Provide either namespace_validator or namespaceOptions
         kwargs = {}
         if delimiters:
-            kwargs['delimiters'] = delimiters
+            kwargs["delimiters"] = delimiters
         if repo_separator:
-            kwargs['repo_separator'] = repo_separator
+            kwargs["repo_separator"] = repo_separator
         if not isinstance(namespace_options, NamespaceValidator):
-            namespace_validator = NamespaceValidator(
-                options=namespace_options,
-                **kwargs
-                )
+            namespace_validator = NamespaceValidator(options=namespace_options, **kwargs)
         else:
             # namespace_options is a NamespaceValidator
             namespace_validator = namespace_options.model_copy(update=kwargs)
@@ -301,12 +291,12 @@ class NamespaceValidationRepo(_Repo):
         super().create()
         with ChDir(self.local_dir):
             # Write the Config
-            with open(self.namespaces_filename, 'w') as f:
+            with open(self.namespaces_filename, "w") as f:
                 f.write(namespace_validator.model_dump_yaml())
-            with open('README.md', 'w') as f:
+            with open("README.md", "w") as f:
                 f.write(_NAMESPACE_README)
             # Commit it
-            self.commit('Initial Namespaces Commit', [self.namespaces_filename, 'README.md'])
+            self.commit("Initial Namespaces Commit", [self.namespaces_filename, "README.md"])
             # Push it
             self.push()
 
@@ -314,18 +304,18 @@ class NamespaceValidationRepo(_Repo):
 class Repo(_Repo):
     """Repo with namespace validator."""
 
-    namespace_validation_repo: Optional[NamespaceValidationRepo] = None
+    namespace_validation_repo: NamespaceValidationRepo | None = None
     validation_level: ValidationEnum = ValidationEnum.none
     name: str
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def _validate_name(self):
         value = self.name
         if self.namespace_validation_repo and self.validation_level in [ValidationEnum.strict, ValidationEnum.warn]:
             namespace_validator = self.namespace_validation_repo.validator
             result, message = namespace_validator.validate_name(value)
             if not result:
-                message = (f'{value} {message.format(key="<root>")}')
+                message = f"{value} {message.format(key='<root>')}"
             value = namespace_validator.to_repo_name(value)
             if self.validation_level == ValidationEnum.strict and not result:
                 raise ValueError(message)

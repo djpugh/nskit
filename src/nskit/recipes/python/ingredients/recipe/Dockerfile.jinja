@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:1
+FROM python:3.12-slim-bookworm
+
+ARG RECIPE_NAME={{name}}
+
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+RUN sh /uv-installer.sh && rm /uv-installer.sh && cp /root/.local/bin/uv /usr/local/bin/uv
+
+WORKDIR /app
+COPY pyproject.toml uv.lock* README.md /app/
+RUN uv sync --frozen --no-install-project --no-dev || uv sync --no-install-project --no-dev
+
+COPY src/ /app/src/
+RUN --mount=type=bind,src=.git,dst=/app/.git \
+    uv sync --frozen --no-dev || uv sync --no-dev
+
+RUN mkdir -p /app/input /app/output \
+    && useradd --create-home nskit \
+    && chown -R nskit:nskit /app
+
+LABEL nskit.recipe="true"
+LABEL nskit.recipe.name="${RECIPE_NAME}"
+USER nskit
+RUN git config --global --add safe.directory '*'
+
+ENTRYPOINT ["uv", "run", "--no-sync", "nskit"]

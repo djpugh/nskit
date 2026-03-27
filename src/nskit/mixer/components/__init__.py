@@ -1,4 +1,11 @@
 """nskit.mixer components for building recipes."""
+from nskit.mixer.components.config import (  # noqa: F401
+    ConfigNotFoundError,
+    FileSystemError,
+    InvalidConfigError,
+    RecipeConfig,
+    RecipeMetadata,
+)
 from nskit.mixer.components.file import File  # noqa: F401
 from nskit.mixer.components.folder import Folder  # noqa: F401
 from nskit.mixer.components.hook import Hook  # noqa: F401

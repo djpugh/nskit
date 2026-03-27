@@ -1,0 +1,15 @@
+{%- extends "nskit.recipes.common.ingredients:Taskfile.yml.jinja" %}
+
+
+{% block AdditionalTaskfiles %}
+  {{ super() }}
+  python:common:
+    taskfile: taskfiles/python-common.yml
+    flatten: true
+  python:
+    taskfile: taskfiles/python-build-test.yml
+    flatten: false
+  docs:
+    taskfile: taskfiles/docs.yml
+    flatten: false
+{% endblock AdditionalTaskfiles %}

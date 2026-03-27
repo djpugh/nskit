@@ -1,5 +1,7 @@
 """Provide a TOML Load/Dump API consistent with JSON."""
-from typing import Mapping, TextIO
+
+from collections.abc import Mapping
+from typing import TextIO
 
 import tomlkit
 

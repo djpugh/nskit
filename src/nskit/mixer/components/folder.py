@@ -1,6 +1,7 @@
 """Folder component."""
+
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from pydantic import Field, field_validator
 
@@ -11,9 +12,9 @@ from .filesystem_object import FileSystemObject
 class Folder(FileSystemObject):
     """Folder component."""
 
-    contents: List[Union[File, 'Folder']] = Field(default_factory=list, description='The folder contents')
+    contents: list[Union[File, "Folder"]] = Field(default_factory=list, description="The folder contents")
 
-    def write(self, base_path: Path, context: Dict[str, Any], override_path: Optional[Path] = None):
+    def write(self, base_path: Path, context: dict[str, Any], override_path: Optional[Path] = None):
         """Write the rendered content to the appropriate path within the ``base_path``."""
         folder_path = self.get_path(base_path, context, override_path)
         folder_path.mkdir(exist_ok=True, parents=True)
@@ -22,7 +23,7 @@ class Folder(FileSystemObject):
             contents_dict.update(obj.write(folder_path, context))
         return {folder_path: contents_dict}
 
-    def dryrun(self, base_path: Path, context: Dict[str, Any], override_path: Optional[Path] = None):
+    def dryrun(self, base_path: Path, context: dict[str, Any], override_path: Optional[Path] = None):
         """Preview the file contents using the context."""
         folder_path = self.get_path(base_path, context, override_path)
         contents_dict = {}
@@ -31,7 +32,7 @@ class Folder(FileSystemObject):
         result = {folder_path: contents_dict}
         return result
 
-    def validate(self, base_path: Path, context: Dict[str, Any], override_path: Optional[Path] = None):
+    def validate(self, base_path: Path, context: dict[str, Any], override_path: Optional[Path] = None):
         """Validate the output against expected."""
         missing = []
         errors = []
@@ -48,7 +49,7 @@ class Folder(FileSystemObject):
             ok.append(path)
         return missing, errors, ok
 
-    @field_validator('contents', mode='before')
+    @field_validator("contents", mode="before")
     @classmethod
     def _validate_contents_ids_unique(cls, contents):
         if contents:
@@ -58,12 +59,14 @@ class Folder(FileSystemObject):
                 if isinstance(item, FileSystemObject):
                     id_ = item.id_
                 if isinstance(item, dict):
-                    id_ = item.get('id_', None)
+                    id_ = item.get("id_", None)
                 if id_ is None:
                     # No id_ provided
                     continue
                 if id_ in ids_:
-                    raise ValueError(f'IDs for contents must be unique. The ID({id_}) already exists in the folder contents')
+                    raise ValueError(
+                        f"IDs for contents must be unique. The ID({id_}) already exists in the folder contents"
+                    )
                 ids_.append(id_)
         return contents
 
@@ -72,7 +75,7 @@ class Folder(FileSystemObject):
         for i, item in enumerate(self.contents):
             if item.id_ == name_or_id or item.name == name_or_id:
                 return i
-        raise KeyError(f'Name or id_ {name_or_id} not found in contents')
+        raise KeyError(f"Name or id_ {name_or_id} not found in contents")
 
     def __getitem__(self, name_or_id):
         """Get the item by name or id."""
@@ -90,11 +93,11 @@ class Folder(FileSystemObject):
 
     def _repr(self, context=None, indent=0, **kwargs):  # noqa: U100
         """Represent the contents of the folder."""
-        indent_ = ' '*indent
-        line_start = f'\n{indent_}|- '
-        contents_repr = ''
+        indent_ = " " * indent
+        line_start = f"\n{indent_}|- "
+        contents_repr = ""
         if self.contents:
             contents = sorted(self.contents, key=lambda x: isinstance(x, Folder))
-            lines = [u._repr(context=context, indent=indent+2) for u in contents]
-            contents_repr = ':'+line_start.join(['']+lines)
-        return f'{super()._repr(context=context)}{contents_repr}'
+            lines = [u._repr(context=context, indent=indent + 2) for u in contents]
+            contents_repr = ":" + line_start.join([""] + lines)
+        return f"{super()._repr(context=context)}{contents_repr}"
