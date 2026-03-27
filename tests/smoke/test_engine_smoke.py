@@ -8,6 +8,7 @@ image from the nskit Dockerfile and execute a recipe inside it.
 from __future__ import annotations
 
 import contextlib
+import os
 import shutil
 import subprocess
 import tempfile
@@ -25,6 +26,8 @@ from nskit.client.recipes import RecipeClient
 
 NSKIT_ROOT = Path(__file__).resolve().parents[2]  # nskit repo root
 DOCKER_IMAGE_TAG = "nskit-smoke-test:latest"
+DOCKER_IMAGE_V1 = "nskit-smoke-test:v1"
+DOCKER_IMAGE_V2 = "nskit-smoke-test:v2"
 
 
 def _docker_available() -> bool:
@@ -86,6 +89,7 @@ def _build_nskit_image() -> bool:
     return result.returncode == 0
 
 
+# ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
 # Local engine — real recipe execution
 # ---------------------------------------------------------------------------
@@ -388,6 +392,105 @@ class TestRecipeClientWithDockerEngine(unittest.TestCase):
                 any(p.name == "pyproject.toml" for p in output_dir.rglob("*")),
                 "Expected pyproject.toml from Docker flow",
             )
+
+
+@unittest.skipUnless(_docker_available(), "Docker not available")
+class TestDockerThreeWayUpdate(unittest.TestCase):
+    """Smoke test: init v1 → customise → update to v2 → verify 3-way merge."""
+
+    _images_built: bool = False
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Build v1 and v2 Docker images."""
+        result = subprocess.run(
+            ["task", "docs:build-demo-images", "IMAGE_PREFIX=nskit-smoke-test", "V1_TAG=v1", "V2_TAG=v2"],
+            cwd=NSKIT_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+        if result.returncode != 0:
+            raise unittest.SkipTest(f"Failed to build images: {result.stderr}")
+        cls._images_built = True
+
+    def _make_backend(self, version_map: dict[str, str]) -> Mock:
+        """Create a mock backend returning image tags by version."""
+        backend = Mock()
+        backend.entrypoint = "nskit.recipes"
+        backend.get_recipe_versions = Mock(return_value=list(version_map.keys()))
+        backend.get_image_url = Mock(side_effect=lambda r, v: version_map[v])
+        backend.pull_image = Mock()
+        return backend
+
+    def test_update_preserves_user_changes_and_adds_new_file(self) -> None:
+        """Init v1, customise README, update to v2: README preserved, CONTRIBUTING.md added."""
+        from nskit.client.update import UpdateClient
+        from nskit.common.models.diff import DiffMode
+
+        version_map = {"v1": DOCKER_IMAGE_TAG, "v2": DOCKER_IMAGE_V2}
+        backend = self._make_backend(version_map)
+        engine = DockerEngine(skip_pull=True)
+
+        with _docker_tmpdir() as tmp:
+            output_dir = tmp / "update-test"
+            params = {
+                "name": "update-test",
+                "repo": {
+                    "owner": "Test",
+                    "email": "test@example.com",
+                    "url": "https://example.com",
+                },
+            }
+
+            # Step 1: Init from v1
+            client = RecipeClient(backend, engine=engine)
+            result = client.initialize_recipe(
+                recipe="python_package", version="v1", parameters=params, output_dir=output_dir
+            )
+            self.assertTrue(result.success, f"Init failed: {result.errors}")
+            self.assertFalse((output_dir / "CONTRIBUTING.md").exists(), "v1 should not have CONTRIBUTING.md")
+
+            # Fix config to reference the actual test image tags
+            from nskit.client.config import ConfigManager
+
+            config_mgr = ConfigManager(output_dir)
+            config = config_mgr.load_config()
+            config.metadata.docker_image = DOCKER_IMAGE_V1
+            config_mgr.save_config(config)
+
+            # Step 2: Customise README
+            readme = output_dir / "README.md"
+            original = readme.read_text()
+            readme.write_text(original + "\n## My Custom Section\n")
+
+            # Commit customisation
+            subprocess.run(["git", "add", "."], cwd=output_dir, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "commit", "-m", "customise", "--no-verify"],
+                cwd=output_dir,
+                capture_output=True,
+                check=True,
+                env={
+                    **os.environ,
+                    "GIT_COMMITTER_NAME": "test",
+                    "GIT_COMMITTER_EMAIL": "t@t",
+                    "GIT_AUTHOR_NAME": "test",
+                    "GIT_AUTHOR_EMAIL": "t@t",
+                },
+            )
+
+            # Step 3: Update to v2
+            update_client = UpdateClient(backend, engine=engine)
+            update_result = update_client.update_project(
+                project_path=output_dir, target_version="v2", diff_mode=DiffMode.THREE_WAY
+            )
+            self.assertTrue(update_result.success, f"Update failed: {update_result.errors}")
+
+            # Step 4: Verify
+            self.assertTrue((output_dir / "CONTRIBUTING.md").exists(), "v2 should add CONTRIBUTING.md")
+            updated_readme = readme.read_text()
+            self.assertIn("My Custom Section", updated_readme, "User customisation should be preserved")
 
 
 if __name__ == "__main__":

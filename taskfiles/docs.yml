@@ -41,8 +41,22 @@ tasks:
     cmds:
       - task: record-cli
       - task: record-yaml
+      - task: build-demo-images
       - task: record-update
       - task: record-docker
+
+  build-demo-images:
+    desc: Build v1 and v2 Docker images for demo tapes and smoke tests.
+    preconditions:
+      - sh: docker info >/dev/null 2>&1
+        msg: "Docker is not running."
+    vars:
+      IMAGE_PREFIX: '{{.IMAGE_PREFIX | default "nskit/python_package"}}'
+      V1_TAG: '{{.V1_TAG | default "v1.0.0"}}'
+      V2_TAG: '{{.V2_TAG | default "v2.0.0"}}'
+    cmds:
+      - docker build --no-cache --target runtime --build-arg RECIPE_NAME=python_package -t "{{.IMAGE_PREFIX}}:{{.V1_TAG}}" . -q
+      - docker build -t "{{.IMAGE_PREFIX}}:{{.V2_TAG}}" --build-arg BASE_IMAGE="{{.IMAGE_PREFIX}}:{{.V1_TAG}}" -f docs/Dockerfile.demo-v2 . -q
 
   record-cli:
     desc: Record interactive CLI demo GIF.
@@ -60,6 +74,7 @@ tasks:
 
   record-update:
     desc: Record update workflow demo GIF.
+    deps: [build-demo-images]
     cmds:
       - cmd: which vhs >/dev/null 2>&1 || brew install charmbracelet/tap/vhs; which ttyd >/dev/null 2>&1 || brew install ttyd
         silent: true
@@ -67,10 +82,9 @@ tasks:
 
   record-docker:
     desc: Record Docker demo GIF (requires Docker).
+    deps: [build-demo-images]
     cmds:
       - cmd: which vhs >/dev/null 2>&1 || brew install charmbracelet/tap/vhs; which ttyd >/dev/null 2>&1 || brew install ttyd
-        silent: true
-      - cmd: docker rmi nskit/python_package:v1.0.0 2>/dev/null || true; docker builder prune -f 2>/dev/null || true; docker build --no-cache --target runtime --build-arg RECIPE_NAME=python_package -t nskit/python_package:v1.0.0 .
         silent: true
       - 'PATH="{{.VHS_PATH}}" vhs docs/demo-docker.tape'
 
