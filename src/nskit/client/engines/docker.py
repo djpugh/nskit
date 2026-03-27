@@ -76,6 +76,11 @@ class DockerEngine(RecipeEngine):
                     "docker",
                     "run",
                     "--rm",
+                ]
+                # Run as host user on Linux to avoid permission issues with volume mounts
+                if hasattr(os, "getuid"):
+                    cmd += ["-u", f"{os.getuid()}:{os.getgid()}"]
+                cmd += [
                     "-e",
                     f"LOG_JSON={os.environ.get('LOG_JSON', 'true')}",
                     "-e",
