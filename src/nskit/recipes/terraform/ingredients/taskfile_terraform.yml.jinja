@@ -1,0 +1,104 @@
+version: '3'
+
+env:
+  {%- raw %}
+  TF_ENVIRONMENT: '{{.TF_ENVIRONMENT | default "dev"}}'
+  TARGET_FOLDER: '{{if or (contains .TF_ENVIRONMENT "dev") (contains .TF_ENVIRONMENT "acc") (contains .TF_ENVIRONMENT "prod")}}envs{{else if contains .TF_ENVIRONMENT "shared"}}shared{{end}}'
+  TERRAFORM_PATH: 'terraform/{{ .TARGET_FOLDER }}'
+  {%- endraw %}
+  TF_STATE_BUCKET_NAME: {{ namespace_domain }}-{% raw %}{{ .TF_ENVIRONMENT }}{% endraw %}-terraform-state
+  TF_WORKSPACE_NAME: '{{ namespace_hyphenated }}-{%- raw %}{{.TF_ENVIRONMENT}}{% endraw %}'
+
+tasks:
+  terraform:set-environment:
+    desc: Interactively prompt and display the command required to set the TF_ENVIRONMENT environment variable
+    silent: true
+    cmds:
+      - |
+        TF_ENVIRONMENT=$(find "terraform/configs/" -maxdepth 1 -name "*.tfvars.json" -exec basename {} \; | sed 's/\.tfvars\.json$//' | fzf --style full --border --border-label ' Which environment? ')
+        echo "export TF_ENVIRONMENT=$TF_ENVIRONMENT"
+
+  terraform:init:
+    desc: Initialize Terraform workspace for a given environment
+    requires:
+      vars: [ TF_ENVIRONMENT ]
+    cmds:
+      - |
+        cd $TERRAFORM_PATH
+        terraform init -upgrade -backend-config "bucket=$TF_STATE_BUCKET_NAME"
+        if ! terraform workspace list | grep -q "\b$TF_WORKSPACE_NAME\b"; then
+          echo "Terraform workspace '$TF_WORKSPACE_NAME' does not exist. Creating it..."
+          terraform workspace new $TF_WORKSPACE_NAME
+        fi
+
+  terraform:plan:
+    desc: Plan Terraform changes for a given environment
+    requires:
+      vars: [ TF_ENVIRONMENT ]
+    cmds:
+      - |
+        cd $TERRAFORM_PATH
+        terraform workspace select $TF_WORKSPACE_NAME
+        terraform plan \
+        -var-file=../configs/$TF_ENVIRONMENT.tfvars.json \
+        -out=./$TF_ENVIRONMENT.tfplan
+
+  terraform:apply:
+    desc: Apply Terraform changes for a given environment
+    requires:
+      vars: [ TF_ENVIRONMENT ]
+    cmds:
+      - |
+        cd $TERRAFORM_PATH
+        terraform workspace select $TF_WORKSPACE_NAME
+        terraform apply ./$TF_ENVIRONMENT.tfplan
+        rm ./$TF_ENVIRONMENT.tfplan
+
+  terraform:validate:
+    desc: Validate a Terraform config for a given environment
+    requires:
+      vars: [ TF_ENVIRONMENT ]
+    cmds:
+      - |
+        cd $TERRAFORM_PATH
+        terraform validate
+
+  terraform:destroy:
+    desc: Destroy a Terraform workspace for a given environment
+    requires:
+      vars: [ TF_ENVIRONMENT ]
+    cmds:
+      - |
+        cd $TERRAFORM_PATH
+        terraform workspace select $TF_WORKSPACE_NAME
+        terraform destroy -var-file=../configs/$TF_ENVIRONMENT.tfvars.json
+
+  terraform:output:
+    desc: Print the Terraform output for a given environment
+    requires:
+      vars: [ TF_ENVIRONMENT ]
+    cmds:
+      - |
+        cd $TERRAFORM_PATH
+        terraform workspace select $TF_WORKSPACE_NAME
+        terraform output
+
+  terraform:state-unlock:
+    desc: Unlock the Terraform state for a given environment
+    requires:
+      vars: [ TF_ENVIRONMENT, LOCK_ID ]
+    cmds:
+      - |
+        cd $TERRAFORM_PATH
+        terraform workspace select $TF_WORKSPACE_NAME
+        terraform force-unlock $LOCK_ID
+
+  terraform:import:
+    desc: Import a resource into Terraform state for a given environment
+    requires:
+      vars: [ TF_ENVIRONMENT, RESOURCE_PATH, IMPORT_ID ]
+    cmds:
+      - |
+        cd $TERRAFORM_PATH
+        terraform workspace select $TF_WORKSPACE_NAME
+        terraform import $RESOURCE_PATH $IMPORT_ID

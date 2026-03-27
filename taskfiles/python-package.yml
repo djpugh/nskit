@@ -1,0 +1,126 @@
+version: '3'
+
+tasks:
+
+  help:
+    desc: This help menu.
+    cmds:
+      - task --list-all
+
+  setup:
+    desc: Install the project dependencies (with uv) and pre-commit hooks.
+    cmds:
+      - uv sync
+      - uv run pre-commit install
+
+  lint:
+    desc: Run the linter (ruff).
+    cmds:
+      - uv run ruff check src/ tests/
+
+  format:
+    desc: Run the formatter (ruff format + import sorting).
+    cmds:
+      - uv run ruff format .
+      - uv run ruff check --select I --fix .
+
+  check:
+    desc: Run all checks (pre-commit, security).
+    cmds:
+      - task: check:precommit
+      - task: check:security
+
+  check:precommit:
+    desc: Run all the precommit checks on all files.
+    cmds:
+      - uv run pre-commit run -a
+
+  check:security:
+    desc: Run security checks (bandit).
+    cmds:
+      - uv run bandit -r src/
+
+  test:unit:
+    desc: Run the unit tests.
+    cmds:
+      - uv run nox -s test -- unit
+
+  test:functional:
+    desc: Run the functional tests.
+    cmds:
+      - uv run nox -s test -- functional
+
+  test:integration:
+    desc: Run the integration tests.
+    cmds:
+      - uv run nox -s test -- integration
+
+  test:smoke:
+    desc: Run the smoke tests.
+    cmds:
+      - uv run nox -s test -- smoke
+
+  test:
+    desc: Run tests. Pass folders as args, e.g. task test -- unit functional
+    cmds:
+      - uv run nox -s test -- {{.CLI_ARGS}}
+
+  build:
+    desc: Build the distribution package.
+    cmds:
+      - uv build
+
+  demo:
+    desc: Run an interactive demo of nskit (local mode).
+    cmds:
+      - cmd: |
+          echo ""
+          echo "╔══════════════════════════════════════════════╗"
+          echo "║         nskit Demo (Local Mode)              ║"
+          echo "╚══════════════════════════════════════════════╝"
+          echo ""
+
+          DEMO_DIR=$(mktemp -d)
+          trap "rm -rf $DEMO_DIR" EXIT
+
+          echo "━━━ Step 1: List available recipes ━━━"
+          echo ""
+          echo "$ nskit list"
+          echo ""
+          uv run nskit list
+          echo ""
+          read -p "Press Enter to continue..."
+          echo ""
+
+          echo "━━━ Step 2: Inspect recipe fields ━━━"
+          echo ""
+          echo "$ nskit get-required-fields --recipe python_package"
+          echo ""
+          uv run nskit get-required-fields --recipe python_package
+          echo ""
+          read -p "Press Enter to continue..."
+          echo ""
+
+          echo "━━━ Step 3: Initialise a project (interactive) ━━━"
+          echo ""
+          echo "$ nskit init --recipe python_package --output-base-path $DEMO_DIR"
+          echo ""
+          uv run nskit init --recipe python_package --output-base-path "$DEMO_DIR"
+          echo ""
+
+          echo "━━━ Step 4: Inspect the generated project ━━━"
+          echo ""
+          PROJECT=$(ls "$DEMO_DIR" | head -1)
+          echo "$ head -20 $PROJECT/pyproject.toml"
+          echo ""
+          head -20 "$DEMO_DIR/$PROJECT/pyproject.toml" 2>/dev/null || echo "(not found)"
+          echo ""
+
+          echo "━━━ Demo complete! ━━━"
+          echo ""
+        silent: true
+
+  publish:
+    desc: Publish the distribution package to PyPI.
+    cmds:
+      - uv publish

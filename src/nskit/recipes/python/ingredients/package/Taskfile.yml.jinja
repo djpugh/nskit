@@ -1,0 +1,8 @@
+{%- extends "nskit.recipes.python.ingredients.shared:taskfile_root.yml.jinja" %}
+
+{%- block AdditionalTaskfiles -%}
+{{super()}}
+  python-package:
+    taskfile: taskfiles/python-package.yml
+    flatten: true
+{%- endblock AdditionalTaskfiles -%}

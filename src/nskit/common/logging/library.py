@@ -1,32 +1,35 @@
 """Library Logging Factory."""
-from typing import Any, Dict, Optional, Union
+
+from typing import Any, Optional, Union
 
 from nskit.common.logging.config import LoggingConfig
 from nskit.common.logging.formatter import get_library_log_format_string
 from nskit.common.logging.logger import get_logger
 
 
-def get_library_logger(library: str, version: str, name: str, config: Optional[Union[LoggingConfig, Dict[str, Any]]] = None, **kwargs):
+def get_library_logger(
+    library: str, version: str, name: str, config: Optional[Union[LoggingConfig, dict[str, Any]]] = None, **kwargs
+):
     """Get a (sub)logger for a library component, which includes the library and version."""
     if config is None:
-        config = {'extra': {}}
+        config = {"extra": {}}
     elif isinstance(config, LoggingConfig):
         config = config.model_dump()
     formatstr = get_library_log_format_string(library, version)
-    library = {'name': library, 'version': version}
-    config['format_string'] = formatstr
-    config['extra'] = config.get('extra', {})
-    config['extra'].update(kwargs.pop('extra', {}))
+    library = {"name": library, "version": version}
+    config["format_string"] = formatstr
+    config["extra"] = config.get("extra", {})
+    config["extra"].update(kwargs.pop("extra", {}))
     config = LoggingConfig(**config)
     if config.json_format:
-        config.extra['library'] = library
+        config.extra["library"] = library
     return get_logger(name, config, **kwargs)
 
 
 class LibraryLoggerFactory:
     """A factory for creating multiple library loggers."""
 
-    def __init__(self, library: str, version: str, base_config: Optional[Union[LoggingConfig, Dict[str, Any]]] = None):
+    def __init__(self, library: str, version: str, base_config: Optional[Union[LoggingConfig, dict[str, Any]]] = None):
         """Initialise the logger factory."""
         self.__library = library
         self.__version = version

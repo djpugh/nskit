@@ -2,7 +2,7 @@
 import inspect
 from typing import Any, Callable
 
-from pydantic import BaseModel, model_serializer, SerializationInfo
+from pydantic import BaseModel, SerializationInfo, model_serializer
 from pydantic_settings import BaseSettings
 
 

@@ -1,9 +1,0 @@
-{% extends "nskit.recipes.python.ingredients:pyproject.toml.template" %}
-{% block Dependencies %}
-    {{ super() }}
-    "fastapi",
-    "uvicorn",
-    "requests",
-    "fastapi_aad_auth",
-
-{% endblock Dependencies %}

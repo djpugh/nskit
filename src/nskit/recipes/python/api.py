@@ -1,17 +1,18 @@
 """API Service Recipe."""
-from typing import List, Union
+
+from typing import Union
 
 from pydantic import Field
 
 from nskit.mixer import File, Folder, LicenseFile
-from nskit.recipes.python import ingredients, PyRecipe
+from nskit.recipes.python import PyRecipe, ingredients
 from nskit.recipes.python.ingredients import api as api_ingredients
 
 
 class APIRecipe(PyRecipe):
     """API Service Recipe."""
 
-    contents: List[Union[File, Folder]] = Field(
+    contents: list[Union[File, Folder]] = Field(
         [
             ingredients.gitignore,
             ingredients.noxfile,
@@ -20,9 +21,10 @@ class APIRecipe(PyRecipe):
             api_ingredients.readme_md,
             ingredients.test_dir,
             api_ingredients.src_dir,
-            api_ingredients.docker.dockerignore,
-            api_ingredients.docker.api_dockerfile,
+            api_ingredients.docker.docker_ignore,
+            api_ingredients.docker.dockerfile,
             ingredients.docs_dir,
-            LicenseFile()
+            LicenseFile(),
         ],
-        description='The folder contents')
+        description="The folder contents",
+    )

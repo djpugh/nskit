@@ -1,0 +1,15 @@
+version: '3'
+
+includes:
+  python-package:
+    taskfile: taskfiles/python-package.yml
+    flatten: true
+  docs:
+    taskfile: taskfiles/docs.yml
+    flatten: false
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list-all

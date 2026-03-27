@@ -1,10 +1,10 @@
 """Context manager for running a test with an extension."""
 from __future__ import annotations
 
+import sys
 from contextlib import ContextDecorator
 from importlib.metadata import Distribution, MetadataPathFinder
 from pathlib import Path
-import sys
 from typing import Any
 
 if sys.version_info.major <= 3 and sys.version_info.minor < 11:

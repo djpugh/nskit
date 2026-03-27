@@ -2,6 +2,9 @@
 # SCM versions
 src/nskit/_version.py
 
+# hypothesis
+.hypothesis
+
 # Compiled files
 *.pyc
 *.nfs*
@@ -66,3 +69,11 @@ mypy
 
 # SBOM FIles
 licenses*.json
+
+# Generated demo GIFs (built by task docs:build)
+# docs/source/assets/*.gif
+
+# Coverage
+htmlcov/
+coverage.xml
+.coverage

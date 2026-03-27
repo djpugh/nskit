@@ -1,7 +1,0 @@
-.nox/*
-.venv/*
-.pytest_cache/*
-test-reports/*
-docs/*
-tests/*
-build/*

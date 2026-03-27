@@ -1,0 +1,19 @@
+version: '3'
+
+vars:
+  ARTIFACT_INDEX_NAME: pypi
+
+dotenv: ['.env']
+
+tasks:
+  dev:
+    desc: Serve the application locally with hot reload
+    cmds:
+      - uv run fastapi dev {{repo.src_path}}/server.py
+  serve:
+    desc: Serve the application locally
+    cmds:
+      - uv run uvicorn {{ repo.py_name }}.app:app --port $LOCAL_RUN_PORT --host 0.0.0.0
+  build:
+  publish:
+  deploy:

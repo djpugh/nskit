@@ -1,0 +1,8 @@
+{% extends "nskit.recipes.python.ingredients.tools:pyproject.toml.jinja" %}
+{% block Dependencies %}
+    {{ super() }}
+    "fastapi",
+    "uvicorn",
+    "requests",
+
+{% endblock Dependencies %}

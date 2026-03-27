@@ -1,0 +1,4 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+RUN sed -i '/ingredients.readme_md,/a\            File(name="CONTRIBUTING.md", content="# Contributing to {{name}}\\n\\nWe welcome contributions!\\n"),' \
+    /app/src/nskit/recipes/python/package.py
