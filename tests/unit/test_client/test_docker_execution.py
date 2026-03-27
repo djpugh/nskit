@@ -54,11 +54,13 @@ class TestDockerExecution:
                 output_dir=tmp_path / "output",
             )
 
-        # Verify docker run was called
+        # Verify docker run was called (find the init call, not the chown)
         assert mock_run.called
-        call_args = mock_run.call_args[0][0]
-        assert call_args[0] == "docker"
-        assert call_args[1] == "run"
+        run_calls = [
+            c[0][0] for c in mock_run.call_args_list if c[0][0][0:2] == ["docker", "run"] and "init" in c[0][0]
+        ]
+        assert len(run_calls) == 1
+        call_args = run_calls[0]
         assert "--rm" in call_args
         assert "ghcr.io/test/recipe:v1.0.0" in call_args
 
@@ -77,8 +79,12 @@ class TestDockerExecution:
                 output_dir=output_dir,
             )
 
-        # Verify volume mount
-        call_args = mock_run.call_args[0][0]
+        # Verify volume mount (find the init call, not the chown)
+        run_calls = [
+            c[0][0] for c in mock_run.call_args_list if c[0][0][0:2] == ["docker", "run"] and "init" in c[0][0]
+        ]
+        assert len(run_calls) == 1
+        call_args = run_calls[0]
         assert "-v" in call_args
         # Find the output volume mount
         v_index = [i for i, arg in enumerate(call_args) if arg == "-v"]

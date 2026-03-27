@@ -1,4 +1,5 @@
 """Tests for recipe execution engines."""
+
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -76,8 +77,8 @@ class TestDockerEngine:
                 image_url="img:v1",
             )
 
-        # pull call, then run call
-        assert mock_run.call_count == 2
+        # pull call, then run call (+ optional chown on Linux)
+        assert mock_run.call_count >= 2
         pull_cmd = mock_run.call_args_list[0][0][0]
         assert pull_cmd == ["docker", "pull", "img:v1"]
 
