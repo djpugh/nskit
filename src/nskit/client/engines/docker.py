@@ -66,6 +66,8 @@ class DockerEngine(RecipeEngine):
             with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
                 yaml.dump(parameters, f, default_flow_style=False)
                 input_file = Path(f.name)
+            # Ensure readable by non-root container user
+            input_file.chmod(0o644)
 
             try:
                 output_dir.mkdir(parents=True, exist_ok=True)
