@@ -100,6 +100,25 @@ class DockerEngine(RecipeEngine):
 
                 result = subprocess.run(cmd, capture_output=True, text=True, check=True)  # nosec B603, B607
 
+                # Fix ownership of files created by the container user
+                if hasattr(os, "getuid"):
+                    subprocess.run(  # nosec B603, B607
+                        [
+                            "docker",
+                            "run",
+                            "--rm",
+                            "-v",
+                            f"{output_dir.absolute()}:/fix",
+                            "busybox",
+                            "chown",
+                            "-R",
+                            f"{os.getuid()}:{os.getgid()}",
+                            "/fix",
+                        ],
+                        capture_output=True,
+                        check=False,
+                    )
+
                 if result.stderr:
                     warnings.append(result.stderr.strip())
 
