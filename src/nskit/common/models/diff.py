@@ -52,6 +52,8 @@ class MergeResult(BaseModel):
     """Result of merge operation."""
 
     clean_merges: list[str] = Field(default_factory=list)
+    added: list[str] = Field(default_factory=list)
+    removed: list[str] = Field(default_factory=list)
     conflicts: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)
 

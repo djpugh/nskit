@@ -402,6 +402,14 @@ def create_cli(
 
             if result.success:
                 rich_print(f"[green]✓ Updated {len(result.files_updated)} files[/green]")
+                if result.files_added:
+                    rich_print(f"[cyan]+ {len(result.files_added)} new files[/cyan]")
+                    for file in result.files_added:
+                        rich_print(f"  + {file}")
+                if result.files_removed:
+                    rich_print(f"[red]- {len(result.files_removed)} removed files[/red]")
+                    for file in result.files_removed:
+                        rich_print(f"  - {file}")
                 if result.files_with_conflicts:
                     rich_print(f"[yellow]⚠ {len(result.files_with_conflicts)} files have conflicts[/yellow]")
                     for file in result.files_with_conflicts:

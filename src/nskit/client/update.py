@@ -133,6 +133,8 @@ class UpdateClient:
             result = UpdateResult(
                 success=len(merge_result.errors) == 0,
                 files_updated=merge_result.clean_merges,
+                files_added=merge_result.added,
+                files_removed=merge_result.removed,
                 files_with_conflicts=merge_result.conflicts,
                 clean_merges=merge_result.clean_merges,
                 errors=merge_result.errors,
@@ -177,6 +179,8 @@ class UpdateClient:
             Merge result with clean merges, conflicts, and errors.
         """
         clean_merges: list[str] = []
+        added: list[str] = []
+        removed: list[str] = []
         conflicts: list[str] = []
         errors: list[str] = []
 
@@ -208,13 +212,20 @@ class UpdateClient:
                 if not dry_run:
                     dest_file.parent.mkdir(parents=True, exist_ok=True)
                     dest_file.write_bytes(target_file.read_bytes())
-                clean_merges.append(rel)
+                added.append(rel)
+
+            for file_diff in diff_result.deleted_files:
+                rel = str(file_diff.relative_path)
+                dest_file = project_path / rel
+                if dest_file.exists() and not dry_run:
+                    dest_file.unlink()
+                removed.append(rel)
 
         else:
             # 2-way: compare current project against target
             diff_result = diff_engine.extract_diff(project_path, new_fresh, DiffMode.TWO_WAY)
 
-            for file_diff in diff_result.modified_files + diff_result.added_files:
+            for file_diff in diff_result.modified_files:
                 rel = str(file_diff.relative_path)
                 source = new_fresh / rel
                 dest = project_path / rel
@@ -223,8 +234,19 @@ class UpdateClient:
                     dest.write_bytes(source.read_bytes())
                 clean_merges.append(rel)
 
+            for file_diff in diff_result.added_files:
+                rel = str(file_diff.relative_path)
+                source = new_fresh / rel
+                dest = project_path / rel
+                if not dry_run:
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    dest.write_bytes(source.read_bytes())
+                added.append(rel)
+
         return MergeResult(
             clean_merges=clean_merges,
+            added=added,
+            removed=removed,
             conflicts=conflicts,
             errors=errors,
         )

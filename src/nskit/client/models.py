@@ -33,6 +33,8 @@ class UpdateResult(BaseModel):
 
     success: bool
     files_updated: list[str] = Field(default_factory=list)
+    files_added: list[str] = Field(default_factory=list)
+    files_removed: list[str] = Field(default_factory=list)
     files_with_conflicts: list[str] = Field(default_factory=list)
     clean_merges: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)
