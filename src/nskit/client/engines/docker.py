@@ -71,15 +71,14 @@ class DockerEngine(RecipeEngine):
 
             try:
                 output_dir.mkdir(parents=True, exist_ok=True)
+                # Ensure container user can write to the mounted output directory
+                output_dir.chmod(0o777)
 
                 cmd = [
                     "docker",
                     "run",
                     "--rm",
                 ]
-                # Run as host user on Linux to avoid permission issues with volume mounts
-                if hasattr(os, "getuid"):
-                    cmd += ["-u", f"{os.getuid()}:{os.getgid()}"]
                 cmd += [
                     "-e",
                     f"LOG_JSON={os.environ.get('LOG_JSON', 'true')}",
