@@ -1,0 +1,4946 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../license/">
+      
+      
+        <link rel="next" href="../../coverage/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Software Bill of Materials - NSKit</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#software-bill-of-materials" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="NSKit" class="md-header__button md-logo" aria-label="NSKit" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1a2.5 2.5 0 0 0-2.5 2.5A2.5 2.5 0 0 0 11 5.79V7H7a2 2 0 0 0-2 2v.71A2.5 2.5 0 0 0 3.5 12 2.5 2.5 0 0 0 5 14.29V15H4a2 2 0 0 0-2 2v1.21A2.5 2.5 0 0 0 .5 20.5 2.5 2.5 0 0 0 3 23a2.5 2.5 0 0 0 2.5-2.5A2.5 2.5 0 0 0 4 18.21V17h4v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 9 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17a2 2 0 0 0-2-2H7v-.71A2.5 2.5 0 0 0 8.5 12 2.5 2.5 0 0 0 7 9.71V9h10v.71A2.5 2.5 0 0 0 15.5 12a2.5 2.5 0 0 0 1.5 2.29V15h-1a2 2 0 0 0-2 2v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 15 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17h4v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 21 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17a2 2 0 0 0-2-2h-1v-.71A2.5 2.5 0 0 0 20.5 12 2.5 2.5 0 0 0 19 9.71V9a2 2 0 0 0-2-2h-4V5.79a2.5 2.5 0 0 0 1.5-2.29A2.5 2.5 0 0 0 12 1m0 1.5a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1M6 11a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m12 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1M3 19.5a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NSKit
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Software Bill of Materials
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="amber"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="amber"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/djpugh/nskit/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  nskit
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/using-a-recipe/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Developing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/nskit.cli/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Releases
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://github.com/djpugh/nskit/issues" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Issue Tracker
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NSKit" class="md-nav__button md-logo" aria-label="NSKit" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 1a2.5 2.5 0 0 0-2.5 2.5A2.5 2.5 0 0 0 11 5.79V7H7a2 2 0 0 0-2 2v.71A2.5 2.5 0 0 0 3.5 12 2.5 2.5 0 0 0 5 14.29V15H4a2 2 0 0 0-2 2v1.21A2.5 2.5 0 0 0 .5 20.5 2.5 2.5 0 0 0 3 23a2.5 2.5 0 0 0 2.5-2.5A2.5 2.5 0 0 0 4 18.21V17h4v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 9 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17a2 2 0 0 0-2-2H7v-.71A2.5 2.5 0 0 0 8.5 12 2.5 2.5 0 0 0 7 9.71V9h10v.71A2.5 2.5 0 0 0 15.5 12a2.5 2.5 0 0 0 1.5 2.29V15h-1a2 2 0 0 0-2 2v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 15 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17h4v1.21a2.5 2.5 0 0 0-1.5 2.29A2.5 2.5 0 0 0 21 23a2.5 2.5 0 0 0 2.5-2.5 2.5 2.5 0 0 0-1.5-2.29V17a2 2 0 0 0-2-2h-1v-.71A2.5 2.5 0 0 0 20.5 12 2.5 2.5 0 0 0 19 9.71V9a2 2 0 0 0-2-2h-4V5.79a2.5 2.5 0 0 0 1.5-2.29A2.5 2.5 0 0 0 12 1m0 1.5a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1M6 11a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m12 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1M3 19.5a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1m6 0a1 1 0 0 1 1 1 1 1 0 0 1-1 1 1 1 0 0 1-1-1 1 1 0 0 1 1-1"/></svg>
+
+    </a>
+    NSKit
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/djpugh/nskit/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    nskit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/using-a-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Using a Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/updating-from-a-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Updating from a Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/building-a-recipe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building a Recipe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/namespaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Working with Namespaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/platform-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Platform Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../architecture/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/recipes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recipes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/mixer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Mixer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/docker-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker vs Local Execution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developing
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Bill of Materials
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Bill of Materials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Runtime Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aenum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        aenum
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aenum">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#annotated-doc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        annotated-doc
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#annotated-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        annotated-types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cfgv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cfgv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#click" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        click
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distlib" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        distlib
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dnspython" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dnspython
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#email-validator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        email-validator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filelock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        filelock
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gitdb
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitpython" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitPython
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GitPython">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#identify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        identify
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#idna" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        idna
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jinja2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Jinja2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logzero" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        logzero
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="logzero">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#markdown-it-py" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        markdown-it-py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#markupsafe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MarkupSafe
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mdurl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mdurl
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nodeenv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nodeenv
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        orjson
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#packaging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        packaging
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="packaging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#platformdirs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        platformdirs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre_commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pre_commit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pre_commit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prompt_toolkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        prompt_toolkit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pydantic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pydantic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pydantic_core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pydantic_core
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pydantic-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pydantic-settings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pydantic-settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pygments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pygments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        python-discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-dotenv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        python-dotenv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PyYAML
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#questionary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        questionary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="questionary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rich" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rich
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ruamelyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ruamel.yaml
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ruamel.yaml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shellingham" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        shellingham
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        smmap
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tomlkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tomlkit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        typer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="typer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#typing_extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        typing_extensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typing-inspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        typing-inspection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#virtualenv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        virtualenv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wcwidth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wcwidth
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extras" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extras:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extras:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Github
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Github">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fastcore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fastcore
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ghapi
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Development Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#argcomplete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        argcomplete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        attrs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#colorlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        colorlog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependency-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dependency-groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#humanize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        humanize
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nox
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setuptools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        setuptools
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Test Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execnet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        execnet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hypothesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hypothesis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="hypothesis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#iniconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iniconfig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pluggy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pluggy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pytest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pytest
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pytest-cov" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pytest-cov
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pytest-subtests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pytest-subtests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pytest-xdist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pytest-xdist
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pytest-xdist">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sortedcontainers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sortedcontainers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lint-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lint Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lint Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#isort" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        isort
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ruff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ruff
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bandit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bandit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bandit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stevedore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stevedore
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docs-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docs Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docs Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#babel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        babel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backrefs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        backrefs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bracex" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bracex
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#certifi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        certifi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#charset-normalizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        charset-normalizer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#colorama" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        colorama
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fastcore_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fastcore
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghapi_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ghapi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghp-import" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ghp-import
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#griffelib" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        griffelib
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#markdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Markdown
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mergedeep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mergedeep
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mike" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mike
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mike">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-autorefs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-autorefs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-coverage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mkdocs-coverage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-get-deps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-get-deps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-git-authors-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-git-authors-plugin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-git-revision-date-localized-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-git-revision-date-localized-plugin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs_github_changelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs_github_changelog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-include-markdown-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-include-markdown-plugin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs_licenseinfo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs_licenseinfo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-material" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-material
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mkdocs-material">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-material-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-material-extensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocstrings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocstrings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocstrings-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocstrings-python
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#paginate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        paginate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pathspec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pathspec
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymdown-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pymdown-extensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyparsing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyparsing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-dateutil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        python-dateutil
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyyaml_env_tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyyaml_env_tag
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        requests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#six" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        six
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#urllib3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        urllib3
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verspec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verspec
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#watchdog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        watchdog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wcmatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wcmatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#build-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Build Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="build">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyproject_hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyproject_hooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test Coverage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/nskit.cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    nskit.cli
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/nskit.client/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    nskit.client
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/nskit.common/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    nskit.common
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/nskit.mixer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    nskit.mixer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/nskit.recipes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    nskit.recipes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/nskit.vcs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    nskit.vcs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/djpugh/nskit/issues" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Issue Tracker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Runtime Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aenum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        aenum
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="aenum">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#annotated-doc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        annotated-doc
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#annotated-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        annotated-types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cfgv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cfgv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#click" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        click
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distlib" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        distlib
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dnspython" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dnspython
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#email-validator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        email-validator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filelock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        filelock
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gitdb
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitpython" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitPython
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GitPython">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#identify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        identify
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#idna" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        idna
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jinja2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Jinja2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logzero" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        logzero
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="logzero">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#markdown-it-py" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        markdown-it-py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#markupsafe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MarkupSafe
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mdurl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mdurl
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nodeenv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nodeenv
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        orjson
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#packaging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        packaging
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="packaging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#platformdirs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        platformdirs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pre_commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pre_commit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pre_commit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prompt_toolkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        prompt_toolkit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pydantic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pydantic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pydantic_core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pydantic_core
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pydantic-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pydantic-settings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pydantic-settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pygments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pygments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        python-discovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-dotenv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        python-dotenv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PyYAML
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#questionary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        questionary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="questionary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rich" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rich
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ruamelyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ruamel.yaml
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ruamel.yaml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shellingham" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        shellingham
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        smmap
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tomlkit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tomlkit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        typer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="typer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#typing_extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        typing_extensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typing-inspection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        typing-inspection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#virtualenv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        virtualenv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wcwidth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wcwidth
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extras" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extras:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Extras:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Github
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Github">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fastcore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fastcore
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ghapi
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Development Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#argcomplete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        argcomplete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        attrs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#colorlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        colorlog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependency-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dependency-groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#humanize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        humanize
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nox
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setuptools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        setuptools
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Test Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execnet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        execnet
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hypothesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hypothesis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="hypothesis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#iniconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        iniconfig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pluggy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pluggy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pytest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pytest
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pytest-cov" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pytest-cov
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pytest-subtests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pytest-subtests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pytest-xdist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pytest-xdist
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="pytest-xdist">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sortedcontainers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sortedcontainers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lint-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lint Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Lint Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#isort" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        isort
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ruff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ruff
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bandit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bandit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="bandit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stevedore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stevedore
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docs-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docs Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docs Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#babel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        babel
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backrefs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        backrefs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bracex" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        bracex
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#certifi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        certifi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#charset-normalizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        charset-normalizer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#colorama" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        colorama
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fastcore_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fastcore
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghapi_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ghapi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ghp-import" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ghp-import
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#griffelib" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        griffelib
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#markdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Markdown
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mergedeep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mergedeep
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mike" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mike
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mike">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-autorefs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-autorefs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-coverage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mkdocs-coverage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-get-deps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-get-deps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-git-authors-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-git-authors-plugin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-git-revision-date-localized-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-git-revision-date-localized-plugin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs_github_changelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs_github_changelog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-include-markdown-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-include-markdown-plugin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs_licenseinfo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs_licenseinfo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-material" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-material
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mkdocs-material">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mkdocs-material-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocs-material-extensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocstrings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocstrings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mkdocstrings-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mkdocstrings-python
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#paginate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        paginate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pathspec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pathspec
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pymdown-extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pymdown-extensions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyparsing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyparsing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-dateutil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        python-dateutil
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyyaml_env_tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyyaml_env_tag
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        requests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#six" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        six
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#urllib3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        urllib3
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verspec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        verspec
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#watchdog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        watchdog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wcmatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        wcmatch
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#build-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Build Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="build">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyproject_hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pyproject_hooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    nskit
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Developing
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="software-bill-of-materials">Software Bill of Materials<a class="headerlink" href="#software-bill-of-materials" title="Permanent link">&para;</a></h1>
+<p><code>nskit</code> is licensed under the <a href="../license/">MIT License</a>.</p>
+<p>The dependencies for <code>nskit</code> are:</p>
+<h2 id="runtime-dependencies">Runtime Dependencies<a class="headerlink" href="#runtime-dependencies" title="Permanent link">&para;</a></h2>
+<p>These are the dependencies used for running <code>nskit</code>:</p>
+<h4 id="aenum"><a href="https://github.com/ethanfurman/aenum">aenum</a><a class="headerlink" href="#aenum" title="Permanent link">&para;</a></h4>
+<p><code>BSD LICENSE</code><br />
+<em>Version Checked: 3.1.17</em><br />
+Author: Ethan Furman
+</p>
+<h5 id="annotated-doc"><a href="https://github.com/fastapi/annotated-doc">annotated-doc</a><a class="headerlink" href="#annotated-doc" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 0.0.4</em><br />
+Author: Sebastián Ramírez<br />
+Needed by: <code>typer</code>
+</p>
+<h5 id="annotated-types"><a href="https://github.com/annotated-types/annotated-types">annotated-types</a><a class="headerlink" href="#annotated-types" title="Permanent link">&para;</a></h5>
+<p><code>MIT LICENSE</code><br />
+<em>Version Checked: 0.7.0</em><br />
+Author: Adrian Garcia Badaracco, Samuel Colvin, Zac Hatfield-Dodds<br />
+Needed by: <code>pydantic</code>
+</p>
+<h5 id="cfgv"><a href="https://github.com/asottile/cfgv">cfgv</a><a class="headerlink" href="#cfgv" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 3.5.0</em><br />
+Author: Anthony Sottile<br />
+Needed by: <code>pre-commit</code>
+</p>
+<h5 id="click"><a href="https://github.com/pallets/click/">click</a><a class="headerlink" href="#click" title="Permanent link">&para;</a></h5>
+<p><code>BSD-3-CLAUSE</code><br />
+<em>Version Checked: 8.3.1</em><br />
+Author: <br />
+Needed by: <code>typer</code>
+</p>
+<h5 id="distlib"><a href="https://github.com/pypa/distlib">distlib</a><a class="headerlink" href="#distlib" title="Permanent link">&para;</a></h5>
+<p><code>PSF-2.0</code><br />
+<em>Version Checked: 0.4.0</em><br />
+Author: Vinay Sajip<br />
+Needed by: <code>virtualenv</code>
+</p>
+<h5 id="dnspython"><a href="https://www.dnspython.org">dnspython</a><a class="headerlink" href="#dnspython" title="Permanent link">&para;</a></h5>
+<p><code>ISC</code><br />
+<em>Version Checked: 2.8.0</em><br />
+Author: Bob Halley<br />
+Needed by: <code>email-validator</code>
+</p>
+<h5 id="email-validator"><a href="https://github.com/JoshData/python-email-validator">email-validator</a><a class="headerlink" href="#email-validator" title="Permanent link">&para;</a></h5>
+<p><code>UNLICENSE</code><br />
+<em>Version Checked: 2.3.0</em><br />
+Author: Joshua Tauberer<br />
+Needed by: <code>pydantic</code>
+</p>
+<h5 id="filelock"><a href="https://github.com/tox-dev/py-filelock">filelock</a><a class="headerlink" href="#filelock" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 3.25.2</em><br />
+Author: <br />
+Needed by: <code>python-discovery</code>, <code>virtualenv</code>
+</p>
+<h5 id="gitdb"><a href="https://github.com/gitpython-developers/gitdb">gitdb</a><a class="headerlink" href="#gitdb" title="Permanent link">&para;</a></h5>
+<p><code>BSD LICENSE</code><br />
+<em>Version Checked: 4.0.12</em><br />
+Author: Sebastian Thiel<br />
+Needed by: <code>gitpython</code>
+</p>
+<h4 id="gitpython"><a href="https://github.com/gitpython-developers/GitPython">GitPython</a><a class="headerlink" href="#gitpython" title="Permanent link">&para;</a></h4>
+<p><code>BSD-3-CLAUSE</code><br />
+<em>Version Checked: 3.1.46</em><br />
+Author: Sebastian Thiel, Michael Trier
+</p>
+<h5 id="identify"><a href="https://github.com/pre-commit/identify">identify</a><a class="headerlink" href="#identify" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 2.6.18</em><br />
+Author: Chris Kuehl<br />
+Needed by: <code>pre-commit</code>
+</p>
+<h5 id="idna"><a href="https://github.com/kjd/idna">idna</a><a class="headerlink" href="#idna" title="Permanent link">&para;</a></h5>
+<p><code>BSD-3-CLAUSE</code><br />
+<em>Version Checked: 3.11</em><br />
+Author: Kim Davies<br />
+Needed by: <code>email-validator</code>
+</p>
+<h4 id="jinja2"><a href="https://github.com/pallets/jinja/">Jinja2</a><a class="headerlink" href="#jinja2" title="Permanent link">&para;</a></h4>
+<p><code>BSD LICENSE</code><br />
+<em>Version Checked: 3.1.6</em><br />
+Author: 
+</p>
+<h4 id="logzero"><a href="https://github.com/metachris/logzero">logzero</a><a class="headerlink" href="#logzero" title="Permanent link">&para;</a></h4>
+<p><code>MIT LICENSE</code><br />
+<em>Version Checked: 1.7.0</em><br />
+Author: Chris Hager
+</p>
+<h5 id="markdown-it-py"><a href="https://github.com/executablebooks/markdown-it-py">markdown-it-py</a><a class="headerlink" href="#markdown-it-py" title="Permanent link">&para;</a></h5>
+<p><code>MIT LICENSE</code><br />
+<em>Version Checked: 4.0.0</em><br />
+Author: Chris Sewell<br />
+Needed by: <code>rich</code>
+</p>
+<h5 id="markupsafe"><a href="https://github.com/pallets/markupsafe/">MarkupSafe</a><a class="headerlink" href="#markupsafe" title="Permanent link">&para;</a></h5>
+<p><code>BSD-3-CLAUSE</code><br />
+<em>Version Checked: 3.0.3</em><br />
+Author: <br />
+Needed by: <code>jinja2</code>
+</p>
+<h5 id="mdurl"><a href="https://github.com/executablebooks/mdurl">mdurl</a><a class="headerlink" href="#mdurl" title="Permanent link">&para;</a></h5>
+<p><code>MIT LICENSE</code><br />
+<em>Version Checked: 0.1.2</em><br />
+Author: Taneli Hukkinen<br />
+Needed by: <code>markdown-it-py</code>
+</p>
+<h5 id="nodeenv"><a href="https://github.com/ekalinin/nodeenv">nodeenv</a><a class="headerlink" href="#nodeenv" title="Permanent link">&para;</a></h5>
+<p><code>BSD</code><br />
+<em>Version Checked: 1.10.0</em><br />
+Author: Eugene Kalinin<br />
+Needed by: <code>pre-commit</code>
+</p>
+<h4 id="orjson"><a href="https://github.com/ijl/orjson">orjson</a><a class="headerlink" href="#orjson" title="Permanent link">&para;</a></h4>
+<p><code>MPL-2.0 AND (APACHE-2.0 OR MIT)</code><br />
+<em>Version Checked: 3.11.7</em><br />
+Author: 
+</p>
+<h4 id="packaging"><a href="https://github.com/pypa/packaging">packaging</a><a class="headerlink" href="#packaging" title="Permanent link">&para;</a></h4>
+<p><code>APACHE-2.0 OR BSD-2-CLAUSE</code><br />
+<em>Version Checked: 26.0</em><br />
+Author: Donald Stufft
+</p>
+<h5 id="platformdirs"><a href="https://github.com/tox-dev/platformdirs">platformdirs</a><a class="headerlink" href="#platformdirs" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 4.9.4</em><br />
+Author: <br />
+Needed by: <code>python-discovery</code>, <code>virtualenv</code>
+</p>
+<h4 id="pre_commit"><a href="https://github.com/pre-commit/pre-commit">pre_commit</a><a class="headerlink" href="#pre_commit" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 4.5.1</em><br />
+Author: Anthony Sottile
+</p>
+<h5 id="prompt_toolkit"><a href="https://github.com/prompt-toolkit/python-prompt-toolkit">prompt_toolkit</a><a class="headerlink" href="#prompt_toolkit" title="Permanent link">&para;</a></h5>
+<p><code>BSD LICENSE</code><br />
+<em>Version Checked: 3.0.52</em><br />
+Author: Jonathan Slenders<br />
+Needed by: <code>questionary</code>
+</p>
+<h5 id="pydantic"><a href="https://github.com/pydantic/pydantic">pydantic</a><a class="headerlink" href="#pydantic" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 2.12.5</em><br />
+Author: Samuel Colvin, Eric Jolibois, Hasan Ramezani, Adrian Garcia Badaracco, Terrence Dorsey, David Montague, Serge Matveenko, Marcelo Trylesinski, Sydney Runkle, David Hewitt, Alex Hall, Victorien Plot, Douwe Maan<br />
+Needed by: <code>pydantic-settings</code>
+</p>
+<h5 id="pydantic_core"><a href="https://github.com/pydantic/pydantic-core">pydantic_core</a><a class="headerlink" href="#pydantic_core" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 2.41.5</em><br />
+Author: Samuel Colvin, Adrian Garcia Badaracco, David Montague, David Hewitt, Sydney Runkle, Victorien Plot<br />
+Needed by: <code>pydantic</code>
+</p>
+<h4 id="pydantic-settings"><a href="https://github.com/pydantic/pydantic-settings">pydantic-settings</a><a class="headerlink" href="#pydantic-settings" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 2.13.1</em><br />
+Author: Samuel Colvin, Eric Jolibois, Hasan Ramezani
+</p>
+<h5 id="pygments"><a href="https://pygments.org">Pygments</a><a class="headerlink" href="#pygments" title="Permanent link">&para;</a></h5>
+<p><code>BSD-2-CLAUSE</code><br />
+<em>Version Checked: 2.19.2</em><br />
+Author: Georg Brandl<br />
+Needed by: <code>rich</code>
+</p>
+<h5 id="python-discovery"><a href="https://github.com/tox-dev/python-discovery">python-discovery</a><a class="headerlink" href="#python-discovery" title="Permanent link">&para;</a></h5>
+<p><code>MIT LICENSE</code><br />
+<em>Version Checked: 1.2.1</em><br />
+Author: <br />
+Needed by: <code>virtualenv</code>
+</p>
+<h5 id="python-dotenv"><a href="https://github.com/theskumar/python-dotenv">python-dotenv</a><a class="headerlink" href="#python-dotenv" title="Permanent link">&para;</a></h5>
+<p><code>BSD-3-CLAUSE</code><br />
+<em>Version Checked: 1.2.2</em><br />
+Author: Saurabh Kumar<br />
+Needed by: <code>pydantic-settings</code>
+</p>
+<h5 id="pyyaml"><a href="https://pyyaml.org/">PyYAML</a><a class="headerlink" href="#pyyaml" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 6.0.3</em><br />
+Author: Kirill Simonov<br />
+Needed by: <code>pre-commit</code>
+</p>
+<h4 id="questionary"><a href="https://github.com/tmbo/questionary">questionary</a><a class="headerlink" href="#questionary" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 2.1.1</em><br />
+Author: Tom Bocklisch
+</p>
+<h5 id="rich"><a href="https://github.com/Textualize/rich">rich</a><a class="headerlink" href="#rich" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 14.3.3</em><br />
+Author: Will McGugan<br />
+Needed by: <code>typer</code>
+</p>
+<h4 id="ruamelyaml"><a href="https://sourceforge.net/p/ruamel-yaml/">ruamel.yaml</a><a class="headerlink" href="#ruamelyaml" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 0.19.1</em><br />
+Author: Anthon van der Neut
+</p>
+<h5 id="shellingham"><a href="https://github.com/sarugaku/shellingham">shellingham</a><a class="headerlink" href="#shellingham" title="Permanent link">&para;</a></h5>
+<p><code>ISC LICENSE</code><br />
+<em>Version Checked: 1.5.4</em><br />
+Author: Tzu-ping Chung<br />
+Needed by: <code>typer</code>
+</p>
+<h5 id="smmap"><a href="https://github.com/gitpython-developers/smmap">smmap</a><a class="headerlink" href="#smmap" title="Permanent link">&para;</a></h5>
+<p><code>BSD-3-CLAUSE</code><br />
+<em>Version Checked: 5.0.3</em><br />
+Author: Sebastian Thiel<br />
+Needed by: <code>gitdb</code>
+</p>
+<h4 id="tomlkit"><a href="https://github.com/sdispater/tomlkit">tomlkit</a><a class="headerlink" href="#tomlkit" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 0.14.0</em><br />
+Author: Sébastien Eustace
+</p>
+<h4 id="typer"><a href="https://github.com/fastapi/typer">typer</a><a class="headerlink" href="#typer" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 0.24.1</em><br />
+Author: Sebastián Ramírez
+</p>
+<h5 id="typing_extensions"><a href="https://github.com/python/typing_extensions">typing_extensions</a><a class="headerlink" href="#typing_extensions" title="Permanent link">&para;</a></h5>
+<p><code>PSF-2.0</code><br />
+<em>Version Checked: 4.15.0</em><br />
+Author: "Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee"<br />
+Needed by: <code>pydantic</code>, <code>pydantic-core</code>, <code>typing-inspection</code>
+</p>
+<h5 id="typing-inspection"><a href="https://github.com/pydantic/typing-inspection">typing-inspection</a><a class="headerlink" href="#typing-inspection" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 0.4.2</em><br />
+Author: Victorien Plot<br />
+Needed by: <code>pydantic</code>, <code>pydantic-settings</code>
+</p>
+<h5 id="virtualenv"><a href="https://github.com/pypa/virtualenv">virtualenv</a><a class="headerlink" href="#virtualenv" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 21.2.0</em><br />
+Author: <br />
+Needed by: <code>pre-commit</code>
+</p>
+<h5 id="wcwidth"><a href="https://github.com/jquast/wcwidth">wcwidth</a><a class="headerlink" href="#wcwidth" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 0.6.0</em><br />
+Author: Jeff Quast<br />
+Needed by: <code>prompt-toolkit</code></p>
+<h2 id="extras">Extras:<a class="headerlink" href="#extras" title="Permanent link">&para;</a></h2>
+<h3 id="github">Github<a class="headerlink" href="#github" title="Permanent link">&para;</a></h3>
+<h6 id="fastcore"><a href="https://github.com/AnswerDotAI/fastcore/">fastcore</a><a class="headerlink" href="#fastcore" title="Permanent link">&para;</a></h6>
+<p><code>APACHE-2.0</code><br />
+<em>Version Checked: 1.12.31</em><br />
+Author: Jeremy Howard and Sylvain Gugger<br />
+Needed by: <code>ghapi</code>
+</p>
+<h5 id="ghapi"><a href="https://github.com/fastai/ghapi">ghapi</a><a class="headerlink" href="#ghapi" title="Permanent link">&para;</a></h5>
+<p><code>APACHE-2.0</code><br />
+<em>Version Checked: 1.0.13</em><br />
+Author: Jeremy Howard</p>
+<h2 id="development-dependencies">Development Dependencies<a class="headerlink" href="#development-dependencies" title="Permanent link">&para;</a></h2>
+<p>These are dependencies used for development (e.g. testing, linting etc.) of <code>nskit</code>:</p>
+<h5 id="argcomplete"><a href="https://github.com/kislyuk/argcomplete">argcomplete</a><a class="headerlink" href="#argcomplete" title="Permanent link">&para;</a></h5>
+<p><code>APACHE SOFTWARE LICENSE</code><br />
+<em>Version Checked: 3.6.3</em><br />
+Author: Andrey Kislyuk<br />
+Needed by: <code>nox</code>
+</p>
+<h5 id="attrs"><a href="https://www.attrs.org/">attrs</a><a class="headerlink" href="#attrs" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 26.1.0</em><br />
+Author: Hynek Schlawack<br />
+Needed by: <code>nox</code>
+</p>
+<h5 id="colorlog"><a href="https://github.com/borntyping/python-colorlog">colorlog</a><a class="headerlink" href="#colorlog" title="Permanent link">&para;</a></h5>
+<p><code>MIT LICENSE</code><br />
+<em>Version Checked: 6.10.1</em><br />
+Author: Sam Clements<br />
+Needed by: <code>nox</code>
+</p>
+<h5 id="dependency-groups"><a href="https://github.com/pypa/dependency-groups">dependency-groups</a><a class="headerlink" href="#dependency-groups" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 1.3.1</em><br />
+Author: Stephen Rosen<br />
+Needed by: <code>nox</code>
+</p>
+<h5 id="humanize"><a href="https://github.com/python-humanize/humanize">humanize</a><a class="headerlink" href="#humanize" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 4.15.0</em><br />
+Author: Jason Moiron<br />
+Needed by: <code>nox</code>
+</p>
+<h4 id="nox"><a href="https://github.com/wntrblm/nox">nox</a><a class="headerlink" href="#nox" title="Permanent link">&para;</a></h4>
+<p><code>APACHE-2.0</code><br />
+<em>Version Checked: 2026.2.9</em><br />
+Author: Alethea Katherine Flowers
+</p>
+<h4 id="setuptools"><a href="https://github.com/pypa/setuptools">setuptools</a><a class="headerlink" href="#setuptools" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 82.0.1</em><br />
+Author: Python Packaging Authority</p>
+<h2 id="test-dependencies">Test Dependencies<a class="headerlink" href="#test-dependencies" title="Permanent link">&para;</a></h2>
+<h5 id="coverage"><a href="https://github.com/coveragepy/coveragepy">coverage</a><a class="headerlink" href="#coverage" title="Permanent link">&para;</a></h5>
+<p><code>APACHE-2.0</code><br />
+<em>Version Checked: 7.13.5</em><br />
+Author: Ned Batchelder and 253 others<br />
+Needed by: <code>pytest-cov</code>
+</p>
+<h5 id="execnet"><a href="https://execnet.readthedocs.io/en/latest/">execnet</a><a class="headerlink" href="#execnet" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 2.1.2</em><br />
+Author: holger krekel and others<br />
+Needed by: <code>pytest-xdist</code>
+</p>
+<h4 id="hypothesis"><a href="https://hypothesis.works">hypothesis</a><a class="headerlink" href="#hypothesis" title="Permanent link">&para;</a></h4>
+<p><code>MPL-2.0</code><br />
+<em>Version Checked: 6.151.9</em><br />
+Author: "David R. MacIver and Zac Hatfield-Dodds"
+</p>
+<h5 id="iniconfig"><a href="https://github.com/pytest-dev/iniconfig">iniconfig</a><a class="headerlink" href="#iniconfig" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 2.3.0</em><br />
+Author: Ronny Pfannschmidt, Holger Krekel<br />
+Needed by: <code>pytest</code>
+</p>
+<h5 id="pluggy"><a href="">pluggy</a><a class="headerlink" href="#pluggy" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 1.6.0</em><br />
+Author: Holger Krekel<br />
+Needed by: <code>pytest</code>, <code>pytest-cov</code>
+</p>
+<h5 id="pytest"><a href="https://docs.pytest.org/en/latest/">pytest</a><a class="headerlink" href="#pytest" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 9.0.2</em><br />
+Author: Holger Krekel, Bruno Oliveira, Ronny Pfannschmidt, Floris Bruynooghe, Brianna Laugher, Florian Bruhin, Others (See AUTHORS)<br />
+Needed by: <code>pytest-cov</code>, <code>pytest-subtests</code>, <code>pytest-xdist</code>
+</p>
+<h4 id="pytest-cov"><a href="https://github.com/pytest-dev/pytest-cov">pytest-cov</a><a class="headerlink" href="#pytest-cov" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 7.1.0</em><br />
+Author: Marc Schlaich
+</p>
+<h4 id="pytest-subtests"><a href="https://github.com/pytest-dev/pytest-subtests">pytest-subtests</a><a class="headerlink" href="#pytest-subtests" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 0.15.0</em><br />
+Author: Bruno Oliveira
+</p>
+<h4 id="pytest-xdist"><a href="https://github.com/pytest-dev/pytest-xdist">pytest-xdist</a><a class="headerlink" href="#pytest-xdist" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 3.8.0</em><br />
+Author: holger krekel and contributors, holger@merlinux.eu
+</p>
+<h5 id="sortedcontainers"><a href="http://www.grantjenks.com/docs/sortedcontainers/">sortedcontainers</a><a class="headerlink" href="#sortedcontainers" title="Permanent link">&para;</a></h5>
+<p><code>APACHE 2.0</code><br />
+<em>Version Checked: 2.4.0</em><br />
+Author: Grant Jenks<br />
+Needed by: <code>hypothesis</code></p>
+<h2 id="lint-dependencies">Lint Dependencies<a class="headerlink" href="#lint-dependencies" title="Permanent link">&para;</a></h2>
+<h4 id="isort"><a href="https://pycqa.github.io/isort/index.html">isort</a><a class="headerlink" href="#isort" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 8.0.1</em><br />
+Author: Timothy Crosley, staticdev
+</p>
+<h4 id="ruff"><a href="https://docs.astral.sh/ruff">ruff</a><a class="headerlink" href="#ruff" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 0.15.8</em><br />
+Author: "Astral Software Inc."</p>
+<h2 id="security-dependencies">Security Dependencies<a class="headerlink" href="#security-dependencies" title="Permanent link">&para;</a></h2>
+<h4 id="bandit"><a href="https://bandit.readthedocs.io/">bandit</a><a class="headerlink" href="#bandit" title="Permanent link">&para;</a></h4>
+<p><code>APACHE-2.0</code><br />
+<em>Version Checked: 1.9.4</em><br />
+Author: PyCQA
+</p>
+<h5 id="stevedore"><a href="https://docs.openstack.org/stevedore">stevedore</a><a class="headerlink" href="#stevedore" title="Permanent link">&para;</a></h5>
+<p><code>APACHE-2.0</code><br />
+<em>Version Checked: 5.7.0</em><br />
+Author: OpenStack<br />
+Needed by: <code>bandit</code></p>
+<h2 id="docs-dependencies">Docs Dependencies<a class="headerlink" href="#docs-dependencies" title="Permanent link">&para;</a></h2>
+<h5 id="babel"><a href="https://babel.pocoo.org/">babel</a><a class="headerlink" href="#babel" title="Permanent link">&para;</a></h5>
+<p><code>BSD-3-CLAUSE</code><br />
+<em>Version Checked: 2.18.0</em><br />
+Author: Armin Ronacher<br />
+Needed by: <code>mkdocs-git-revision-date-localized-plugin</code>, <code>mkdocs-material</code>
+</p>
+<h5 id="backrefs"><a href="https://github.com/facelessuser/backrefs">backrefs</a><a class="headerlink" href="#backrefs" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 6.2</em><br />
+Author: Isaac Muse<br />
+Needed by: <code>mkdocs-material</code>
+</p>
+<h5 id="bracex"><a href="https://github.com/facelessuser/bracex">bracex</a><a class="headerlink" href="#bracex" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 2.6</em><br />
+Author: Isaac Muse<br />
+Needed by: <code>wcmatch</code>
+</p>
+<h5 id="certifi"><a href="https://github.com/certifi/python-certifi">certifi</a><a class="headerlink" href="#certifi" title="Permanent link">&para;</a></h5>
+<p><code>MPL-2.0</code><br />
+<em>Version Checked: 2026.2.25</em><br />
+Author: Kenneth Reitz<br />
+Needed by: <code>requests</code>
+</p>
+<h5 id="charset-normalizer"><a href="https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md">charset-normalizer</a><a class="headerlink" href="#charset-normalizer" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 3.4.6</em><br />
+Author: "Ahmed R. TAHRI"<br />
+Needed by: <code>requests</code>
+</p>
+<h5 id="colorama"><a href="https://github.com/tartley/colorama">colorama</a><a class="headerlink" href="#colorama" title="Permanent link">&para;</a></h5>
+<p><code>BSD LICENSE</code><br />
+<em>Version Checked: 0.4.6</em><br />
+Author: Jonathan Hartley<br />
+Needed by: <code>mkdocs-material</code>
+</p>
+<h5 id="fastcore_1"><a href="https://github.com/AnswerDotAI/fastcore/">fastcore</a><a class="headerlink" href="#fastcore_1" title="Permanent link">&para;</a></h5>
+<p><code>APACHE-2.0</code><br />
+<em>Version Checked: 1.12.31</em><br />
+Author: Jeremy Howard and Sylvain Gugger<br />
+Needed by: <code>ghapi</code>
+</p>
+<h5 id="ghapi_1"><a href="https://github.com/fastai/ghapi">ghapi</a><a class="headerlink" href="#ghapi_1" title="Permanent link">&para;</a></h5>
+<p><code>APACHE-2.0</code><br />
+<em>Version Checked: 1.0.13</em><br />
+Author: Jeremy Howard<br />
+Needed by: <code>mkdocs-github-changelog</code>
+</p>
+<h5 id="ghp-import"><a href="https://github.com/c-w/ghp-import">ghp-import</a><a class="headerlink" href="#ghp-import" title="Permanent link">&para;</a></h5>
+<p><code>APACHE SOFTWARE LICENSE</code><br />
+<em>Version Checked: 2.1.0</em><br />
+Author: Paul Joseph Davis<br />
+Needed by: <code>mkdocs</code>
+</p>
+<h5 id="griffelib"><a href="">griffelib</a><a class="headerlink" href="#griffelib" title="Permanent link">&para;</a></h5>
+<p><code>ISC</code><br />
+<em>Version Checked: 2.0.2</em><br />
+Author: Timothée Mazzucotelli<br />
+Needed by: <code>mkdocstrings-python</code>
+</p>
+<h5 id="markdown"><a href="https://Python-Markdown.github.io/">Markdown</a><a class="headerlink" href="#markdown" title="Permanent link">&para;</a></h5>
+<p><code>BSD-3-CLAUSE</code><br />
+<em>Version Checked: 3.10.2</em><br />
+Author: Manfred Stienstra, Yuri Takhteyev<br />
+Needed by: <code>mkdocs</code>, <code>mkdocs-autorefs</code>, <code>mkdocs-material</code>, <code>mkdocstrings</code>, <code>pymdown-extensions</code>
+</p>
+<h5 id="mergedeep"><a href="https://github.com/clarketm/mergedeep">mergedeep</a><a class="headerlink" href="#mergedeep" title="Permanent link">&para;</a></h5>
+<p><code>UNKNOWN</code><br />
+<em>Version Checked: 1.3.4</em><br />
+Author: Travis Clarke<br />
+Needed by: <code>mkdocs</code>, <code>mkdocs-get-deps</code>
+</p>
+<h4 id="mike"><a href="https://github.com/jimporter/mike">mike</a><a class="headerlink" href="#mike" title="Permanent link">&para;</a></h4>
+<p><code>BSD-3-CLAUSE</code><br />
+<em>Version Checked: 2.1.4</em><br />
+Author: Jim Porter
+</p>
+<h5 id="mkdocs"><a href="https://github.com/mkdocs/mkdocs">mkdocs</a><a class="headerlink" href="#mkdocs" title="Permanent link">&para;</a></h5>
+<p><code>BSD-2-CLAUSE</code><br />
+<em>Version Checked: 1.6.1</em><br />
+Author: Tom Christie<br />
+Needed by: <code>mike</code>, <code>mkdocs-autorefs</code>, <code>mkdocs-coverage</code>, <code>mkdocs-git-authors-plugin</code>, <code>mkdocs-git-revision-date-localized-plugin</code>, <code>mkdocs-github-changelog</code>, <code>mkdocs-include-markdown-plugin</code>, <code>mkdocs-licenseinfo</code>, <code>mkdocs-material</code>, <code>mkdocstrings</code>
+</p>
+<h5 id="mkdocs-autorefs"><a href="https://mkdocstrings.github.io/autorefs">mkdocs-autorefs</a><a class="headerlink" href="#mkdocs-autorefs" title="Permanent link">&para;</a></h5>
+<p><code>ISC</code><br />
+<em>Version Checked: 1.4.4</em><br />
+Author: Oleh Prypin, Timothée Mazzucotelli<br />
+Needed by: <code>mkdocstrings</code>, <code>mkdocstrings-python</code>
+</p>
+<h4 id="mkdocs-coverage"><a href="https://pawamoy.github.io/mkdocs-coverage">mkdocs-coverage</a><a class="headerlink" href="#mkdocs-coverage" title="Permanent link">&para;</a></h4>
+<p><code>ISC</code><br />
+<em>Version Checked: 2.0.0</em><br />
+Author: Timothée Mazzucotelli
+</p>
+<h5 id="mkdocs-get-deps"><a href="https://github.com/mkdocs/get-deps">mkdocs-get-deps</a><a class="headerlink" href="#mkdocs-get-deps" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 0.2.2</em><br />
+Author: Oleh Prypin<br />
+Needed by: <code>mkdocs</code>
+</p>
+<h4 id="mkdocs-git-authors-plugin"><a href="https://github.com/timvink/mkdocs-git-authors-plugin">mkdocs-git-authors-plugin</a><a class="headerlink" href="#mkdocs-git-authors-plugin" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 0.10.0</em><br />
+Author: Tim Vink
+</p>
+<h4 id="mkdocs-git-revision-date-localized-plugin"><a href="https://github.com/timvink/mkdocs-git-revision-date-localized-plugin">mkdocs-git-revision-date-localized-plugin</a><a class="headerlink" href="#mkdocs-git-revision-date-localized-plugin" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 1.5.1</em><br />
+Author: Tim Vink
+</p>
+<h4 id="mkdocs_github_changelog"><a href="https://github.com/djpugh/mkdocs_github_changelog">mkdocs_github_changelog</a><a class="headerlink" href="#mkdocs_github_changelog" title="Permanent link">&para;</a></h4>
+<p><code>MIT LICENSE</code><br />
+<em>Version Checked: 0.1.0</em><br />
+Author: David J Pugh
+</p>
+<h4 id="mkdocs-include-markdown-plugin"><a href="https://github.com/mondeja/mkdocs-include-markdown-plugin">mkdocs-include-markdown-plugin</a><a class="headerlink" href="#mkdocs-include-markdown-plugin" title="Permanent link">&para;</a></h4>
+<p><code>APACHE-2.0</code><br />
+<em>Version Checked: 7.2.1</em><br />
+Author: Joe Rickerby
+</p>
+<h4 id="mkdocs_licenseinfo"><a href="https://github.com/djpugh/mkdocs_licenseinfo">mkdocs_licenseinfo</a><a class="headerlink" href="#mkdocs_licenseinfo" title="Permanent link">&para;</a></h4>
+<p><code>MIT LICENSE</code><br />
+<em>Version Checked: 1.0.0</em><br />
+Author: David J Pugh
+</p>
+<h4 id="mkdocs-material"><a href="https://github.com/squidfunk/mkdocs-material">mkdocs-material</a><a class="headerlink" href="#mkdocs-material" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 9.7.6</em><br />
+Author: Martin Donath
+</p>
+<h5 id="mkdocs-material-extensions"><a href="https://github.com/facelessuser/mkdocs-material-extensions">mkdocs-material-extensions</a><a class="headerlink" href="#mkdocs-material-extensions" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 1.3.1</em><br />
+Author: Isaac Muse<br />
+Needed by: <code>mkdocs-material</code>
+</p>
+<h5 id="mkdocstrings"><a href="https://mkdocstrings.github.io">mkdocstrings</a><a class="headerlink" href="#mkdocstrings" title="Permanent link">&para;</a></h5>
+<p><code>ISC</code><br />
+<em>Version Checked: 1.0.3</em><br />
+Author: Timothée Mazzucotelli<br />
+Needed by: <code>mkdocstrings-python</code>
+</p>
+<h5 id="mkdocstrings-python"><a href="https://mkdocstrings.github.io/python">mkdocstrings-python</a><a class="headerlink" href="#mkdocstrings-python" title="Permanent link">&para;</a></h5>
+<p><code>ISC</code><br />
+<em>Version Checked: 2.0.3</em><br />
+Author: Timothée Mazzucotelli<br />
+Needed by: <code>mkdocstrings</code>
+</p>
+<h5 id="paginate"><a href="https://github.com/Signum/paginate">paginate</a><a class="headerlink" href="#paginate" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 0.5.7</em><br />
+Author: Christoph Haas<br />
+Needed by: <code>mkdocs-material</code>
+</p>
+<h5 id="pathspec"><a href="https://python-path-specification.readthedocs.io/en/latest/index.html">pathspec</a><a class="headerlink" href="#pathspec" title="Permanent link">&para;</a></h5>
+<p><code>MOZILLA PUBLIC LICENSE 2.0 (MPL 2.0)</code><br />
+<em>Version Checked: 1.0.4</em><br />
+Author: "Caleb P. Burns"<br />
+Needed by: <code>mkdocs</code>
+</p>
+<h5 id="pymdown-extensions"><a href="https://github.com/facelessuser/pymdown-extensions">pymdown-extensions</a><a class="headerlink" href="#pymdown-extensions" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 10.21</em><br />
+Author: Isaac Muse<br />
+Needed by: <code>mkdocs-material</code>, <code>mkdocstrings</code>
+</p>
+<h5 id="pyparsing"><a href="https://github.com/pyparsing/pyparsing/">pyparsing</a><a class="headerlink" href="#pyparsing" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 3.3.2</em><br />
+Author: Paul McGuire<br />
+Needed by: <code>mike</code>
+</p>
+<h5 id="python-dateutil"><a href="https://github.com/dateutil/dateutil">python-dateutil</a><a class="headerlink" href="#python-dateutil" title="Permanent link">&para;</a></h5>
+<p><code>DUAL LICENSE</code><br />
+<em>Version Checked: 2.9.0.post0</em><br />
+Author: Gustavo Niemeyer<br />
+Needed by: <code>ghp-import</code>
+</p>
+<h5 id="pyyaml_env_tag"><a href="https://github.com/waylan/pyyaml-env-tag">pyyaml_env_tag</a><a class="headerlink" href="#pyyaml_env_tag" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 1.1</em><br />
+Author: Waylan Limberg<br />
+Needed by: <code>mike</code>, <code>mkdocs</code>
+</p>
+<h5 id="requests"><a href="https://github.com/psf/requests">requests</a><a class="headerlink" href="#requests" title="Permanent link">&para;</a></h5>
+<p><code>APACHE-2.0</code><br />
+<em>Version Checked: 2.33.0</em><br />
+Author: Kenneth Reitz<br />
+Needed by: <code>mkdocs-material</code>
+</p>
+<h5 id="six"><a href="https://github.com/benjaminp/six">six</a><a class="headerlink" href="#six" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 1.17.0</em><br />
+Author: Benjamin Peterson<br />
+Needed by: <code>python-dateutil</code>
+</p>
+<h5 id="urllib3"><a href="https://github.com/urllib3/urllib3/blob/main/CHANGES.rst">urllib3</a><a class="headerlink" href="#urllib3" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 2.6.3</em><br />
+Author: Andrey Petrov<br />
+Needed by: <code>requests</code>
+</p>
+<h5 id="uv"><a href="https://pypi.org/project/uv/">uv</a><a class="headerlink" href="#uv" title="Permanent link">&para;</a></h5>
+<p><code>MIT OR APACHE-2.0</code><br />
+<em>Version Checked: 0.11.2</em><br />
+Author: "Astral Software Inc."<br />
+Needed by: <code>mkdocs-licenseinfo</code>
+</p>
+<h5 id="verspec"><a href="https://github.com/jimporter/verspec">verspec</a><a class="headerlink" href="#verspec" title="Permanent link">&para;</a></h5>
+<p><code>BSD 2-CLAUSE OR APACHE-2.0</code><br />
+<em>Version Checked: 0.1.0</em><br />
+Author: Jim Porter<br />
+Needed by: <code>mike</code>
+</p>
+<h5 id="watchdog"><a href="https://github.com/gorakhargosh/watchdog">watchdog</a><a class="headerlink" href="#watchdog" title="Permanent link">&para;</a></h5>
+<p><code>APACHE-2.0</code><br />
+<em>Version Checked: 6.0.0</em><br />
+Author: Mickaël Schoentgen<br />
+Needed by: <code>mkdocs</code>
+</p>
+<h5 id="wcmatch"><a href="https://github.com/facelessuser/wcmatch">wcmatch</a><a class="headerlink" href="#wcmatch" title="Permanent link">&para;</a></h5>
+<p><code>MIT</code><br />
+<em>Version Checked: 10.1</em><br />
+Author: Isaac Muse<br />
+Needed by: <code>mkdocs-include-markdown-plugin</code></p>
+<h2 id="build-dependencies">Build Dependencies<a class="headerlink" href="#build-dependencies" title="Permanent link">&para;</a></h2>
+<h4 id="build"><a href="https://build.pypa.io">build</a><a class="headerlink" href="#build" title="Permanent link">&para;</a></h4>
+<p><code>MIT</code><br />
+<em>Version Checked: 1.4.2</em><br />
+Author: Filipe Laíns, Bernát Gábor, layday, Henry Schreiner
+</p>
+<h5 id="pyproject_hooks"><a href="https://github.com/pypa/pyproject-hooks">pyproject_hooks</a><a class="headerlink" href="#pyproject_hooks" title="Permanent link">&para;</a></h5>
+<p><code>MIT LICENSE</code><br />
+<em>Version Checked: 1.2.0</em><br />
+Author: Thomas Kluyver<br />
+Needed by: <code>build</code></p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 27, 2026 17:33:13 UTC">2026-03-27</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.prefetch", "navigation.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.path", "navigation.indexes", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
