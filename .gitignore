@@ -2,6 +2,9 @@
 # SCM versions
 src/nskit/_version.py
 
+# Lock file
+uv.lock
+
 # hypothesis
 .hypothesis
 
