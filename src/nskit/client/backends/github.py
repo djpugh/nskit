@@ -15,7 +15,6 @@ except ImportError:
 
 from nskit._logging import logger_factory
 from nskit.client.backends.base import RecipeBackend
-from nskit.client.backends.settings import GitHubBackendConfig
 from nskit.client.models import RecipeInfo
 from nskit.client.validation import validate_image_url, validate_recipe_name, validate_version
 
@@ -47,23 +46,6 @@ class GitHubBackend(RecipeBackend):
         self._entrypoint = entrypoint
         if GhApi is None:
             raise ImportError("GitHubBackend requires ghapi. Install with: pip install nskit[github]")
-
-    @classmethod
-    def from_config(cls, config: GitHubBackendConfig) -> "GitHubBackend":
-        """Create from a validated config model.
-
-        Args:
-            config: Validated ``GitHubBackendConfig`` instance.
-
-        Returns:
-            Configured ``GitHubBackend``.
-        """
-        return cls(
-            org=config.org,
-            repo_pattern=config.repo_pattern,
-            token=config.token,
-            entrypoint=config.entrypoint,
-        )
 
     @property
     def entrypoint(self) -> str:

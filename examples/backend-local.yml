@@ -1,3 +1,3 @@
 # Local filesystem backend configuration
 type: local
-path: /path/to/recipes
+recipes_dir: /path/to/recipes

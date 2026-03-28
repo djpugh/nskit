@@ -36,7 +36,7 @@ class TestResolveBackend(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp:
             cfg = Path(tmp) / "backend.yml"
-            cfg.write_text("type: local\npath: /tmp\n")
+            cfg.write_text("type: local\nrecipes_dir: /tmp\n")
             result = _resolve_backend(str(cfg))
             from nskit.client.backends import LocalBackend
 

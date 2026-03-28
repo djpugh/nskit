@@ -16,7 +16,7 @@ class TestCreateBackendFromConfig(unittest.TestCase):
 
     def test_local_from_dict(self):
         """Create LocalBackend from dict config."""
-        result = create_backend_from_config({"type": "local", "path": "/tmp"})
+        result = create_backend_from_config({"type": "local", "recipes_dir": "/tmp"})
         self.assertIsInstance(result, LocalBackend)
 
     @patch("nskit.client.backends.docker.DockerBackend._check_docker")
@@ -45,7 +45,7 @@ class TestCreateBackendFromConfig(unittest.TestCase):
         """Create backend from YAML file path."""
         with TemporaryDirectory() as tmp:
             cfg = Path(tmp) / "backend.yml"
-            cfg.write_text("type: local\npath: /tmp\n")
+            cfg.write_text("type: local\nrecipes_dir: /tmp\n")
             result = create_backend_from_config(str(cfg))
             self.assertIsInstance(result, LocalBackend)
 
@@ -53,7 +53,7 @@ class TestCreateBackendFromConfig(unittest.TestCase):
         """Create backend from Path object."""
         with TemporaryDirectory() as tmp:
             cfg = Path(tmp) / "backend.yml"
-            cfg.write_text("type: local\npath: /tmp\n")
+            cfg.write_text("type: local\nrecipes_dir: /tmp\n")
             result = create_backend_from_config(cfg)
             self.assertIsInstance(result, LocalBackend)
 
@@ -64,7 +64,7 @@ class TestCreateBackendFromConfig(unittest.TestCase):
 
     def test_default_type_is_local(self):
         """Missing type defaults to local."""
-        result = create_backend_from_config({"path": "/tmp"})
+        result = create_backend_from_config({"recipes_dir": "/tmp"})
         self.assertIsInstance(result, LocalBackend)
 
 

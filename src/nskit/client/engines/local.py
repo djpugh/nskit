@@ -40,13 +40,8 @@ class LocalEngine(RecipeEngine):
         warnings: list[str] = []
 
         try:
-            # Load recipe from installed package
             recipe_instance = Recipe.load(recipe, entrypoint=entrypoint, **parameters)
-
-            # Create the project
             result = recipe_instance.create(base_path=output_dir.parent, override_path=output_dir.name)
-
-            # Collect created files
             files_created = list(result.keys()) if result else []
 
             return RecipeResult(

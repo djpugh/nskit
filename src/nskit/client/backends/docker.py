@@ -8,7 +8,7 @@ from pydantic import SecretStr
 
 from nskit._logging import logger_factory
 from nskit.client.backends.base import RecipeBackend
-from nskit.client.backends.settings import DockerBackendConfig, DockerTimeouts
+from nskit.client.backends.settings import DockerTimeouts
 from nskit.client.models import RecipeInfo
 from nskit.client.validation import validate_image_url, validate_recipe_name, validate_version
 
@@ -41,24 +41,6 @@ class DockerBackend(RecipeBackend):
         self._entrypoint = entrypoint
         self.timeouts = timeouts or DockerTimeouts()
         self._check_docker()
-
-    @classmethod
-    def from_config(cls, config: DockerBackendConfig) -> "DockerBackend":
-        """Create from a validated config model.
-
-        Args:
-            config: Validated ``DockerBackendConfig`` instance.
-
-        Returns:
-            Configured ``DockerBackend``.
-        """
-        return cls(
-            registry_url=config.registry_url,
-            image_prefix=config.image_prefix,
-            auth_token=config.auth_token,
-            entrypoint=config.entrypoint,
-            timeouts=config.timeouts,
-        )
 
     @property
     def entrypoint(self) -> str:

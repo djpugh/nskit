@@ -2,8 +2,8 @@
 
 The factory uses a registry that maps backend ``type`` strings (from YAML
 config) to a ``(ConfigModel, BackendClass)`` pair.  The config dict is
-validated through the pydantic model, then the backend is constructed via
-its ``from_config`` classmethod.
+validated through the pydantic model, then the backend is constructed
+by passing the validated fields to the backend constructor.
 
 Third-party backends can be registered with ``register_backend``.
 """
@@ -33,8 +33,8 @@ def register_backend(type_name: str, config_cls: type, backend_cls: type[RecipeB
     Args:
         type_name: The ``type`` value used in YAML config files.
         config_cls: Pydantic model that validates the config dict.
-        backend_cls: Backend class with a ``from_config(cls, config)``
-            classmethod.
+        backend_cls: Backend class whose constructor accepts the
+            config model's fields as keyword arguments.
     """
     _REGISTRY[type_name] = (config_cls, backend_cls)
 
@@ -44,7 +44,7 @@ def create_backend_from_config(config: Union[dict, Path, str]) -> RecipeBackend:
 
     Looks up the ``type`` key in the registry, validates the remaining
     keys through the corresponding pydantic model, and constructs the
-    backend via ``Backend.from_config(validated_config)``.
+    backend by unpacking the validated fields.
 
     Args:
         config: Dict, or path to a YAML config file.
@@ -64,4 +64,4 @@ def create_backend_from_config(config: Union[dict, Path, str]) -> RecipeBackend:
 
     config_cls, backend_cls = entry
     validated = config_cls(**config)
-    return backend_cls.from_config(validated)
+    return backend_cls(**validated.model_dump(exclude={"type"}))

@@ -3,7 +3,6 @@
 from pathlib import Path
 
 from nskit.client.backends.base import RecipeBackend
-from nskit.client.backends.settings import LocalBackendConfig
 from nskit.client.models import RecipeInfo
 
 
@@ -19,18 +18,6 @@ class LocalBackend(RecipeBackend):
         """
         self.recipes_dir = Path(recipes_dir)
         self._entrypoint = entrypoint
-
-    @classmethod
-    def from_config(cls, config: LocalBackendConfig) -> "LocalBackend":
-        """Create from a validated config model.
-
-        Args:
-            config: Validated ``LocalBackendConfig`` instance.
-
-        Returns:
-            Configured ``LocalBackend``.
-        """
-        return cls(recipes_dir=config.path, entrypoint=config.entrypoint)
 
     @property
     def entrypoint(self) -> str:

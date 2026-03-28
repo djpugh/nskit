@@ -27,7 +27,7 @@ class LocalBackendConfig(BaseModel):
     """Configuration for the local filesystem backend."""
 
     type: Literal["local"] = "local"
-    path: Path
+    recipes_dir: Path
     entrypoint: str = "nskit.recipes"
 
 
