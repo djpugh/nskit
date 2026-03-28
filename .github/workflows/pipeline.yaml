@@ -182,7 +182,7 @@ jobs:
         flags: tests
         name: ${{ matrix.py }} - ${{ matrix.os }}
     - name: Test Report
-      uses: dorny/test-reporter@v1
+      uses: dorny/test-reporter@v3
       if: always()
       with:
         name: Test Results (${{ matrix.py }} - ${{ matrix.os }})
