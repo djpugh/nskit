@@ -27,6 +27,10 @@ class GitInit(Hook):
             if not initial_branch_name:
                 initial_branch_name = "main"
             initial_branch_name = context.get("git", {}).get("initial_branch_name", initial_branch_name)
+            # Validate branch name to prevent argument injection
+            initial_branch_name = initial_branch_name.strip()
+            if not initial_branch_name or initial_branch_name.startswith("-"):
+                initial_branch_name = "main"
             # Check git version - new versions have --initial-branch arg on init
             version = subprocess.check_output(["git", "version"]).decode()  # nosec B607, B603
             version = version.replace("git version", "").lstrip()

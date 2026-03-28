@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from nskit._logging import logger_factory
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.config import ConfigManager
 from nskit.client.diff.engine import DiffEngine
@@ -15,6 +16,8 @@ from nskit.client.project_generator import ProjectGenerator
 from nskit.client.utils.git import GitUtils
 from nskit.client.version_resolver import VersionResolver
 from nskit.common.models.diff import DiffMode, MergeResult
+
+logger = logger_factory.get_logger(__name__)
 
 
 class UpdateClient:
@@ -66,7 +69,8 @@ class UpdateClient:
             if update_needed:
                 return resolved
         except Exception:  # nosec B110
-            pass
+            logger.warning("Could not check for updates — run with debug logging for details")
+            logger.debug("Update check failed for %s", project_path, exc_info=True)
 
         return None
 
@@ -326,4 +330,5 @@ class UpdateClient:
             chunk = path.read_bytes()[:8192]
             return b"\x00" in chunk
         except Exception:  # nosec B110
+            logger.debug("Failed binary check for %s", path, exc_info=True)
             return False

@@ -23,15 +23,15 @@ class LocalEngine(RecipeEngine):
         """Execute recipe from installed package.
 
         Args:
-            recipe: Recipe name
-            version: Recipe version
-            parameters: Recipe parameters
-            output_dir: Output directory
-            image_url: Not used for Local engine
-            entrypoint: Recipe entrypoint (required)
+            recipe: Recipe name.
+            version: Recipe version.
+            parameters: Recipe parameters.
+            output_dir: Output directory.
+            image_url: Not used for Local engine.
+            entrypoint: Recipe entrypoint (required).
 
         Returns:
-            Recipe execution result
+            Recipe execution result.
         """
         if not entrypoint:
             raise ValueError("Local engine requires entrypoint")

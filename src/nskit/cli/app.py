@@ -234,8 +234,8 @@ def create_cli(
                     if default is None and meta.get("template"):
                         try:
                             default = derived_eval.evaluate(meta["template"], {**input_data, "ctx": ctx_values})
-                        except Exception:  # nosec B110
-                            pass
+                        except Exception:
+                            pass  # Template evaluation is best-effort for defaults
 
                     # 4. Context provider fallback
                     if default is None:

@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import DEFAULT, MagicMock, call, patch
 
-from jinja2 import ChoiceLoader, Environment
+from jinja2 import ChoiceLoader
+from jinja2.sandbox import SandboxedEnvironment
 from pydantic import TypeAdapter, ValidationError
 
 from nskit.common.contextmanagers import Env, TestExtension
@@ -165,7 +166,7 @@ class EnvironmentFactoryTestCase(unittest.TestCase):
                 with Env(override={"NSKIT_MIXER_ENVIRONMENT_FACTORY": "default"}):
                     self.assertNotEqual(factory.get_environment(), environment1)
                     self.assertNotEqual(factory.get_environment(), environment2)
-                    self.assertIsInstance(factory.get_environment(), Environment)
+                    self.assertIsInstance(factory.get_environment(), SandboxedEnvironment)
 
     def test_get_environment_none(self):
         # Create Extensions for this
@@ -185,7 +186,7 @@ class EnvironmentFactoryTestCase(unittest.TestCase):
                 with Env(remove=["NSKIT_MIXER_ENVIRONMENT_FACTORY"]):
                     self.assertNotEqual(factory.get_environment(), environment1)
                     self.assertNotEqual(factory.get_environment(), environment2)
-                    self.assertIsInstance(factory.get_environment(), Environment)
+                    self.assertIsInstance(factory.get_environment(), SandboxedEnvironment)
 
     def test_environment_exists(self):
         factory = _EnvironmentFactory()
@@ -206,6 +207,6 @@ class EnvironmentFactoryTestCase(unittest.TestCase):
     def test_default_environment(self):
         # Check loader is correct
         environment = _EnvironmentFactory.default_environment()
-        self.assertIsInstance(environment, Environment)
+        self.assertIsInstance(environment, SandboxedEnvironment)
         self.assertIsInstance(environment.loader, ChoiceLoader)
         self.assertIsInstance(environment.loader.loaders[0], _PkgResourcesTemplateLoader)

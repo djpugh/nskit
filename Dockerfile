@@ -15,10 +15,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
 RUN sh /uv-installer.sh && rm /uv-installer.sh && cp /root/.local/bin/uv /usr/local/bin/uv
 
-# Trust all directories for git safe.directory — recipe post-hooks (git init,
+# Trust the app directory for git safe.directory — recipe post-hooks (git init,
 # pre-commit install) run inside Docker volume mounts where ownership metadata
 # may differ from the container user, causing git 2.35.2+ to reject operations.
-RUN git config --global --add safe.directory '*'
+RUN git config --global --add safe.directory /app \
+    && git config --global --add safe.directory /app/output
 
 # Copy dependency files
 WORKDIR ${PROJECT_DIR}
@@ -61,6 +62,7 @@ LABEL nskit.recipe.name="${RECIPE_NAME}"
 RUN useradd --create-home nskit \
     && chown -R nskit:nskit ${PROJECT_DIR}
 USER nskit
-RUN git config --global --add safe.directory '*'
+RUN git config --global --add safe.directory /app \
+    && git config --global --add safe.directory /app/output
 
 ENTRYPOINT ["sh", "-c", "uv run --no-sync $CLI_COMMAND \"$@\"", "--"]

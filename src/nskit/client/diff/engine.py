@@ -4,8 +4,11 @@ import subprocess  # nosec B404
 from pathlib import Path
 from typing import Optional
 
+from nskit._logging import logger_factory
 from nskit.client.diff.file_discovery import FileDiscovery
 from nskit.common.models.diff import DiffMode, DiffResult, DiffType, FileDiff
+
+logger = logger_factory.get_logger(__name__)
 
 
 class DiffEngine:
@@ -126,4 +129,5 @@ class DiffEngine:
             return result.returncode != 0
         except Exception:
             # Fallback to byte comparison
+            logger.debug("git diff failed for %s vs %s, falling back to byte comparison", file1, file2, exc_info=True)
             return file1.read_bytes() != file2.read_bytes()

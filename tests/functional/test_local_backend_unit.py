@@ -20,7 +20,7 @@ class TestLocalBackendListRecipes(unittest.TestCase):
             (recipes_dir / "recipe-a" / "2.0.0").mkdir(parents=True)
             (recipes_dir / "recipe-b" / "0.1.0").mkdir(parents=True)
 
-            backend = LocalBackend(recipes_dir)
+            backend = LocalBackend(recipes_dir=recipes_dir)
             recipes = backend.list_recipes()
 
             names = {r.name for r in recipes}
@@ -29,12 +29,12 @@ class TestLocalBackendListRecipes(unittest.TestCase):
     def test_empty_directory_returns_empty(self) -> None:
         """Returns empty list when recipes directory is empty."""
         with TemporaryDirectory() as tmp:
-            backend = LocalBackend(Path(tmp))
+            backend = LocalBackend(recipes_dir=Path(tmp))
             self.assertEqual(backend.list_recipes(), [])
 
     def test_nonexistent_directory_returns_empty(self) -> None:
         """Returns empty list when recipes directory does not exist."""
-        backend = LocalBackend(Path("/nonexistent/path"))
+        backend = LocalBackend(recipes_dir=Path("/nonexistent/path"))
         self.assertEqual(backend.list_recipes(), [])
 
     def test_hidden_directories_ignored(self) -> None:
@@ -44,7 +44,7 @@ class TestLocalBackendListRecipes(unittest.TestCase):
             (recipes_dir / ".hidden" / "1.0.0").mkdir(parents=True)
             (recipes_dir / "visible" / "1.0.0").mkdir(parents=True)
 
-            backend = LocalBackend(recipes_dir)
+            backend = LocalBackend(recipes_dir=recipes_dir)
             names = [r.name for r in backend.list_recipes()]
             self.assertEqual(names, ["visible"])
 
@@ -59,14 +59,14 @@ class TestLocalBackendGetRecipeVersions(unittest.TestCase):
             (recipes_dir / "recipe" / "2.0.0").mkdir(parents=True)
             (recipes_dir / "recipe" / "1.0.0").mkdir(parents=True)
 
-            backend = LocalBackend(recipes_dir)
+            backend = LocalBackend(recipes_dir=recipes_dir)
             versions = backend.get_recipe_versions("recipe")
             self.assertEqual(versions, ["1.0.0", "2.0.0"])
 
     def test_nonexistent_recipe_returns_empty(self) -> None:
         """Returns empty list for a recipe that does not exist."""
         with TemporaryDirectory() as tmp:
-            backend = LocalBackend(Path(tmp))
+            backend = LocalBackend(recipes_dir=Path(tmp))
             self.assertEqual(backend.get_recipe_versions("nope"), [])
 
 
@@ -82,7 +82,7 @@ class TestLocalBackendFetchRecipe(unittest.TestCase):
             (version_dir / "template.txt").write_text("hello")
 
             dest = Path(tmp) / "dest"
-            backend = LocalBackend(recipes_dir)
+            backend = LocalBackend(recipes_dir=recipes_dir)
             result = backend.fetch_recipe("my-recipe", "1.0.0", dest)
 
             self.assertTrue((result / "template.txt").exists())
@@ -93,7 +93,7 @@ class TestLocalBackendFetchRecipe(unittest.TestCase):
             recipes_dir = Path(tmp) / "recipes"
             recipes_dir.mkdir()
 
-            backend = LocalBackend(recipes_dir)
+            backend = LocalBackend(recipes_dir=recipes_dir)
             with self.assertRaises(FileNotFoundError):
                 backend.fetch_recipe("nope", "1.0.0", Path(tmp) / "dest")
 
@@ -103,12 +103,12 @@ class TestLocalBackendEntrypoint(unittest.TestCase):
 
     def test_default_entrypoint(self) -> None:
         """Default entrypoint is 'nskit.recipes'."""
-        backend = LocalBackend(Path("."))
+        backend = LocalBackend(recipes_dir=Path("."))
         self.assertEqual(backend.entrypoint, "nskit.recipes")
 
     def test_custom_entrypoint(self) -> None:
         """Custom entrypoint is returned."""
-        backend = LocalBackend(Path("."), entrypoint="custom.entry")
+        backend = LocalBackend(recipes_dir=Path("."), entrypoint="custom.entry")
         self.assertEqual(backend.entrypoint, "custom.entry")
 
 

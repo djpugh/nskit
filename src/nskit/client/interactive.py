@@ -4,11 +4,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from nskit._logging import logger_factory
 from nskit.client.derived_evaluator import DerivedFieldEvaluator
 from nskit.client.env_resolver import EnvVarResolver
 from nskit.client.field_models import ConditionalAction, FieldSpec, FieldType, InputFieldsResponse
 from nskit.client.field_parser import FieldParser
 from nskit.client.models import RecipeInfo
+
+logger = logger_factory.get_logger(__name__)
 
 
 class InteractiveHandler:
@@ -141,7 +144,7 @@ class InteractiveHandler:
                 if result:
                     return result
             except Exception:  # nosec B110
-                pass
+                logger.debug("Failed to evaluate template for field default", exc_info=True)
 
         # 3. Fall back to static default
         return field.default

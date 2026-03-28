@@ -33,7 +33,7 @@ class TestGitHubBackend:
         backend = GitHubBackend(org="testorg", token="test_token")
 
         assert backend.org == "testorg"
-        assert backend._token == "test_token"
+        assert backend._token.get_secret_value() == "test_token"
 
     def test_get_token_from_gh_cli(self, mock_subprocess):
         """Test getting token from gh CLI."""
