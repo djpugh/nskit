@@ -22,7 +22,7 @@ nskit --backend docker-local init --recipe python_package
 ```
 
 Or configure programmatically:
-
+```python
 backend = GitHubBackend(
     org='myorg',                              # GitHub org
     repo_pattern='{recipe_name}',             # Repo name pattern

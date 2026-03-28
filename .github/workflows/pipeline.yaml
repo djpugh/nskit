@@ -1,6 +1,8 @@
 
 name: Pipeline
 on:
+  push:
+    branches: [main]
   pull_request:
     types: [opened, synchronize, reopened]
   release:
@@ -438,6 +440,35 @@ jobs:
           exit $( [ "$result" = "success" ] && echo 0 || echo 1 )
 
   # ── Release-only jobs ─────────────────────────────────────────
+
+  publish-dev-docs:
+    name: Publish Dev Docs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install Task
+        uses: go-task/setup-task@v2
+        with:
+          repo-token: ${{ github.token }}
+      - name: Install dependencies
+        run: task setup
+      - name: Deploy dev docs
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          uv run mike deploy -u main --config-file docs/mkdocs.yml -p
 
   publish-package:
     name: Publish Package
