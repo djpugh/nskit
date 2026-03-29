@@ -97,6 +97,7 @@ def _registry_request(url: str, token: str | None, accept: str = "application/vn
         headers["Authorization"] = f"Bearer {token}"
     req = Request(url, headers=headers)
     ssl_ctx = ssl.create_default_context()
+    ssl_ctx.minimum_version = ssl.TLSVersion.TLSv1_2
     with urlopen(req, timeout=10, context=ssl_ctx) as resp:  # nosec B310
         return json.loads(resp.read())
 
