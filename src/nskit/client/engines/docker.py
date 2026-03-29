@@ -1,5 +1,7 @@
 """Docker execution engine."""
 
+from __future__ import annotations
+
 import os
 import subprocess  # nosec B404
 import tempfile
