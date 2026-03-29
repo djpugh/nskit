@@ -1,10 +1,11 @@
 """GitHub backend for recipe management."""
 
+from __future__ import annotations
+
 import subprocess  # nosec B404
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Optional
 
 from pydantic import SecretStr
 
@@ -28,7 +29,7 @@ class GitHubBackend(RecipeBackend):
         self,
         org: str,
         repo_pattern: str = "{recipe_name}",
-        token: Optional[str | SecretStr] = None,
+        token: str | SecretStr | None = None,
         entrypoint: str = "nskit.recipes",
     ):
         """Initialize GitHub backend.
@@ -42,7 +43,7 @@ class GitHubBackend(RecipeBackend):
         self.org = org
         self.repo_pattern = repo_pattern
         self._token: SecretStr | None = SecretStr(token) if isinstance(token, str) else token
-        self._github: Optional[GhApi] = None
+        self._github: GhApi | None = None
         self._entrypoint = entrypoint
         if GhApi is None:
             raise ImportError("GitHubBackend requires ghapi. Install with: pip install nskit[github]")
@@ -205,6 +206,9 @@ class GitHubBackend(RecipeBackend):
         token = self._get_token()
         subprocess.run(  # nosec B603, B607
             ["docker", "login", "ghcr.io", "-u", "token", "--password-stdin"],
-            input=token, text=True, check=True, capture_output=True,
+            input=token,
+            text=True,
+            check=True,
+            capture_output=True,
         )
         subprocess.run(["docker", "pull", image_url], check=True, capture_output=True)  # nosec B603, B607
