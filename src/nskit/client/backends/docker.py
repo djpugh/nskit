@@ -1,8 +1,9 @@
 """Docker backend for recipe management."""
 
+from __future__ import annotations
+
 import subprocess  # nosec B404
 from pathlib import Path
-from typing import Optional
 
 from pydantic import SecretStr
 
@@ -22,7 +23,7 @@ class DockerBackend(RecipeBackend):
         self,
         registry_url: str = "ghcr.io",
         image_prefix: str = "",
-        auth_token: Optional[str | SecretStr] = None,
+        auth_token: str | SecretStr | None = None,
         entrypoint: str = "nskit.recipes",
         timeouts: DockerTimeouts | None = None,
     ):

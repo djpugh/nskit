@@ -6,7 +6,7 @@ import os
 import subprocess  # nosec B404
 import tempfile
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml as pyyaml
 
@@ -38,8 +38,8 @@ class DockerEngine(RecipeEngine):
         version: str,
         parameters: dict[str, Any],
         output_dir: Path,
-        image_url: Optional[str] = None,
-        entrypoint: Optional[str] = None,
+        image_url: str | None = None,
+        entrypoint: str | None = None,
     ) -> RecipeResult:
         """Execute recipe in a Docker container.
 
