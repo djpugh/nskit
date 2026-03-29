@@ -1,4 +1,5 @@
 """Context manager for running a test with an extension."""
+
 from __future__ import annotations
 
 import sys
@@ -16,9 +17,8 @@ from nskit._logging import logger_factory
 
 
 class _TestEntrypoint(EntryPoint):
-
     def __init__(self, name: str, group: str, entrypoint: type, *, solo: bool = False):
-        super().__init__(name, f'{entrypoint.__module__}:{entrypoint.__name__}', group)
+        super().__init__(name, f"{entrypoint.__module__}:{entrypoint.__name__}", group)
         self._entrypoint = entrypoint
         self._sys_meta_path = None
         self._solo = solo
@@ -44,16 +44,13 @@ class _TestEntrypoint(EntryPoint):
 
 
 class _DummyDistribution(Distribution):
-
     def __init__(self, i: int, entrypoint: EntryPoint):
         self._entrypoint = entrypoint
         self._i = i
 
     @property
     def metadata(self):
-        return {
-            'Name': f'DummyDistribution{self._i}'
-        }
+        return {"Name": f"DummyDistribution{self._i}"}
 
     @property
     def entry_points(self):
@@ -67,7 +64,6 @@ class _DummyDistribution(Distribution):
 
 
 class _TestExtensionFinder(MetadataPathFinder):
-
     def __init__(self, entrypoint: EntryPoint):
         self._entrypoints = [entrypoint]
 
@@ -97,10 +93,12 @@ class TestExtension(ContextDecorator):
 
     def __enter__(self):
         """Add the extension so it can be loaded."""
-        logger_factory.get_logger(__name__).info(f'Starting entrypoint for extension {self.ep.name} in {self.ep.group}')
+        logger_factory.get_logger(__name__).info(f"Starting entrypoint for extension {self.ep.name} in {self.ep.group}")
         self.ep.start()
 
     def __exit__(self, *args, **kwargs):  # noqa: U100
         """Remove the extension and return to the original."""
-        logger_factory.get_logger(__name__).info(f'Stoppings entrypoint for extension {self.ep.name} in {self.ep.group}')
+        logger_factory.get_logger(__name__).info(
+            f"Stoppings entrypoint for extension {self.ep.name} in {self.ep.group}"
+        )
         self.ep.stop()

@@ -9,6 +9,7 @@ Build recipe images with these labels:
         --label nskit.recipe.entrypoint=mycompany.recipes \\
         -t myorg/python_package:v1.0.0 .
 """
+
 from __future__ import annotations
 
 import subprocess  # nosec B404
@@ -16,6 +17,7 @@ from pathlib import Path
 
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.models import RecipeInfo
+from nskit.constants import RECIPE_ENTRYPOINT
 
 LABEL_PREFIX = "nskit.recipe"
 
@@ -34,7 +36,7 @@ class DockerLocalBackend(RecipeBackend):
 
     def __init__(
         self,
-        entrypoint: str = "nskit.recipes",
+        entrypoint: str = RECIPE_ENTRYPOINT,
         label_filter: str = f"{LABEL_PREFIX}=true",
     ) -> None:
         self._entrypoint = entrypoint
@@ -55,11 +57,16 @@ class DockerLocalBackend(RecipeBackend):
 
         result = subprocess.run(  # nosec B603, B607
             [
-                "docker", "images",
-                "--filter", f"label={self._label_filter}",
-                "--format", "{{.Repository}}\t{{.Tag}}",
+                "docker",
+                "images",
+                "--filter",
+                f"label={self._label_filter}",
+                "--format",
+                "{{.Repository}}\t{{.Tag}}",
             ],
-            capture_output=True, text=True, check=False,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         images = []
         for line in result.stdout.strip().splitlines():

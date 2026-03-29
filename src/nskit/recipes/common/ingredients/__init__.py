@@ -1,4 +1,5 @@
 """Shared Python ingredients for recipes."""
+
 from nskit.mixer import File, Folder
 
 pre_commit_config = File(

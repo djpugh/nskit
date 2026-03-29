@@ -191,9 +191,19 @@ def list_recipes():
 Implement `RecipeBackend` for your infrastructure:
 
 ```python
+from pydantic import BaseModel
 from nskit.client.backends.base import RecipeBackend
 
+class S3BackendConfig(BaseModel):
+    type: str = "s3"
+    bucket: str
+    prefix: str = ""
+
 class S3Backend(RecipeBackend):
+    def __init__(self, bucket: str, prefix: str = ""):
+        self._bucket = bucket
+        self._prefix = prefix
+
     @property
     def entrypoint(self) -> str:
         return self._entrypoint
@@ -202,6 +212,22 @@ class S3Backend(RecipeBackend):
     def get_recipe_versions(self, recipe_name: str): ...
     def fetch_recipe(self, recipe_name: str, version: str, target_path): ...
     def get_image_url(self, recipe: str, version: str) -> str: ...
+```
+
+Register it as an entry point so nskit discovers it automatically:
+
+```toml
+# In your package's pyproject.toml
+[project.entry-points."nskit.backends"]
+s3 = "my_package.backends:S3BackendConfig, S3Backend"
+```
+
+Once installed, the backend is available in YAML config files:
+
+```yaml
+type: s3
+bucket: my-recipes
+prefix: templates/
 ```
 
 ## Error Handling

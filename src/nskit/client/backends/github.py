@@ -18,6 +18,7 @@ from nskit._logging import logger_factory
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.models import RecipeInfo
 from nskit.client.validation import validate_image_url, validate_recipe_name, validate_version
+from nskit.constants import RECIPE_ENTRYPOINT
 
 logger = logger_factory.get_logger(__name__)
 
@@ -30,7 +31,7 @@ class GitHubBackend(RecipeBackend):
         org: str,
         repo_pattern: str = "{recipe_name}",
         token: str | SecretStr | None = None,
-        entrypoint: str = "nskit.recipes",
+        entrypoint: str = RECIPE_ENTRYPOINT,
     ):
         """Initialize GitHub backend.
 

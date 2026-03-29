@@ -4,8 +4,8 @@ from typing import Union
 
 from pydantic import Field
 
+from nskit.constants import RECIPE_ENTRYPOINT
 from nskit.mixer import File, Folder, LicenseFile
-from nskit.mixer.components.recipe import RECIPE_ENTRYPOINT
 from nskit.recipes.python import PyRecipe, ingredients
 from nskit.recipes.python.ingredients import recipe as recipe_ingredients
 

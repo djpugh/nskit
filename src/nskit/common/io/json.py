@@ -1,4 +1,5 @@
 """Provide a JSON Load/Dump API consistent with stdlib JSON."""
+
 from typing import Any, Optional, TextIO
 
 import orjson

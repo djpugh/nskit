@@ -12,6 +12,7 @@ from nskit.client.backends.base import RecipeBackend
 from nskit.client.backends.settings import DockerTimeouts
 from nskit.client.models import RecipeInfo
 from nskit.client.validation import validate_image_url, validate_recipe_name, validate_version
+from nskit.constants import RECIPE_ENTRYPOINT
 
 logger = logger_factory.get_logger(__name__)
 
@@ -24,7 +25,7 @@ class DockerBackend(RecipeBackend):
         registry_url: str = "ghcr.io",
         image_prefix: str = "",
         auth_token: str | SecretStr | None = None,
-        entrypoint: str = "nskit.recipes",
+        entrypoint: str = RECIPE_ENTRYPOINT,
         timeouts: DockerTimeouts | None = None,
     ):
         """Initialize Docker backend.

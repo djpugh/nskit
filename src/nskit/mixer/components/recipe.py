@@ -12,10 +12,9 @@ from pydantic.fields import FieldInfo
 from nskit import __version__
 from nskit.common.extensions import get_extension_names, load_extension
 from nskit.common.io import yaml
+from nskit.constants import RECIPE_ENTRYPOINT
 from nskit.mixer.components.folder import Folder
 from nskit.mixer.components.hook import Hook
-
-RECIPE_ENTRYPOINT = "nskit.recipes"
 
 
 def RecipeField(

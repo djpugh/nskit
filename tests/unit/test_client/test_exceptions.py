@@ -1,4 +1,5 @@
 """Unit tests for domain exception classes."""
+
 from __future__ import annotations
 
 import unittest

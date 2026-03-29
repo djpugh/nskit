@@ -1,4 +1,5 @@
 """Environment variable resolver with prefix-based security."""
+
 from __future__ import annotations
 
 import os

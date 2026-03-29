@@ -1,4 +1,5 @@
 """Ingredients for repos."""
+
 from nskit.mixer import File, Folder
 from nskit.recipes.common.ingredients import taskfiles_folder  # noqa: F401
 

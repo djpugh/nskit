@@ -1,4 +1,5 @@
 """Unit tests for DiscoveryClient."""
+
 from __future__ import annotations
 
 import unittest

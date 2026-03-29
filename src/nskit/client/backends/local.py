@@ -4,12 +4,13 @@ from pathlib import Path
 
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.models import RecipeInfo
+from nskit.constants import RECIPE_ENTRYPOINT
 
 
 class LocalBackend(RecipeBackend):
     """Backend for local filesystem recipes."""
 
-    def __init__(self, recipes_dir: Path, entrypoint: str = "nskit.recipes"):
+    def __init__(self, recipes_dir: Path, entrypoint: str = RECIPE_ENTRYPOINT):
         """Initialize local backend.
 
         Args:

@@ -1,4 +1,5 @@
 """Python Recipes."""
+
 import re
 from pathlib import Path
 
@@ -7,7 +8,7 @@ from pydantic import Field
 from nskit import __version__
 from nskit.mixer import CodeRecipe, RepoMetadata
 
-_DELIMITERS = ['.', ',', '-']
+_DELIMITERS = [".", ",", "-"]
 
 
 class PyRepoMetadata(RepoMetadata):
@@ -27,12 +28,12 @@ class PyRepoMetadata(RepoMetadata):
             self._name = value
 
     def _get_name_parts(self):
-        return re.split('|'.join(map(re.escape, list(set(_DELIMITERS+[self.repo_separator])))), self.name)
+        return re.split("|".join(map(re.escape, list(set(_DELIMITERS + [self.repo_separator])))), self.name)
 
     @property
     def py_name(self):
         """Get python module name."""
-        return '.'.join(self._get_name_parts())
+        return ".".join(self._get_name_parts())
 
     @property
     def py_root(self):
@@ -64,7 +65,7 @@ class PyRecipe(CodeRecipe):
 
     @staticmethod
     def _to_pep8(value):
-        return str(value).lower().replace(' ', '_').replace('-', '_')
+        return str(value).lower().replace(" ", "_").replace("-", "_")
 
     def model_post_init(self, *args):  # noqa: U100
         """Set repo name handling."""

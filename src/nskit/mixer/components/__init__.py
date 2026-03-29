@@ -1,4 +1,5 @@
 """nskit.mixer components for building recipes."""
+
 from nskit.mixer.components.config import (  # noqa: F401
     ConfigNotFoundError,
     FileSystemError,

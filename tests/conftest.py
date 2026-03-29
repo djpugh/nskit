@@ -1,4 +1,5 @@
 """Shared pytest fixtures and configuration."""
+
 import shutil
 import tempfile
 from pathlib import Path

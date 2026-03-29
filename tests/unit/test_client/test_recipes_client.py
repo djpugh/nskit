@@ -1,4 +1,5 @@
 """Unit tests for RecipeClient."""
+
 from __future__ import annotations
 
 import unittest

@@ -7,6 +7,8 @@ from typing import Literal, Union
 
 from pydantic import BaseModel, Field, SecretStr
 
+from nskit.constants import RECIPE_ENTRYPOINT
+
 
 class DockerTimeouts(BaseModel):
     """Timeout configuration for Docker operations (seconds)."""
@@ -28,7 +30,7 @@ class LocalBackendConfig(BaseModel):
 
     type: Literal["local"] = "local"
     recipes_dir: Path
-    entrypoint: str = "nskit.recipes"
+    entrypoint: str = RECIPE_ENTRYPOINT
 
 
 class DockerBackendConfig(BaseModel):
@@ -38,7 +40,7 @@ class DockerBackendConfig(BaseModel):
     registry_url: str = "ghcr.io"
     image_prefix: str = ""
     auth_token: SecretStr | None = None
-    entrypoint: str = "nskit.recipes"
+    entrypoint: str = RECIPE_ENTRYPOINT
     timeouts: DockerTimeouts = Field(default_factory=DockerTimeouts)
 
 
@@ -49,7 +51,7 @@ class GitHubBackendConfig(BaseModel):
     org: str
     repo_pattern: str = "{recipe_name}"
     token: SecretStr | None = None
-    entrypoint: str = "nskit.recipes"
+    entrypoint: str = RECIPE_ENTRYPOINT
 
 
 BackendConfig = Union[LocalBackendConfig, DockerBackendConfig, GitHubBackendConfig]
