@@ -8,8 +8,13 @@ Uses the OCI Distribution Spec:
 from __future__ import annotations
 
 import json
+import ssl
 import subprocess  # nosec B404
 from urllib.request import Request, urlopen
+
+from nskit._logging import logger_factory
+
+logger = logger_factory.get_logger(__name__)
 
 
 def read_remote_labels(image_url: str, token: str | None = None) -> dict[str, str]:
@@ -31,6 +36,7 @@ def read_remote_labels(image_url: str, token: str | None = None) -> dict[str, st
         config = _get_blob(registry, name, config_digest, token)
         return config.get("config", {}).get("Labels", {})
     except Exception:  # nosec B110
+        logger.debug("Failed to read remote labels for %s", image_url, exc_info=True)
         return {}
 
 
@@ -90,7 +96,9 @@ def _registry_request(url: str, token: str | None, accept: str = "application/vn
     if token:
         headers["Authorization"] = f"Bearer {token}"
     req = Request(url, headers=headers)
-    with urlopen(req, timeout=10) as resp:  # nosec B310
+    ssl_ctx = ssl.create_default_context()
+    ssl_ctx.minimum_version = ssl.TLSVersion.TLSv1_2
+    with urlopen(req, timeout=10, context=ssl_ctx) as resp:  # nosec B310
         return json.loads(resp.read())
 
 

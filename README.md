@@ -118,6 +118,8 @@ nskit supports multiple backends for recipe distribution:
 
 See [Architecture](docs/source/architecture/index.md) for the detailed design rationale and [Docker vs Local Execution](docs/source/architecture/docker-execution.md) for the execution flow.
 
+**Custom Backends** — Third-party backends are discovered via the `nskit.backends` entry-point group. See [Platform Integration](docs/source/guides/platform-integration.md) for details.
+
 ## Usage Examples
 
 ### Programmatic Usage

@@ -1,4 +1,5 @@
 """Field specification models for interactive recipe initialisation."""
+
 from __future__ import annotations
 
 from enum import Enum

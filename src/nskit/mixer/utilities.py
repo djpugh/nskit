@@ -1,4 +1,5 @@
 """Utilities for interacting with systems etc."""
+
 import os
 import sys
 from pathlib import Path
@@ -10,6 +11,7 @@ else:
     from importlib.resources import files
 
 from jinja2 import BaseLoader, ChoiceLoader, Environment, TemplateNotFound
+from jinja2.sandbox import SandboxedEnvironment
 from pydantic import GetCoreSchemaHandler, TypeAdapter, ValidationError
 from pydantic_core import CoreSchema, core_schema
 
@@ -133,7 +135,7 @@ class _EnvironmentFactory:
     @staticmethod
     def default_environment():
         """Get the default environment object."""
-        return Environment(loader=ChoiceLoader([_PkgResourcesTemplateLoader()]))  # nosec B701
+        return SandboxedEnvironment(loader=ChoiceLoader([_PkgResourcesTemplateLoader()]))
 
 
 JINJA_ENVIRONMENT_FACTORY = _EnvironmentFactory()

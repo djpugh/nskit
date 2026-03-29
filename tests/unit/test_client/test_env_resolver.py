@@ -1,4 +1,5 @@
 """Unit tests for EnvVarResolver."""
+
 from __future__ import annotations
 
 import os

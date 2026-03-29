@@ -1,4 +1,5 @@
 """Client module for recipe operations."""
+
 from nskit.client.discovery import DiscoveryClient
 from nskit.client.engines import DockerEngine, LocalEngine, RecipeEngine
 from nskit.client.models import RecipeInfo, RecipeResult, UpdateResult

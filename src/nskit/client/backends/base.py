@@ -21,7 +21,7 @@ class RecipeBackend(ABC):
         """List all available recipes.
 
         Returns:
-            List of recipe information
+            List of recipe information.
         """
         pass
 
@@ -30,10 +30,10 @@ class RecipeBackend(ABC):
         """Get available versions for a recipe.
 
         Args:
-            recipe: Recipe name
+            recipe: Recipe name.
 
         Returns:
-            List of version strings
+            List of version strings.
         """
         pass
 
@@ -42,12 +42,12 @@ class RecipeBackend(ABC):
         """Fetch a recipe to a destination directory.
 
         Args:
-            recipe: Recipe name
-            version: Recipe version
-            dest: Destination directory
+            recipe: Recipe name.
+            version: Recipe version.
+            dest: Destination directory.
 
         Returns:
-            Path to the fetched recipe
+            Path to the fetched recipe.
         """
         pass
 
@@ -55,11 +55,11 @@ class RecipeBackend(ABC):
         """Get metadata for a specific recipe version.
 
         Args:
-            recipe: Recipe name
-            version: Recipe version
+            recipe: Recipe name.
+            version: Recipe version.
 
         Returns:
-            Recipe metadata dictionary
+            Recipe metadata dictionary.
         """
         return {}
 
@@ -67,11 +67,11 @@ class RecipeBackend(ABC):
         """Get Docker image URL for a recipe.
 
         Args:
-            recipe: Recipe name
-            version: Recipe version
+            recipe: Recipe name.
+            version: Recipe version.
 
         Returns:
-            Docker image URL
+            Docker image URL.
         """
         raise NotImplementedError("This backend does not support Docker images")
 
@@ -79,6 +79,6 @@ class RecipeBackend(ABC):
         """Pull Docker image.
 
         Args:
-            image_url: Docker image URL to pull
+            image_url: Docker image URL to pull.
         """
         raise NotImplementedError("This backend does not support Docker images")

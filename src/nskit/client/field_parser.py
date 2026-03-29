@@ -1,4 +1,5 @@
 """Field parser for recipe field specifications."""
+
 from __future__ import annotations
 
 import json

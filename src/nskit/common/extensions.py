@@ -1,4 +1,5 @@
 """Common extension helpers."""
+
 import sys
 from enum import Enum
 
@@ -17,7 +18,7 @@ def get_extension_names(entrypoint: str):
     extensions = []
     for ep in entry_points().select(group=entrypoint):
         extensions.append(ep.name)
-    logger_factory.get_logger(__name__).debug(f'Identified extensions {extensions} for entrypoint {entrypoint}')
+    logger_factory.get_logger(__name__).debug(f"Identified extensions {extensions} for entrypoint {entrypoint}")
     return extensions
 
 
@@ -25,7 +26,7 @@ def load_extension(entrypoint: str, extension: str):
     """Load a given extension for a given entrypoint."""
     for ep in entry_points().select(group=entrypoint, name=extension):
         return ep.load()
-    logger_factory.get_logger(__name__).warning(f'Entrypoint {extension} not found for {entrypoint}')
+    logger_factory.get_logger(__name__).warning(f"Entrypoint {extension} not found for {entrypoint}")
 
 
 def get_extensions(entrypoint: str):
@@ -33,7 +34,7 @@ def get_extensions(entrypoint: str):
     extensions = {}
     for ep in entry_points().select(group=entrypoint):
         extensions[ep.name] = ep
-    logger_factory.get_logger(__name__).debug(f'Identified extensions {extensions} for entrypoint {entrypoint}')
+    logger_factory.get_logger(__name__).debug(f"Identified extensions {extensions} for entrypoint {entrypoint}")
     return extensions
 
 

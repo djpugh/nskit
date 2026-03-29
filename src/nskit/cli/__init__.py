@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 from nskit.cli.app import create_cli
+from nskit.constants import RECIPE_ENTRYPOINT
 
 __all__ = ["create_cli"]
 
@@ -93,7 +94,7 @@ def main():
     engine = _resolve_engine(engine_type)
 
     app = create_cli(
-        recipe_entrypoint="nskit.recipes",
+        recipe_entrypoint=RECIPE_ENTRYPOINT,
         backend=backend,
     )
 

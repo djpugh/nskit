@@ -5,6 +5,7 @@ Includes:
     - file based config loading (json/toml/yaml)
     - model dumping to toml & yaml
 """
+
 from __future__ import annotations
 
 from pathlib import Path

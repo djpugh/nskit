@@ -182,6 +182,10 @@ python_package = "nskit.recipes.python.package:PackageRecipe"
 python_api_service = "nskit.recipes.python.api:APIRecipe"
 recipe = "nskit.recipes.recipe:RecipeRecipe"
 
+[project.entry-points."nskit.backends"]
+# Third-party backends register here. Each entry point should resolve to
+# a (ConfigModel, BackendClass) tuple.
+
 [project.entry-points."nskit.vcs.providers"]
 github = "nskit.vcs.providers.github:GithubSettings"
 

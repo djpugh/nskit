@@ -37,5 +37,3 @@
             - LoggingConfig
             - get_library_logger
             - LibraryLoggerFactory
-
-

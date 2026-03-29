@@ -5,9 +5,8 @@ from nskit.mixer.components.hook import Hook
 
 
 class HookTestCase(unittest.TestCase):
-
     def setUp(self):
-        self._patch = patch.object(Hook, '__abstractmethods__', set())
+        self._patch = patch.object(Hook, "__abstractmethods__", set())
         self._patch.start()
 
     def tearDown(self) -> None:
@@ -32,5 +31,3 @@ class HookTestCase(unittest.TestCase):
 
         t = TestHook()
         self.assertEqual(t(1, 2), (3, 4))
-
-

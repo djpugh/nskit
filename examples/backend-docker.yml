@@ -4,3 +4,8 @@ registry_url: ghcr.io
 image_prefix: myorg/recipes
 # Optional: auth_token for private registries
 # auth_token: ${GITHUB_TOKEN}
+# Optional: timeouts in seconds for Docker operations
+# timeouts:
+#   pull: 600       # image pull
+#   cmd: 30         # short commands (create, rm)
+#   file_copy: 120  # file copy from container

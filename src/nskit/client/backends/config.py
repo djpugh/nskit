@@ -1,68 +1,77 @@
-"""Backend configuration and factory."""
+"""Backend configuration and factory.
+
+Built-in backends are registered in ``_BUILTIN_REGISTRY``.  Third-party
+backends are discovered automatically via the ``nskit.backends``
+entry-point group.  Each entry point should resolve to a
+``(ConfigModel, BackendClass)`` tuple.
+
+Example third-party ``pyproject.toml``::
+
+    [project.entry-points."nskit.backends"]
+    s3 = "my_package.backends:S3BackendConfig, S3Backend"
+"""
+
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Union
 
 import yaml
 
+from nskit._logging import logger_factory
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.backends.docker import DockerBackend
 from nskit.client.backends.github import GitHubBackend
 from nskit.client.backends.local import LocalBackend
+from nskit.client.backends.settings import DockerBackendConfig, GitHubBackendConfig, LocalBackendConfig
+from nskit.common.extensions import get_extensions
+from nskit.constants import BACKENDS_ENTRYPOINT
 
-_DEFAULT_ENTRYPOINT = "nskit.recipes"
+logger = logger_factory.get_logger(__name__)
+
+# Built-in backends — always available.
+_BUILTIN_REGISTRY: dict[str, tuple[type, type[RecipeBackend]]] = {
+    "local": (LocalBackendConfig, LocalBackend),
+    "docker": (DockerBackendConfig, DockerBackend),
+    "github": (GitHubBackendConfig, GitHubBackend),
+}
 
 
-def create_backend_from_config(config: Union[dict, Path, str]) -> RecipeBackend:
-    """Create backend from configuration.
+def _build_registry() -> dict[str, tuple[type, type[RecipeBackend]]]:
+    """Merge built-in backends with any discovered via entry points."""
+    registry = dict(_BUILTIN_REGISTRY)
+    for name, ep in get_extensions(BACKENDS_ENTRYPOINT).items():
+        try:
+            config_cls, backend_cls = ep.load()
+            registry[name] = (config_cls, backend_cls)
+        except Exception:
+            logger.warning("Failed to load backend entry point %r", name, exc_info=True)
+    return registry
+
+
+def create_backend_from_config(config: dict | Path | str) -> RecipeBackend:
+    """Create a backend from a config dict or YAML file.
+
+    Looks up the ``type`` key in the registry (built-in + entry-point
+    discovered), validates the remaining keys through the corresponding
+    pydantic model, and constructs the backend.
 
     Args:
-        config: Dict config or path to YAML config file
+        config: Dict, or path to a YAML config file.
 
     Returns:
-        Configured backend instance
-
-    Example config:
-        type: local
-        path: /path/to/recipes
-
-        type: docker
-        registry_url: ghcr.io
-        image_prefix: org/project
-        auth_token: ${GITHUB_TOKEN}
-
-        type: github
-        org: myorg
-        repo_pattern: recipe-{recipe_name}
-        token: ${GITHUB_TOKEN}
+        Configured backend instance.
     """
     if isinstance(config, (Path, str)):
         with open(config) as f:
             config = yaml.safe_load(f)
 
     backend_type = config.get("type", "local")
+    registry = _build_registry()
 
-    if backend_type == "local":
-        return LocalBackend(
-            recipes_dir=Path(config["path"]),
-            entrypoint=config.get("entrypoint", _DEFAULT_ENTRYPOINT),
-        )
+    entry = registry.get(backend_type)
+    if entry is None:
+        raise ValueError(f"Unknown backend type: {backend_type!r}. Available: {', '.join(sorted(registry))}")
 
-    elif backend_type == "docker":
-        return DockerBackend(
-            registry_url=config.get("registry_url", "ghcr.io"),
-            image_prefix=config.get("image_prefix", ""),
-            auth_token=config.get("auth_token"),
-            entrypoint=config.get("entrypoint", _DEFAULT_ENTRYPOINT),
-        )
-
-    elif backend_type == "github":
-        return GitHubBackend(
-            org=config["org"],
-            repo_pattern=config.get("repo_pattern", "{recipe_name}"),
-            token=config.get("token"),
-            entrypoint=config.get("entrypoint", _DEFAULT_ENTRYPOINT),
-        )
-
-    else:
-        raise ValueError(f"Unknown backend type: {backend_type}")
+    config_cls, backend_cls = entry
+    validated = config_cls(**config)
+    return backend_cls(**validated.model_dump(exclude={"type"}))

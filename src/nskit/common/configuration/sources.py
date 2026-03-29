@@ -1,4 +1,5 @@
 """Add settings sources."""
+
 from __future__ import annotations as _annotations
 
 from pathlib import Path
@@ -28,8 +29,9 @@ from nskit.common.io import json, toml, yaml
 
 class JsonConfigSettingsSource(_JsonConfigSettingsSource):
     """Use the nskit.common.io.json loading to load settings from a json file."""
+
     def _read_file(self, file_path: Path) -> dict[str, Any]:
-        encoding = self.json_file_encoding or 'utf-8'
+        encoding = self.json_file_encoding or "utf-8"
         file_contents = file_path.read_text(encoding)
         return json.loads(file_contents)
 
@@ -41,6 +43,7 @@ class JsonConfigSettingsSource(_JsonConfigSettingsSource):
 
 class TomlConfigSettingsSource(_TomlConfigSettingsSource):
     """Use the nskit.common.io.toml loading to load settings from a toml file."""
+
     def _read_file(self, file_path: Path) -> dict[str, Any]:
         file_contents = file_path.read_text()
         return toml.loads(file_contents)
@@ -53,8 +56,9 @@ class TomlConfigSettingsSource(_TomlConfigSettingsSource):
 
 class YamlConfigSettingsSource(_YamlConfigSettingsSource):
     """Use the nskit.common.io.yaml loading to load settings from a yaml file."""
+
     def _read_file(self, file_path: Path) -> dict[str, Any]:
-        encoding = self.yaml_file_encoding or 'utf-8'
+        encoding = self.yaml_file_encoding or "utf-8"
         file_contents = file_path.read_text(encoding)
         return yaml.loads(file_contents)
 
@@ -80,7 +84,7 @@ class DotEnvSettingsSource(_DotEnvSettingsSource):
         env_nested_delimiter: str | None = None,
         env_ignore_empty: bool | None = None,
         env_parse_none_str: str | None = None,
-        dotenv_extra: ExtraValues | None = 'ignore'
+        dotenv_extra: ExtraValues | None = "ignore",
     ) -> None:
         """Wrapper for init function to add dotenv_extra handling."""
         self.dotenv_extra = dotenv_extra
@@ -92,7 +96,7 @@ class DotEnvSettingsSource(_DotEnvSettingsSource):
             env_prefix,
             env_nested_delimiter,
             env_ignore_empty,
-            env_parse_none_str
+            env_parse_none_str,
         )
 
     def __call__(self) -> dict[str, Any]:
@@ -108,7 +112,7 @@ class DotEnvSettingsSource(_DotEnvSettingsSource):
                         break
                 if matched:
                     break
-            if not matched and self.dotenv_extra == 'ignore':
+            if not matched and self.dotenv_extra == "ignore":
                 to_pop.append(key)
         for key in to_pop:
             data.pop(key)

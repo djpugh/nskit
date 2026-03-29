@@ -1,27 +1,36 @@
 """Docker execution engine."""
 
+from __future__ import annotations
+
 import os
 import subprocess  # nosec B404
 import tempfile
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-import yaml
+import yaml as pyyaml
 
+from nskit.client.backends.settings import EngineTimeouts
 from nskit.client.engines.base import RecipeEngine
 from nskit.client.models import RecipeResult
+from nskit.client.validation import validate_image_url, validate_recipe_name
 
 
 class DockerEngine(RecipeEngine):
     """Execute recipes in Docker containers."""
 
-    def __init__(self, skip_pull: bool = False) -> None:
+    def __init__(self, skip_pull: bool = False, timeouts: EngineTimeouts | dict | None = None) -> None:
         """Initialise the Docker engine.
 
         Args:
             skip_pull: Skip pulling the image (useful for locally built images).
+            timeouts: Timeout configuration for Docker operations.
         """
         self.skip_pull = skip_pull
+        if isinstance(timeouts, dict):
+            self.timeouts = EngineTimeouts(**timeouts)
+        else:
+            self.timeouts = timeouts or EngineTimeouts()
 
     def execute(
         self,
@@ -29,8 +38,8 @@ class DockerEngine(RecipeEngine):
         version: str,
         parameters: dict[str, Any],
         output_dir: Path,
-        image_url: Optional[str] = None,
-        entrypoint: Optional[str] = None,
+        image_url: str | None = None,
+        entrypoint: str | None = None,
     ) -> RecipeResult:
         """Execute recipe in a Docker container.
 
@@ -51,6 +60,9 @@ class DockerEngine(RecipeEngine):
         if not image_url:
             raise ValueError("Docker engine requires image_url")
 
+        validate_image_url(image_url)
+        validate_recipe_name(recipe)
+
         errors: list[str] = []
         warnings: list[str] = []
 
@@ -60,26 +72,30 @@ class DockerEngine(RecipeEngine):
                     ["docker", "pull", image_url],
                     check=True,
                     capture_output=True,
+                    timeout=self.timeouts.pull,
                 )
 
             # Write parameters as YAML (matches CLI --input-yaml-path)
             with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
-                yaml.dump(parameters, f, default_flow_style=False)
+                pyyaml.safe_dump(parameters, f, default_flow_style=False)
                 input_file = Path(f.name)
             # Ensure readable by non-root container user
             input_file.chmod(0o644)
 
             try:
                 output_dir.mkdir(parents=True, exist_ok=True)
-                # Ensure container user can write to the mounted output directory
-                output_dir.chmod(0o777)
 
                 cmd = [
                     "docker",
                     "run",
                     "--rm",
                 ]
+                # Run as host user so output files have correct ownership
+                if hasattr(os, "getuid"):
+                    cmd += ["--user", f"{os.getuid()}:{os.getgid()}"]
                 cmd += [
+                    "-e",
+                    "HOME=/tmp",
                     "-e",
                     f"LOG_JSON={os.environ.get('LOG_JSON', 'true')}",
                     "-e",
@@ -98,26 +114,7 @@ class DockerEngine(RecipeEngine):
                     "/app/output",
                 ]
 
-                result = subprocess.run(cmd, capture_output=True, text=True, check=True)  # nosec B603, B607
-
-                # Fix ownership of files created by the container user
-                if hasattr(os, "getuid"):
-                    subprocess.run(  # nosec B603, B607
-                        [
-                            "docker",
-                            "run",
-                            "--rm",
-                            "-v",
-                            f"{output_dir.absolute()}:/fix",
-                            "busybox",
-                            "chown",
-                            "-R",
-                            f"{os.getuid()}:{os.getgid()}",
-                            "/fix",
-                        ],
-                        capture_output=True,
-                        check=False,
-                    )
+                result = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=self.timeouts.run)  # nosec B603, B607
 
                 if result.stderr:
                     warnings.append(result.stderr.strip())

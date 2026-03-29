@@ -55,7 +55,6 @@ class Env(ContextDecorator):
                 for key in list(self._remove):
                     os.environ.pop(key, None)
             logger.info("Changing env variables")
-            logger.debug(f"New env variables: {os.environ}")
         else:
             logger.info("No arguments set (environ, override, remove)")
 

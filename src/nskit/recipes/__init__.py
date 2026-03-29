@@ -1,4 +1,5 @@
 """Recipes module initialization (moved to nskit.client)."""
+
 # Backward compatibility - re-export from new location
 from nskit.client import DiscoveryClient, RecipeClient, UpdateClient
 from nskit.client.engines import DockerEngine, LocalEngine

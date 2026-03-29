@@ -1,4 +1,5 @@
 """Common logging helpers."""
+
 from functools import wraps
 
 from .config import LoggingConfig  # noqa: F401
