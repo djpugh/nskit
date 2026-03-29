@@ -93,6 +93,8 @@ class DockerEngine(RecipeEngine):
                     cmd += ["--user", f"{os.getuid()}:{os.getgid()}"]
                 cmd += [
                     "-e",
+                    "HOME=/tmp",
+                    "-e",
                     f"LOG_JSON={os.environ.get('LOG_JSON', 'true')}",
                     "-e",
                     f"LOGLEVEL={os.environ.get('LOGLEVEL', 'INFO')}",
