@@ -370,7 +370,11 @@ jobs:
 
   test-build:
     name: Test Build Python ${{ matrix.py }} - ${{ matrix.os }}
-    needs: [build, test]
+    # Tests the built wheel. Runs on release (to gate publishing) as well as on
+    # PRs. Deliberately does NOT depend on the PR-only ``test`` job, otherwise it
+    # would skip on release and take ``publish-package`` (which needs it) with it.
+    needs: [build]
+    if: ${{ !cancelled() && needs.build.result == 'success' && (github.event_name == 'release' || github.event_name == 'pull_request') }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
@@ -501,7 +505,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [docs, publish-package]
+    # Rebuilds + deploys docs itself (mike deploy below), so it does not need
+    # the PR-only ``docs`` build job — depending on it would skip publish-docs
+    # on release. Gate only on a successful package publish.
+    needs: [publish-package]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
