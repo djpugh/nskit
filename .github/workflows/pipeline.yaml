@@ -542,6 +542,6 @@ jobs:
           uv run mike deploy -u "${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor}}" latest --config-file docs/mkdocs.yml -p
           uv run mike set-default latest --config-file docs/mkdocs.yml
           git checkout gh-pages
-          git pull origin
+          git pull origin gh-pages
           git tag docs-${{ steps.get_version.outputs.tag_name }}
           git push origin docs-${{ steps.get_version.outputs.tag_name }}
