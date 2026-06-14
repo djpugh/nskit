@@ -23,6 +23,8 @@ def RecipeField(
     env_var: Optional[str] = None,
     template: Optional[str] = None,
     prompt_text: Optional[str] = None,
+    display_name: Optional[str] = None,
+    help_text: Optional[str] = None,
     options: Optional[list[str]] = None,
     conditional_rules: Optional[list[dict]] = None,
     description: Optional[str] = None,
@@ -39,8 +41,12 @@ def RecipeField(
         env_var: Environment variable name for default resolution.
         template: Jinja2 template expression for derived defaults.
         prompt_text: Custom prompt text for interactive collection.
+        display_name: Human-readable field name for UI prompting.
+        help_text: Additional help text shown alongside the prompt.
         options: Available choices for enum-type fields.
-        conditional_rules: Rules controlling field visibility.
+        conditional_rules: Rules controlling field visibility. Each may use the
+            structured ``{depends_on, operator, value}`` form or the ``"op:value"``
+            ``condition`` shorthand.
         description: Description of the field's purpose.
         **kwargs: Additional keyword arguments passed to ``pydantic.Field``.
 
@@ -54,6 +60,10 @@ def RecipeField(
         extra["template"] = template
     if prompt_text is not None:
         extra["prompt_text"] = prompt_text
+    if display_name is not None:
+        extra["display_name"] = display_name
+    if help_text is not None:
+        extra["help_text"] = help_text
     if options is not None:
         extra["options"] = options
     if conditional_rules is not None:

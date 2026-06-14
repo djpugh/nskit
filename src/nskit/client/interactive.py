@@ -162,15 +162,37 @@ class InteractiveHandler:
         return True
 
     def _evaluate_condition(self, actual: Any, operator: str, expected: Any) -> bool:
-        """Evaluate a single conditional expression."""
-        if operator == "equals":
-            return actual == expected
-        if operator == "not_equals":
-            return actual != expected
+        """Evaluate a single conditional expression.
+
+        When ``expected`` is a string (as produced by the ``"op:value"``
+        shorthand, e.g. ``"ne:true"``), the actual value is stringified and
+        compared case-insensitively, so ``True`` matches ``"true"``. When
+        ``expected`` is a non-string (structured rules), values are compared
+        with their native types.
+        """
+
+        def _eq(a: Any, e: Any) -> bool:
+            # Case-insensitive string comparison when the expected side is a
+            # string (matches the "op:value" shorthand); native otherwise.
+            if isinstance(e, str):
+                return str(a).lower() == e.lower()
+            return a == e
+
+        if operator in ("equals", "eq"):
+            return _eq(actual, expected)
+        if operator in ("not_equals", "ne"):
+            return not _eq(actual, expected)
         if operator == "in":
-            return actual in expected
+            expected_seq = expected if isinstance(expected, (list, tuple, set)) else [expected]
+            return any(_eq(actual, e) for e in expected_seq)
         if operator == "not_in":
-            return actual not in expected
+            expected_seq = expected if isinstance(expected, (list, tuple, set)) else [expected]
+            return not any(_eq(actual, e) for e in expected_seq)
+        if operator in ("gt", "lt"):
+            try:
+                return float(actual) > float(expected) if operator == "gt" else float(actual) < float(expected)
+            except (ValueError, TypeError):
+                return False
         return False
 
     def _prompt_field(self, field: FieldSpec, default: Any) -> Any:

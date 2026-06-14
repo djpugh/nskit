@@ -5,7 +5,20 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+# Short operator aliases accepted in the ``"op:value"`` condition string form,
+# mapped to the canonical operators used by the interactive evaluator.
+_OPERATOR_ALIASES = {
+    "eq": "equals",
+    "ne": "not_equals",
+    "equals": "equals",
+    "not_equals": "not_equals",
+    "in": "in",
+    "not_in": "not_in",
+    "gt": "gt",
+    "lt": "lt",
+}
 
 
 class FieldType(str, Enum):
@@ -32,15 +45,38 @@ class ConditionalRule(BaseModel):
 
     Args:
         depends_on: Name of the field this rule depends on.
-        operator: Comparison operator (equals, not_equals, in, not_in).
+        operator: Comparison operator (equals, not_equals, in, not_in, gt, lt).
         value: Value to compare against.
         action: Action to take when the condition is met.
+        condition: Optional shorthand ``"op:value"`` form (e.g. ``"ne:true"``,
+            ``"in:a,b"``). When given, ``operator`` and ``value`` are derived
+            from it. Provided for compatibility with string-based condition
+            formats; ``operator``/``value`` are the canonical fields.
     """
 
     depends_on: str
-    operator: str
-    value: Any
-    action: ConditionalAction
+    operator: str = "equals"
+    value: Any = None
+    action: ConditionalAction = ConditionalAction.SKIP
+
+    @model_validator(mode="before")
+    @classmethod
+    def _expand_condition_string(cls, data: Any) -> Any:
+        """Derive operator/value from a ``"op:value"`` ``condition`` shorthand."""
+        if not isinstance(data, dict) or "condition" not in data:
+            return data
+        data = dict(data)
+        condition = data.pop("condition")
+        if isinstance(condition, str):
+            raw_op, _, raw_value = condition.partition(":")
+            operator = _OPERATOR_ALIASES.get(raw_op.strip().lower(), raw_op.strip().lower())
+            data.setdefault("operator", operator)
+            if "value" not in data:
+                if operator in ("in", "not_in"):
+                    data["value"] = [v.strip() for v in raw_value.split(",")] if raw_value else []
+                else:
+                    data["value"] = raw_value.strip()
+        return data
 
 
 class FieldSpec(BaseModel):
@@ -54,6 +90,7 @@ class FieldSpec(BaseModel):
         display_name: Human-readable name for display.
         prompt_text: Custom prompt text for interactive collection.
         description: Description of the field's purpose.
+        help_text: Additional help text shown alongside the prompt.
         options: Available choices for enum-type fields.
         env_var: Environment variable name for default resolution.
         template: Jinja2 template expression for derived defaults.
@@ -67,6 +104,7 @@ class FieldSpec(BaseModel):
     display_name: str | None = None
     prompt_text: str | None = None
     description: str | None = None
+    help_text: str | None = None
     options: list[str] | None = None
     env_var: str | None = None
     template: str | None = None
