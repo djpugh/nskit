@@ -11,6 +11,9 @@ class RemoveEmptyFilesHook(Hook):
     """Post hook that removes all empty files from the generated recipe."""
 
     skip_gitkeep: bool = True
+    whitespace_is_empty: bool = True
+    """Treat whitespace-only files as empty. Conditional templates that render
+    to nothing often leave only a trailing newline; this removes them too."""
 
     def call(self, recipe_path: Path, context: dict[str, Any]) -> Optional[tuple[Path, dict[str, Any]]]:
         """Remove all empty files from the recipe directory.
@@ -32,8 +35,13 @@ class RemoveEmptyFilesHook(Hook):
             for file in files:
                 file_path = Path(root) / file
                 try:
-                    # Check if file is empty (0 bytes)
-                    if file_path.stat().st_size == 0 and not (self.skip_gitkeep and file_path.name == ".gitkeep"):
+                    if self.skip_gitkeep and file_path.name == ".gitkeep":
+                        continue
+                    # Empty == 0 bytes, or (optionally) whitespace-only content.
+                    is_empty = file_path.stat().st_size == 0
+                    if not is_empty and self.whitespace_is_empty:
+                        is_empty = file_path.read_text(encoding="utf-8").strip() == ""
+                    if is_empty:
                         file_path.unlink()  # Remove the empty file
                         empty_files_removed.append(str(file_path.relative_to(recipe_path)))
                 except OSError as e:
