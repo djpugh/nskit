@@ -12,6 +12,7 @@ from rich import print as rich_print
 from rich.console import Console
 from rich.table import Table
 
+from nskit._logging import logger_factory
 from nskit.client import DiscoveryClient, RecipeClient, UpdateClient
 from nskit.client.backends import create_backend_from_config
 from nskit.client.backends.base import RecipeBackend
@@ -25,6 +26,8 @@ from nskit.client.utils import get_required_fields_as_dict
 from nskit.common.models.diff import DiffMode
 from nskit.mixer.components.recipe import Recipe
 
+logger = logger_factory.get_logger(__name__)
+
 TREE_IGNORE = {".git", "__pycache__", ".venv", "node_modules"}
 
 
@@ -35,6 +38,7 @@ def _commit_and_maybe_push(
     create_repo: bool,
     vcs_client,
     console: Console,
+    default_branch: str = "main",
 ) -> None:
     """Commit generated files and optionally create a remote repo and push.
 
@@ -45,6 +49,7 @@ def _commit_and_maybe_push(
         create_repo: Whether the user opted to create a remote repo.
         vcs_client: Detected VCS repo client (or ``None``).
         console: Rich console for output.
+        default_branch: Branch to apply provider configuration/protection to.
     """
     import subprocess  # nosec B404
 
@@ -87,6 +92,11 @@ def _commit_and_maybe_push(
             rc = RepositoryClient(vcs_client=vcs_client)
             info = rc.create_and_push(repo_name, project_path, description=description)
             console.print(f"[green]✓ Created and pushed to {info.url}[/green]")
+            try:
+                rc.configure_repository(repo_name, default_branch=default_branch)
+                console.print("[green]✓ Applied repository configuration[/green]")
+            except Exception as e:
+                console.print(f"[yellow]⚠ Failed to configure repository: {e}[/yellow]")
         except Exception as e:
             console.print(f"[yellow]⚠ Failed to create repository: {e}[/yellow]")
 
@@ -235,7 +245,12 @@ def create_cli(
                         try:
                             default = derived_eval.evaluate(meta["template"], {**input_data, "ctx": ctx_values})
                         except Exception:
-                            pass  # Template evaluation is best-effort for defaults
+                            # Template evaluation is best-effort for defaults.
+                            logger.debug(
+                                "Failed to evaluate template default for field %s",
+                                field_name,
+                                exc_info=True,
+                            )
 
                     # 4. Context provider fallback
                     if default is None:

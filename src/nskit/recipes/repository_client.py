@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import subprocess  # nosec B404
 from pathlib import Path
+from typing import Any
 
 from nskit.client.models import RepositoryInfo
 from nskit.vcs.providers.abstract import RepoClient
@@ -90,20 +91,29 @@ class RepositoryClient:
     def configure_repository(
         self,
         repo_name: str,
-        branch_protection: bool = True,
-        require_reviews: bool = True,
+        settings: dict[str, Any] | None = None,
+        default_branch: str | None = None,
+        branch_rules: dict[str, Any] | None = None,
     ) -> None:
-        """Configure repository settings.
+        """Apply repository configuration and branch protection via the provider.
 
-        Not yet implemented — placeholder for future configuration logic.
+        Delegates to the VCS provider's ``configure`` and
+        ``set_branch_protection`` hooks. Providers that do not support remote
+        configuration treat these as no-ops, so this is safe to call always.
 
         Args:
             repo_name: Repository name.
-            branch_protection: Enable branch protection.
-            require_reviews: Require pull request reviews.
+            settings: Repository-level settings overrides (merge options, features).
+            default_branch: Branch to apply protection to. If ``None``, branch
+                protection is skipped.
+            branch_rules: Branch protection overrides for ``default_branch``.
         """
         if not self.vcs_client:
             raise ValueError("VCS client not configured")
+
+        self.vcs_client.configure(repo_name, settings=settings)
+        if default_branch is not None:
+            self.vcs_client.set_branch_protection(repo_name, default_branch, rules=branch_rules)
 
     def get_repository_info(self, repo_name: str) -> RepositoryInfo | None:
         """Get repository information.
