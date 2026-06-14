@@ -109,7 +109,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.2.0
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -153,7 +153,7 @@ jobs:
       with:
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
     - name: Install uv
-      uses: astral-sh/setup-uv@v7
+      uses: astral-sh/setup-uv@v8.2.0
     - name: Set up Python ${{ matrix.py }}
       uses: actions/setup-python@v6
       with:
@@ -178,7 +178,7 @@ jobs:
           reports/*-test.xml
           reports/coverage.xml
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v6
+      uses: codecov/codecov-action@v7
       with:
         directory: ./reports/
         flags: tests
@@ -213,7 +213,7 @@ jobs:
         comment_mode: "off"
         check_name: Unit Tests (${{ matrix.py }} - ${{ matrix.os }})
     - name: Coverage Comment
-      uses: orgoro/coverage@v3.2
+      uses: orgoro/coverage@v3.3
       if: matrix.os == 'ubuntu' && matrix.py == '3.12'
       continue-on-error: true
       with:
@@ -237,7 +237,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v7
+        uses: SonarSource/sonarqube-scan-action@v8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -312,7 +312,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.2.0
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
@@ -351,7 +351,7 @@ jobs:
           clean: true
           fetch-depth: 0
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.2.0
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
@@ -370,7 +370,11 @@ jobs:
 
   test-build:
     name: Test Build Python ${{ matrix.py }} - ${{ matrix.os }}
-    needs: [build, test]
+    # Tests the built wheel. Runs on release (to gate publishing) as well as on
+    # PRs. Deliberately does NOT depend on the PR-only ``test`` job, otherwise it
+    # would skip on release and take ``publish-package`` (which needs it) with it.
+    needs: [build]
+    if: ${{ !cancelled() && needs.build.result == 'success' && (github.event_name == 'release' || github.event_name == 'pull_request') }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
       fail-fast: false
@@ -392,7 +396,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           path: ./repo
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.2.0
       - name: Set up Python ${{ matrix.py }}
         uses: actions/setup-python@v6
         with:
@@ -453,7 +457,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.2.0
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
@@ -501,14 +505,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [docs, publish-package]
+    # Rebuilds + deploys docs itself (mike deploy below), so it does not need
+    # the PR-only ``docs`` build job — depending on it would skip publish-docs
+    # on release. Gate only on a successful package publish.
+    needs: [publish-package]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.2.0
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
@@ -542,6 +549,6 @@ jobs:
           uv run mike deploy -u "${{ steps.get_version.outputs.major }}.${{ steps.get_version.outputs.minor}}" latest --config-file docs/mkdocs.yml -p
           uv run mike set-default latest --config-file docs/mkdocs.yml
           git checkout gh-pages
-          git pull origin
+          git pull origin gh-pages
           git tag docs-${{ steps.get_version.outputs.tag_name }}
           git push origin docs-${{ steps.get_version.outputs.tag_name }}
