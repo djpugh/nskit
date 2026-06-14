@@ -2,11 +2,12 @@
 
 import re
 from pathlib import Path
+from typing import Callable, Optional
 
 from pydantic import Field
 
 from nskit import __version__
-from nskit.mixer import CodeRecipe, RepoMetadata
+from nskit.mixer import CodeRecipe, RepoMetadata, hooks
 
 _DELIMITERS = [".", ",", "-"]
 
@@ -62,6 +63,15 @@ class PyRecipe(CodeRecipe):
 
     repo: PyRepoMetadata = Field(...)
     """Python repo metadata."""
+
+    language: str = "python"
+    """The primary language of the repo."""
+
+    post_hooks: Optional[list[Callable]] = Field(
+        [hooks.git.GitInit(), hooks.pre_commit.PrecommitInstall()],
+        validate_default=True,
+        description="Hooks that can be used to modify a recipe path and context after writing",
+    )
 
     @staticmethod
     def _to_pep8(value):

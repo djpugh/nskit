@@ -1,7 +1,7 @@
 """Github provider using ghapi."""
 
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 try:
     from fastcore.net import HTTP404NotFoundError
@@ -13,8 +13,31 @@ except ImportError:
     ) from None
 from pydantic import Field, HttpUrl, SecretStr, ValidationInfo, field_validator
 
+from nskit._logging import logger_factory
 from nskit.common.configuration import BaseConfiguration, SettingsConfigDict
 from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
+
+logger = logger_factory.get(__name__)
+
+
+class GithubBranchProtectionSettings(BaseConfiguration):
+    """Github default branch protection settings.
+
+    Maps to the GitHub branch-protection API. Fields left as ``None`` are
+    omitted so the provider only sends what is explicitly configured.
+    """
+
+    model_config = SettingsConfigDict(env_prefix="GITHUB_BRANCH_PROTECTION_", env_file=".env", dotenv_extra="ignore")
+
+    enabled: bool = False
+    required_approving_review_count: Optional[int] = None
+    require_code_owner_reviews: Optional[bool] = None
+    dismiss_stale_reviews: Optional[bool] = None
+    require_conversation_resolution: Optional[bool] = None
+    enforce_admins: Optional[bool] = None
+    required_status_checks: Optional[list[str]] = None
+    allow_force_pushes: Optional[bool] = None
+    allow_deletions: Optional[bool] = None
 
 
 class GithubRepoSettings(BaseConfiguration):
@@ -32,6 +55,7 @@ class GithubRepoSettings(BaseConfiguration):
     allow_rebase_merge: Optional[bool] = None
     delete_branch_on_merge: Optional[bool] = None
     auto_init: bool = False
+    branch_protection: GithubBranchProtectionSettings = Field(default_factory=GithubBranchProtectionSettings)
 
 
 class GithubSettings(VCSProviderSettings):
@@ -150,3 +174,73 @@ class GithubRepoClient(RepoClient):
         for u in paged(get_method, self._config.organisation, per_page=100):
             repos += [x["name"] for x in u]
         return repos
+
+    def configure(self, repo_name: str, settings: Optional[dict[str, Any]] = None) -> None:
+        """Apply repository-level settings (merge options, features) to the repo.
+
+        Uses the configured ``GithubRepoSettings`` as defaults, overridden by any
+        explicit ``settings``. Only non-``None`` values are sent to the API.
+        """
+        defaults = self._config.repo.model_dump(
+            include={
+                "private",
+                "has_issues",
+                "has_wiki",
+                "has_downloads",
+                "has_projects",
+                "allow_squash_merge",
+                "allow_merge_commit",
+                "allow_rebase_merge",
+                "delete_branch_on_merge",
+            },
+        )
+        defaults.update(settings or {})
+        kwargs = {k: v for k, v in defaults.items() if v is not None}
+        if not kwargs:
+            return
+        self._github.repos.update(self._config.organisation, repo_name, **kwargs)
+        logger.info(f"Configured repository {repo_name}")
+
+    def set_branch_protection(
+        self,
+        repo_name: str,
+        branch: str,
+        rules: Optional[dict[str, Any]] = None,
+    ) -> None:
+        """Apply branch protection to ``branch`` using the GitHub API.
+
+        Uses the configured ``GithubBranchProtectionSettings`` as defaults,
+        overridden by any explicit ``rules``. A no-op unless protection is
+        enabled (either via config or an explicit ``rules`` payload).
+        """
+        config = self._config.repo.branch_protection
+        enabled = config.enabled or bool(rules)
+        if not enabled:
+            return
+
+        required_reviews = None
+        if config.required_approving_review_count is not None or config.require_code_owner_reviews is not None:
+            required_reviews = {}
+            if config.required_approving_review_count is not None:
+                required_reviews["required_approving_review_count"] = config.required_approving_review_count
+            if config.require_code_owner_reviews is not None:
+                required_reviews["require_code_owner_reviews"] = config.require_code_owner_reviews
+            if config.dismiss_stale_reviews is not None:
+                required_reviews["dismiss_stale_reviews"] = config.dismiss_stale_reviews
+
+        status_checks = None
+        if config.required_status_checks is not None:
+            status_checks = {"strict": True, "contexts": config.required_status_checks}
+
+        payload = {
+            "required_status_checks": status_checks,
+            "enforce_admins": config.enforce_admins,
+            "required_pull_request_reviews": required_reviews,
+            "restrictions": None,
+            "required_conversation_resolution": config.require_conversation_resolution,
+            "allow_force_pushes": config.allow_force_pushes,
+            "allow_deletions": config.allow_deletions,
+        }
+        payload.update(rules or {})
+        self._github.repos.update_branch_protection(self._config.organisation, repo_name, branch, **payload)
+        logger.info(f"Applied branch protection to {repo_name}@{branch}")

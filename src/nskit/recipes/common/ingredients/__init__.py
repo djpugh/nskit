@@ -1,4 +1,4 @@
-"""Shared Python ingredients for recipes."""
+"""Shared language-agnostic ingredients for recipes."""
 
 from nskit.mixer import File, Folder
 
@@ -10,11 +10,6 @@ pre_commit_config = File(
 gitignore = File(
     name=".gitignore",
     content="nskit.recipes.common.ingredients:gitignore.jinja",
-)
-
-codeowners = File(
-    name="CODEOWNERS",
-    content="nskit.recipes.common.ingredients:codeowners.jinja",
 )
 
 # Taskfiles folder structure
