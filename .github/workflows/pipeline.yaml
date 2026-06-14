@@ -213,7 +213,7 @@ jobs:
         comment_mode: "off"
         check_name: Unit Tests (${{ matrix.py }} - ${{ matrix.os }})
     - name: Coverage Comment
-      uses: orgoro/coverage@v3.2
+      uses: orgoro/coverage@v3.3
       if: matrix.os == 'ubuntu' && matrix.py == '3.12'
       continue-on-error: true
       with:
