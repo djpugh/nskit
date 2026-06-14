@@ -65,6 +65,21 @@ class Resource(str):
         return ta.validate_python(value)
 
 
+def ref(module: str, filename: str) -> Resource:
+    """Build a validated template resource string for a file in ``module``.
+
+    Avoids repeating the full package path on every ingredient. Pass the
+    defining module (typically ``__name__`` from an ``__init__.py``) and the
+    template filename::
+
+        File(name="pyproject.toml", content=ref(__name__, "pyproject.toml.jinja"))
+
+    The result is validated eagerly (at construction/import time) so a malformed
+    reference fails fast rather than at render time.
+    """
+    return Resource.validate(f"{module}:{filename}")
+
+
 class _PkgResourcesTemplateLoader(BaseLoader):
     """Load jinja templates via importlib.resources."""
 
@@ -135,7 +150,13 @@ class _EnvironmentFactory:
     @staticmethod
     def default_environment():
         """Get the default environment object."""
-        return SandboxedEnvironment(loader=ChoiceLoader([_PkgResourcesTemplateLoader()]))
+        # keep_trailing_newline so rendered files retain their final newline
+        # (POSIX text-file convention; otherwise every generated file fails
+        # end-of-file-fixer style pre-commit hooks).
+        return SandboxedEnvironment(
+            loader=ChoiceLoader([_PkgResourcesTemplateLoader()]),
+            keep_trailing_newline=True,
+        )
 
 
 JINJA_ENVIRONMENT_FACTORY = _EnvironmentFactory()

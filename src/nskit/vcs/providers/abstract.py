@@ -1,6 +1,7 @@
 """Abstract classes for the provider."""
 
 from abc import ABC, abstractmethod, abstractproperty
+from typing import Any, Optional
 
 from pydantic import HttpUrl
 
@@ -41,6 +42,27 @@ class RepoClient(ABC):
     def list(self) -> list[str]:
         """List all repos on the remote."""
         raise NotImplementedError()
+
+    def configure(self, repo_name: str, settings: Optional[dict[str, Any]] = None) -> None:
+        """Apply repository-level configuration (e.g. merge options, features).
+
+        Default is a no-op so providers that do not support remote configuration
+        remain valid. Providers should override to apply ``settings`` to the repo.
+        """
+        return None
+
+    def set_branch_protection(
+        self,
+        repo_name: str,
+        branch: str,
+        rules: Optional[dict[str, Any]] = None,
+    ) -> None:
+        """Apply branch protection / ruleset configuration to ``branch``.
+
+        Default is a no-op so providers without ruleset support remain valid.
+        Providers should override to apply ``rules`` to the named branch.
+        """
+        return None
 
 
 class VCSProviderSettings(ABC, BaseConfiguration):

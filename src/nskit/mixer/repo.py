@@ -43,19 +43,23 @@ class RepoMetadata(BaseConfiguration):
 
 
 class CodeRecipe(Recipe):
-    """Recipe for a code repo.
+    """Recipe for a (git) code repo.
 
-    Includes default git init and precommit install hooks.
+    Language-agnostic: includes a default git init hook only. Language-specific
+    recipes (e.g. ``PyRecipe``) extend ``post_hooks`` with their own tooling
+    (such as pre-commit installation) and set ``language`` accordingly.
     """
 
     repo: RepoMetadata
     post_hooks: Optional[list[Callable]] = Field(
-        [hooks.git.GitInit(), hooks.pre_commit.PrecommitInstall()],
+        [hooks.git.GitInit()],
         validate_default=True,
         description="Hooks that can be used to modify a recipe path and context after writing",
     )
     git: GitConfig = GitConfig()
-    language: str = "python"
+    language: Optional[str] = Field(
+        None, description="The primary language of the repo, set by the language-specific recipe"
+    )
     license: Optional[LicenseOptionsEnum] = None
 
     def get_pipeline_filenames(self):

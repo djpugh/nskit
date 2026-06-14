@@ -144,7 +144,7 @@ class PackageRecipeTestCase(unittest.TestCase):
                         root / "docs" / "source" / "usage.md": None,
                         root / "docs" / "source" / "developing": {
                             root / "docs" / "source" / "developing" / "index.md": None,
-                            root / "docs" / "source" / "developing" / "license.md": "",
+                            root / "docs" / "source" / "developing" / "license.md": "\n",
                         },
                     },
                 },

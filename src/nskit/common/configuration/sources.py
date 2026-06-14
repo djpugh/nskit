@@ -88,15 +88,19 @@ class DotEnvSettingsSource(_DotEnvSettingsSource):
     ) -> None:
         """Wrapper for init function to add dotenv_extra handling."""
         self.dotenv_extra = dotenv_extra
+        # Pass as keyword arguments: pydantic-settings 2.14 inserted a new
+        # positional ``dotenv_filtering`` parameter ahead of ``case_sensitive``,
+        # so a positional call silently shifts env_prefix/env_nested_delimiter
+        # into the wrong slots (breaking env var -> field mapping).
         super().__init__(
             settings_cls,
-            env_file,
-            env_file_encoding,
-            case_sensitive,
-            env_prefix,
-            env_nested_delimiter,
-            env_ignore_empty,
-            env_parse_none_str,
+            env_file=env_file,
+            env_file_encoding=env_file_encoding,
+            case_sensitive=case_sensitive,
+            env_prefix=env_prefix,
+            env_nested_delimiter=env_nested_delimiter,
+            env_ignore_empty=env_ignore_empty,
+            env_parse_none_str=env_parse_none_str,
         )
 
     def __call__(self) -> dict[str, Any]:
