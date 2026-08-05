@@ -57,11 +57,35 @@ class RepoClient(ABC):
         branch: str,
         rules: Optional[dict[str, Any]] = None,
     ) -> None:
-        """Apply branch protection / ruleset configuration to ``branch``.
+        """Apply classic branch protection configuration to ``branch``.
+
+        Default is a no-op so providers without branch-protection support remain
+        valid. Providers should override to apply ``rules`` to the named branch.
+
+        Prefer the ruleset methods below where the provider supports them;
+        rulesets are the successor to classic branch protection.
+        """
+        return None
+
+    def create_ruleset(self, repo_name: str, ruleset: Any) -> Optional[int]:
+        """Create a ruleset on the repo, returning its ID if the provider gives one.
 
         Default is a no-op so providers without ruleset support remain valid.
-        Providers should override to apply ``rules`` to the named branch.
         """
+        return None
+
+    # NB: the return annotation is quoted because ``list`` is also a method on
+    # this class, so an unquoted ``list[Any]`` would resolve to that method.
+    def list_rulesets(self, repo_name: str) -> "list[Any]":
+        """List the repo's rulesets. Default is an empty list."""
+        return []
+
+    def update_ruleset(self, repo_name: str, ruleset_id: int, **changes: Any) -> None:
+        """Update fields on an existing ruleset. Default is a no-op."""
+        return None
+
+    def delete_ruleset(self, repo_name: str, ruleset_id: int) -> None:
+        """Delete a ruleset. Default is a no-op."""
         return None
 
 
