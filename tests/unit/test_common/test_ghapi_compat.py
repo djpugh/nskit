@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 import nskit
 from nskit.common import ghapi_compat
-from nskit.common.ghapi_compat import supports_sync_flag, sync_ghapi
+from nskit.common.ghapi_compat import paged, supports_sync_flag, sync_ghapi
 
 
 class TestSupportsSyncFlag(unittest.TestCase):
@@ -116,12 +116,66 @@ class TestSyncGhApi(unittest.TestCase):
         self.assertEqual(captured["gh_host"], "https://ghe.example.com")
 
 
-class TestNoDirectGhApiConstruction(unittest.TestCase):
-    """No source file constructs ``GhApi`` directly.
+class TestPaged(unittest.TestCase):
+    """Selection of the synchronous pager."""
 
-    A direct construction silently returns an async client on ghapi 2.x, and the
-    failure surfaces far from the cause (``'coroutine' object has no attribute
-    ...``). This guard means a new call site cannot reintroduce that.
+    def setUp(self) -> None:
+        """Clear the cache so each test controls the resolved pager."""
+        ghapi_compat._pager.cache_clear()
+        self.addCleanup(ghapi_compat._pager.cache_clear)
+
+    def test_prefers_sync_paged_when_available(self) -> None:
+        """On 2.x, ``sync_paged`` is used rather than the async ``paged``."""
+        calls = []
+
+        def fake_sync_paged(oper, *args, **kwargs):
+            calls.append((oper, args, kwargs))
+            return iter([["a"], ["b"]])
+
+        def fake_paged(oper, *args, **kwargs):  # pragma: no cover - must not run
+            raise AssertionError("the async paged() must not be used")
+
+        with patch("ghapi.all.sync_paged", fake_sync_paged, create=True), patch("ghapi.all.paged", fake_paged):
+            pages = list(paged("oper", "org", per_page=100))
+        self.assertEqual(pages, [["a"], ["b"]])
+        self.assertEqual(calls, [("oper", ("org",), {"per_page": 100})])
+
+    def test_falls_back_to_paged_on_1x(self) -> None:
+        """On 1.x there is no ``sync_paged``; ``paged`` is already synchronous."""
+        calls = []
+
+        def fake_paged(oper, *args, **kwargs):
+            calls.append((oper, args, kwargs))
+            return iter([["a"]])
+
+        import ghapi.all
+
+        had_sync_paged = hasattr(ghapi.all, "sync_paged")
+        if had_sync_paged:
+            self.addCleanup(setattr, ghapi.all, "sync_paged", ghapi.all.sync_paged)
+            del ghapi.all.sync_paged
+        with patch("ghapi.all.paged", fake_paged):
+            pages = list(paged("oper", "org"))
+        self.assertEqual(pages, [["a"]])
+        self.assertEqual(calls, [("oper", ("org",), {})])
+
+    def test_resolved_pager_is_not_async(self) -> None:
+        """Against the real library, the pager is not an async generator.
+
+        This is the actual regression: on 2.x, ``paged`` is an async generator
+        function even when the client uses the synchronous transport, so
+        iterating it raises ``'async_generator' object is not iterable``.
+        """
+        self.assertFalse(inspect.isasyncgenfunction(ghapi_compat._pager()))
+
+
+class TestNoDirectGhapiUse(unittest.TestCase):
+    """No source file uses ``GhApi`` or ``paged`` from ghapi directly.
+
+    Direct use silently gets the asynchronous form on ghapi 2.x, and the failure
+    surfaces far from the cause (``'coroutine' object has no attribute ...``,
+    ``'async_generator' object is not iterable``). This guard means a new call
+    site cannot reintroduce that.
     """
 
     def test_all_construction_goes_through_the_helper(self) -> None:
@@ -137,6 +191,21 @@ class TestNoDirectGhApiConstruction(unittest.TestCase):
         self.assertFalse(
             offenders,
             f"construct clients via nskit.common.ghapi_compat.sync_ghapi instead of GhApi() directly: {offenders}",
+        )
+
+    def test_paged_is_not_imported_from_ghapi(self) -> None:
+        """``paged`` is imported from the compat helper, not from ghapi."""
+        src = Path(nskit.__file__).parent
+        offenders = []
+        for path in src.rglob("*.py"):
+            if path.name == "ghapi_compat.py":
+                continue
+            for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+                if re.match(r"\s*from ghapi[\w.]* import .*\bpaged\b", line):
+                    offenders.append(f"{path.relative_to(src)}:{number}")
+        self.assertFalse(
+            offenders,
+            f"import paged from nskit.common.ghapi_compat instead of ghapi: {offenders}",
         )
 
 

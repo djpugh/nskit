@@ -15,6 +15,11 @@ interface, so this opts into the synchronous transport instead.
 arguments, but they are not necessarily inert, so the flag is passed only when
 the installed version actually declares it. That keeps this working across both
 majors while ``ghapi`` remains unpinned.
+
+Pagination needs the same treatment separately: on 2.x ``ghapi.all.paged`` is an
+async generator function *regardless* of the client's transport, so iterating it
+raises ``'async_generator' object is not iterable`` even against a sync client.
+2.x exports ``sync_paged`` for that; see :func:`paged`.
 """
 
 from __future__ import annotations
@@ -50,3 +55,30 @@ def sync_ghapi(**kwargs: Any):
     if supports_sync_flag():
         kwargs.setdefault("sync", True)
     return GhApi(**kwargs)
+
+
+@lru_cache(maxsize=1)
+def _pager() -> Any:
+    """Resolve the synchronous pager provided by the installed ghapi.
+
+    On 2.x that is ``sync_paged``; ``paged`` there is an async generator function
+    and cannot be iterated. On 1.x, ``paged`` is already synchronous and
+    ``sync_paged`` does not exist.
+    """
+    import ghapi.all
+
+    return getattr(ghapi.all, "sync_paged", ghapi.all.paged)
+
+
+def paged(oper: Any, *args: Any, **kwargs: Any) -> Any:
+    """Iterate the pages of a paginated ghapi operation.
+
+    Args:
+        oper: The ghapi operation to page, e.g. ``api.repos.list_for_org``.
+        *args: Positional arguments for the operation.
+        **kwargs: Keyword arguments for the operation, e.g. ``per_page``.
+
+    Returns:
+        An iterator over pages of results.
+    """
+    return _pager()(oper, *args, **kwargs)
