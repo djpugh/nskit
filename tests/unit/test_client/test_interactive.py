@@ -75,6 +75,72 @@ class TestResolveDefault(unittest.TestCase):
         self.assertEqual(result, "static")
 
 
+class TestHiddenFields(unittest.TestCase):
+    """Hidden fields are resolved but never prompted for.
+
+    ``FieldSpec.hidden`` marks a value the recipe pins or derives. The parser
+    setting the flag is not enough — the handler has to honour it, or the flag is
+    inert and the user is still asked.
+    """
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.handler = InteractiveHandler()
+
+    def test_hidden_field_is_not_prompted(self) -> None:
+        """No prompt is issued for a hidden field."""
+        fields = InputFieldsResponse(fields=[FieldSpec(name="pinned", default=True, hidden=True)])
+        with patch.object(self.handler, "_prompt_field") as prompt:
+            self.handler.collect_field_values(fields)
+            prompt.assert_not_called()
+
+    def test_hidden_field_default_is_kept(self) -> None:
+        """A hidden field's resolved default is still collected.
+
+        Dropping it would mean a pinned or derived value never materialises.
+        """
+        fields = InputFieldsResponse(fields=[FieldSpec(name="pinned", default=True, hidden=True)])
+        with patch.object(self.handler, "_prompt_field"):
+            collected = self.handler.collect_field_values(fields)
+        self.assertEqual(collected, {"pinned": True})
+
+    def test_hidden_field_without_default_is_omitted(self) -> None:
+        """A hidden field with nothing to resolve contributes no value."""
+        fields = InputFieldsResponse(fields=[FieldSpec(name="pinned", hidden=True)])
+        with patch.object(self.handler, "_prompt_field"):
+            collected = self.handler.collect_field_values(fields)
+        self.assertEqual(collected, {})
+
+    def test_hidden_required_field_does_not_cancel(self) -> None:
+        """A hidden required field must not abort collection.
+
+        The unprompted path returns no value, and a required field with no value
+        normally cancels; hidden fields have to bypass that.
+        """
+        fields = InputFieldsResponse(fields=[FieldSpec(name="pinned", default=True, required=True, hidden=True)])
+        with patch.object(self.handler, "_prompt_field"):
+            self.assertIsNotNone(self.handler.collect_field_values(fields))
+
+    def test_visible_fields_are_still_prompted(self) -> None:
+        """Hiding one field does not suppress the others."""
+        fields = InputFieldsResponse(
+            fields=[
+                FieldSpec(name="pinned", default=True, hidden=True),
+                FieldSpec(name="asked", default="x"),
+            ]
+        )
+        with patch.object(self.handler, "_prompt_field", return_value="answer") as prompt:
+            collected = self.handler.collect_field_values(fields)
+        self.assertEqual(prompt.call_count, 1)
+        self.assertEqual(collected, {"pinned": True, "asked": "answer"})
+
+    def test_pre_filled_value_wins_over_hidden_default(self) -> None:
+        """An explicitly supplied value is not overwritten by the pinned default."""
+        fields = InputFieldsResponse(fields=[FieldSpec(name="pinned", default=True, hidden=True)])
+        collected = self.handler.collect_field_values(fields, pre_filled={"pinned": "supplied"})
+        self.assertEqual(collected, {"pinned": "supplied"})
+
+
 class TestShouldShowField(unittest.TestCase):
     """Tests for InteractiveHandler._should_show_field."""
 

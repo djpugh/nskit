@@ -145,6 +145,13 @@ ignore = [
     "E501",  # line too long (handled by formatter)
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
+    # PEP 604 unions (``X | None``) are only valid at runtime from 3.10, and
+    # this package supports 3.9. ``from __future__ import annotations`` is not
+    # enough: pydantic evaluates model annotations when building the model, so
+    # a PEP 604 union in a model field raises TypeError on 3.9. Keep Optional /
+    # Union until the 3.9 floor is dropped.
+    "UP007",  # non-pep604-annotation-union
+    "UP045",  # non-pep604-annotation-optional
 ]
 
 [tool.ruff.lint.per-file-ignores]

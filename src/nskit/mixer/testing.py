@@ -11,9 +11,11 @@ Typical use in a downstream ``conftest``/test module::
 
     INPUTS = {"python_package": {"name": "svc", "repo": {...}}, ...}
 
-    @pytest.mark.parametrize("name", list_recipes("paebbl.nskitchen.recipes"))
+    ENTRYPOINT = "my_org.recipes"
+
+    @pytest.mark.parametrize("name", list_recipes(ENTRYPOINT))
     def test_recipe(name):
-        result = check_recipe(name, INPUTS[name], entrypoint="paebbl.nskitchen.recipes")
+        result = check_recipe(name, INPUTS[name], entrypoint=ENTRYPOINT)
         assert result.ok, result.summary()
 
 The harness never asserts on its own — it returns a :class:`RecipeCheckResult`

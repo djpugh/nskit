@@ -89,6 +89,15 @@ class InteractiveHandler:
             # Resolve default value
             default = self._resolve_default(field, collected)
 
+            # A hidden field is never prompted for, but its value is still
+            # resolved and kept: ``hidden`` marks a value the recipe pins or
+            # derives (via env_var / template / a pinned Literal), not one to
+            # discard. Dropping it would mean a derived field never materialises.
+            if field.hidden:
+                if default is not None:
+                    collected[field.name] = default
+                continue
+
             # Prompt for value
             try:
                 value = self._prompt_field(field, default)
