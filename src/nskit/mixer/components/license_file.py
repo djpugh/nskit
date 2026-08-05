@@ -13,6 +13,7 @@ except ImportError:
     GhApi = None
 from pydantic import Field
 
+from nskit.common.ghapi_compat import sync_ghapi
 from nskit.mixer.components.file import File
 from nskit.mixer.components.filesystem_object import TemplateStr
 from nskit.mixer.utilities import Resource
@@ -100,7 +101,7 @@ def _get_license_content(license: LicenseOptionsEnum):
     # Cache results as a static method to make testing etc. better on rates/rate limiting
     if GhApi is None:
         raise ImportError("License file support requires ghapi. Install with: pip install nskit[github]")
-    license_content = GhApi().licenses.get(license.value)
+    license_content = sync_ghapi().licenses.get(license.value)
     return license_content
 
 

@@ -12,9 +12,9 @@ from nskit.mixer.components.license_file import LicenseFile, LicenseOptionsEnum,
 
 
 def mock_gh_api(func):
-    @patch.object(_license_file, "GhApi", autospec=True)
+    @patch.object(_license_file, "sync_ghapi", autospec=True)
     @wraps(func)
-    def mocked_call(self, GhApi):
+    def mocked_call(self, sync_ghapi):
         _get_license_content.cache_clear()
         licenses = MagicMock()
         license_content_mit = MagicMock()
@@ -31,34 +31,34 @@ def mock_gh_api(func):
                 raise HTTP404NotFoundError(None, None, None)
 
         licenses.get.side_effect = get
-        client = GhApi()
-        GhApi.reset_mock()
+        client = sync_ghapi()
+        sync_ghapi.reset_mock()
         client.licenses = licenses
-        return func(self, GhApi)
+        return func(self, sync_ghapi)
 
     return mocked_call
 
 
 class LicenseFileTestCase(unittest.TestCase):
-    # @patch.object(license_file, 'GhApi', autospec=True)
+    # @patch.object(license_file, 'sync_ghapi', autospec=True)
     @mock_gh_api
-    def test_get_license_content_cache(self, GhApi):
+    def test_get_license_content_cache(self, sync_ghapi):
         # We need to clear the cache here on the test
         _get_license_content.cache_clear()
         self.assertEqual(
             f"{date.today().year} test_repo Developers abc",
             LicenseFile().render_content({"license": "mit", "repo": {"name": "test_repo"}}),
         )
-        GhApi.assert_called_once_with()
-        GhApi().licenses.get.assert_called_once_with("mit")
-        GhApi().licenses.get.reset_mock()
-        GhApi.reset_mock()
+        sync_ghapi.assert_called_once_with()
+        sync_ghapi().licenses.get.assert_called_once_with("mit")
+        sync_ghapi().licenses.get.reset_mock()
+        sync_ghapi.reset_mock()
         self.assertEqual(
             f"{date.today().year} test_repo2 Developers abc",
             LicenseFile().render_content({"license": "mit", "repo": {"name": "test_repo2"}}),
         )
-        GhApi.assert_not_called()
-        GhApi().licenses.get.assert_not_called()
+        sync_ghapi.assert_not_called()
+        sync_ghapi().licenses.get.assert_not_called()
 
     def test_write_no_license(self):
         with ChDir():
@@ -98,7 +98,7 @@ class LicenseFileTestCase(unittest.TestCase):
             self.assertEqual(ok, [])
 
     @mock_gh_api
-    def test_write_license(self, GhApi):
+    def test_write_license(self, sync_ghapi):
         with ChDir():
             self.assertFalse(Path("LICENSE").exists())
             self.assertFalse(Path("COPYING").exists())
@@ -116,13 +116,13 @@ class LicenseFileTestCase(unittest.TestCase):
             self.assertEqual(resp, {Path("LICENSE"): f"{date.today().year} test_repo2 Developers abc"})
 
     @mock_gh_api
-    def test_dry_run_license(self, GhApi):
+    def test_dry_run_license(self, sync_ghapi):
         license_file = LicenseFile()
         resp = license_file.dryrun(Path("."), {"license": "mit", "repo": {"name": "test_repo2"}})
         self.assertEqual(resp, {Path("LICENSE"): f"{date.today().year} test_repo2 Developers abc"})
 
     @mock_gh_api
-    def test_validate_license_ok(self, GhApi):
+    def test_validate_license_ok(self, sync_ghapi):
         with ChDir():
             license_file = LicenseFile()
             license_file.write(Path("."), {"license": "mit", "repo": {"name": "test_repo2"}})
@@ -132,7 +132,7 @@ class LicenseFileTestCase(unittest.TestCase):
             self.assertEqual(ok, [Path("LICENSE")])
 
     @mock_gh_api
-    def test_validate_license_missing(self, GhApi):
+    def test_validate_license_missing(self, sync_ghapi):
         with ChDir():
             license_file = LicenseFile()
             missing, errors, ok = license_file.validate(Path("."), {"license": "mit", "repo": {"name": "test_repo2"}})
@@ -141,7 +141,7 @@ class LicenseFileTestCase(unittest.TestCase):
             self.assertEqual(ok, [])
 
     @mock_gh_api
-    def test_validate_license_error(self, GhApi):
+    def test_validate_license_error(self, sync_ghapi):
         with ChDir():
             license_file = LicenseFile()
             # License doesn't have the year fullname replacement
@@ -152,7 +152,7 @@ class LicenseFileTestCase(unittest.TestCase):
             self.assertEqual(ok, [])
 
     @mock_gh_api
-    def test_override_year(self, GhApi):
+    def test_override_year(self, sync_ghapi):
         license_file = LicenseFile()
         resp = license_file.dryrun(Path("."), {"license": "mit", "repo": {"name": "test_repo2"}, "license_year": 2022})
         self.assertEqual(resp, {Path("LICENSE"): "2022 test_repo2 Developers abc"})
@@ -210,7 +210,7 @@ class LicenseFileTestCase(unittest.TestCase):
                 self.assertIsNotNone(LicenseFile().render_name(context={"license": license_name}))
 
     @mock_gh_api
-    def test_each_license_render_content(self, GhApi):
+    def test_each_license_render_content(self, sync_ghapi):
         for license_name in LicenseOptionsEnum:
             with self.subTest(license=license_name):
                 # Test that it renders content

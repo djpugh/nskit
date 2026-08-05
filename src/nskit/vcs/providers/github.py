@@ -5,7 +5,12 @@ from typing import Any, Optional
 
 try:
     from fastcore.net import HTTP404NotFoundError
-    from ghapi.all import GhApi, GhDeviceAuth, Scope, paged
+
+    # GhApi itself is not imported here: clients are constructed via
+    # nskit.common.ghapi_compat.sync_ghapi so the synchronous transport is
+    # selected on ghapi 2.x. This import still serves as the availability check
+    # that produces the "install nskit[github]" hint below.
+    from ghapi.all import GhDeviceAuth, Scope, paged
     from ghapi.auth import _def_clientid
 except ImportError:
     raise ImportError(
@@ -15,6 +20,7 @@ from pydantic import Field, HttpUrl, SecretStr, ValidationInfo, field_validator
 
 from nskit._logging import logger_factory
 from nskit.common.configuration import BaseConfiguration, SettingsConfigDict
+from nskit.common.ghapi_compat import sync_ghapi
 from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
 
 logger = logger_factory.get(__name__)
@@ -107,7 +113,9 @@ class GithubRepoClient(RepoClient):
     def __init__(self, config: GithubSettings):
         """Initialise the client."""
         self._config = config
-        self._github = GhApi(token=self._config.token.get_secret_value(), gh_host=str(self._config.url).rstrip("/"))
+        self._github = sync_ghapi(
+            token=self._config.token.get_secret_value(), gh_host=str(self._config.url).rstrip("/")
+        )
         # If the organisation is set, we get it, and assume that the token is valid
         # Otherwise default to the user
         if self._config.organisation:
