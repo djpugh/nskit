@@ -20,11 +20,15 @@ def _not_found() -> HTTP404NotFoundError:
 
 
 class GithubRepoClientTestCase(unittest.TestCase):
-    """Base case wiring a client to a mocked GhApi."""
+    """Base case wiring a client to a mocked API client."""
 
     def setUp(self) -> None:
-        """Patch GhApi and build a client against a fake org."""
-        patcher = patch.object(github_module, "GhApi")
+        """Patch the client factory and build a client against a fake org.
+
+        The provider constructs clients via ``ghapi_compat.sync_ghapi`` rather
+        than ``GhApi`` directly, so that is what has to be patched.
+        """
+        patcher = patch.object(github_module, "sync_ghapi")
         self.addCleanup(patcher.stop)
         self.gh_api_cls = patcher.start()
         self.api = self.gh_api_cls.return_value
