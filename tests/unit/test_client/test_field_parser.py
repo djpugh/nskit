@@ -110,6 +110,206 @@ class TestFieldParserGetFieldPrompt(unittest.TestCase):
         self.assertEqual(self.parser.get_field_prompt(field), "project_name")
 
 
+class TestFieldParserFromRecipeModel(unittest.TestCase):
+    """Tests for FieldParser.from_recipe_model."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        from typing import Literal, Optional
+
+        from pydantic import BaseModel, Field
+
+        self.parser = FieldParser()
+
+        class Repository(BaseModel):
+            codeowner_name: str = Field(..., json_schema_extra={"display_name": "Owner"})
+            description: str = ""
+
+        class Model(BaseModel):
+            name: str = "default-name"
+            mandatory: str = Field(...)
+            optional: Optional[str] = None
+            repository: Repository = Field(...)
+            maybe_repo: Optional[Repository] = None
+            pinned: Literal[True] = True
+            choice: Literal["a", "b"] = "a"
+            explicitly_hidden: str = Field("x", json_schema_extra={"hidden": True})
+
+        self.Model = Model
+
+    def _specs(self, **kwargs) -> dict:
+        return {f.name: f for f in self.parser.from_recipe_model(self.Model, **kwargs).fields}
+
+    def test_field_with_ellipsis_default_is_required(self) -> None:
+        """``Field(...)`` is reported required.
+
+        Regression test: deriving ``required`` from ``default is None`` reported
+        ``False`` here, because ``Field(...)`` leaves the default as
+        ``PydanticUndefined`` rather than ``None``.
+        """
+        self.assertTrue(self._specs()["mandatory"].required)
+
+    def test_optional_field_is_not_required(self) -> None:
+        """A field with a default is not required."""
+        specs = self._specs()
+        self.assertFalse(specs["optional"].required)
+        self.assertFalse(specs["name"].required)
+
+    def test_default_is_reported_for_optional_fields(self) -> None:
+        """Optional fields carry their default; required fields do not."""
+        specs = self._specs()
+        self.assertEqual(specs["name"].default, "default-name")
+        self.assertIsNone(specs["mandatory"].default)
+
+    def test_nested_models_emit_dotted_leaves(self) -> None:
+        """Nested BaseModel fields are walked into dot-notation leaves."""
+        specs = self._specs()
+        self.assertIn("repository.codeowner_name", specs)
+        self.assertIn("repository.description", specs)
+        self.assertNotIn("repository", specs)
+
+    def test_nested_leaf_keeps_its_metadata(self) -> None:
+        """Metadata on a nested leaf survives the walk."""
+        self.assertEqual(self._specs()["repository.codeowner_name"].display_name, "Owner")
+
+    def test_optional_nested_model_recurses(self) -> None:
+        """``Optional[Model]`` is unwrapped and still recursed."""
+        self.assertIn("maybe_repo.codeowner_name", self._specs())
+
+    def test_dotted_leaves_round_trip_through_create_nested_dict(self) -> None:
+        """Emitted dotted names rebuild the nested shape."""
+        values = {"repository.codeowner_name": "Jo", "repository.description": "d"}
+        self.assertEqual(
+            self.parser.create_nested_dict(values),
+            {"repository": {"codeowner_name": "Jo", "description": "d"}},
+        )
+
+    def test_recurse_nested_false_emits_object(self) -> None:
+        """Opting out emits the nested model as a single OBJECT field."""
+        specs = self._specs(recurse_nested=False)
+        self.assertIn("repository", specs)
+        self.assertEqual(specs["repository"].type, FieldType.OBJECT)
+        self.assertNotIn("repository.codeowner_name", specs)
+
+    def test_name_is_kept_when_base_fields_excluded(self) -> None:
+        """``name`` survives ``include_base=False`` because users supply it."""
+        self.assertIn("name", self._specs())
+
+    def test_exclude_drops_named_fields(self) -> None:
+        """``exclude`` removes top-level fields."""
+        self.assertNotIn("name", self._specs(exclude={"name"}))
+
+    def test_single_valued_literal_is_enum_and_hidden(self) -> None:
+        """``Literal[True]`` is a pinned value: ENUM, one option, hidden."""
+        spec = self._specs()["pinned"]
+        self.assertEqual(spec.type, FieldType.ENUM)
+        self.assertEqual(spec.options, ["True"])
+        self.assertTrue(spec.hidden)
+
+    def test_multi_valued_literal_is_enum_and_prompted(self) -> None:
+        """A multi-member Literal is a real choice, so it is not hidden."""
+        spec = self._specs()["choice"]
+        self.assertEqual(spec.type, FieldType.ENUM)
+        self.assertEqual(spec.options, ["a", "b"])
+        self.assertFalse(spec.hidden)
+
+    def test_explicit_hidden_metadata_is_honoured(self) -> None:
+        """``json_schema_extra={"hidden": True}`` hides a field."""
+        self.assertTrue(self._specs()["explicitly_hidden"].hidden)
+
+    def test_ordinary_fields_are_not_hidden(self) -> None:
+        """Fields without a pin or a hidden flag are prompted."""
+        self.assertFalse(self._specs()["mandatory"].hidden)
+
+    def test_list_of_models_is_not_flattened(self) -> None:
+        """``list[Model]`` is not treated as a nested model.
+
+        Regression test: any single-argument generic used to be unwrapped, so
+        ``list[Leaf]`` emitted ``items.value`` — losing the fact that it is a
+        sequence, which dot-notation cannot express.
+        """
+        from pydantic import BaseModel
+
+        class Leaf(BaseModel):
+            value: str = ""
+
+        class WithList(BaseModel):
+            items: list[Leaf] = []
+
+        names = {f.name for f in self.parser.from_recipe_model(WithList).fields}
+        self.assertIn("items", names)
+        self.assertNotIn("items.value", names)
+
+    def test_deeply_nested_models_flatten_fully(self) -> None:
+        """Recursion continues through more than one level of nesting."""
+        from pydantic import BaseModel
+
+        class Leaf(BaseModel):
+            value: str = ""
+
+        class Mid(BaseModel):
+            leaf: Leaf = Leaf()
+
+        class Top(BaseModel):
+            mid: Mid = Mid()
+
+        names = {f.name for f in self.parser.from_recipe_model(Top).fields}
+        self.assertEqual(names, {"mid.leaf.value"})
+
+    def test_enum_field_reports_its_members_as_options(self) -> None:
+        """An Enum field surfaces its choices.
+
+        Regression test: enum fields were reported as ENUM with ``options=None``,
+        which tells a prompting UI nothing about what to offer.
+        """
+        from enum import Enum
+
+        from pydantic import BaseModel
+
+        class Colour(str, Enum):
+            red = "red"
+            blue = "blue"
+
+        class WithEnum(BaseModel):
+            colour: Colour = Colour.red
+
+        spec = next(f for f in self.parser.from_recipe_model(WithEnum).fields)
+        self.assertEqual(spec.type, FieldType.ENUM)
+        self.assertEqual(spec.options, ["red", "blue"])
+
+    def test_optional_enum_reports_options(self) -> None:
+        """``Optional[Enum]`` still surfaces its choices."""
+        from enum import Enum
+        from typing import Optional
+
+        from pydantic import BaseModel
+
+        class Colour(str, Enum):
+            red = "red"
+
+        class WithOptionalEnum(BaseModel):
+            colour: Optional[Colour] = None
+
+        spec = next(f for f in self.parser.from_recipe_model(WithOptionalEnum).fields)
+        self.assertEqual(spec.options, ["red"])
+
+    def test_explicit_options_override_inferred_ones(self) -> None:
+        """A field's own declared options win over inference."""
+        from enum import Enum
+
+        from pydantic import BaseModel, Field
+
+        class Colour(str, Enum):
+            red = "red"
+            blue = "blue"
+
+        class WithOverride(BaseModel):
+            colour: Colour = Field(Colour.red, json_schema_extra={"options": ["red"]})
+
+        spec = next(f for f in self.parser.from_recipe_model(WithOverride).fields)
+        self.assertEqual(spec.options, ["red"])
+
+
 class TestFieldParserResolveFieldType(unittest.TestCase):
     """Tests for FieldParser._resolve_field_type."""
 
@@ -148,6 +348,37 @@ class TestFieldParserResolveFieldType(unittest.TestCase):
     def test_unknown_type_defaults_to_str(self) -> None:
         """Unmapped type falls back to STR."""
         self.assertEqual(self.parser._resolve_field_type(bytes), FieldType.STR)
+
+    def test_bool_maps_to_bool(self) -> None:
+        """bool maps to BOOL rather than being caught by the int mapping."""
+        self.assertEqual(self.parser._resolve_field_type(bool), FieldType.BOOL)
+
+    def test_literal_maps_to_enum(self) -> None:
+        """A Literal is a closed value set, so ENUM."""
+        from typing import Literal
+
+        self.assertEqual(self.parser._resolve_field_type(Literal["a", "b"]), FieldType.ENUM)
+
+    def test_bare_union_without_args_defaults_to_str(self) -> None:
+        """A generic that unwraps to nothing usable falls back to STR."""
+        from typing import Optional
+
+        self.assertEqual(self.parser._resolve_field_type(Optional[None]), FieldType.STR)
+
+    def test_nested_model_returns_none_for_containers(self) -> None:
+        """Only unions unwrap; containers are not nested models."""
+        from typing import Optional
+
+        from pydantic import BaseModel
+
+        class Inner(BaseModel):
+            x: int = 0
+
+        self.assertIs(self.parser._nested_model(Inner), Inner)
+        self.assertIs(self.parser._nested_model(Optional[Inner]), Inner)
+        self.assertIsNone(self.parser._nested_model(list[Inner]))
+        self.assertIsNone(self.parser._nested_model(dict[str, Inner]))
+        self.assertIsNone(self.parser._nested_model(str))
 
 
 if __name__ == "__main__":
