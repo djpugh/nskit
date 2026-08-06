@@ -52,10 +52,20 @@ def _fix_docker_permissions(path: Path) -> None:
     )
 
 
+# Repo root: guaranteed to be on a Docker-shared host path since the image is
+# built from it.
+_MOUNTABLE_ROOT = Path(__file__).resolve().parents[2]
+
+
 @contextlib.contextmanager
 def _docker_tmpdir():
-    """Temporary directory that cleans up root-owned Docker output."""
-    tmp = tempfile.mkdtemp()
+    """Temporary directory Docker can bind-mount, cleaning up root-owned output.
+
+    Uses the repo root rather than $TMPDIR because Docker Desktop only shares
+    selected host paths. Mounting an unshared path silently creates an empty
+    directory at the mount target.
+    """
+    tmp = tempfile.mkdtemp(prefix=".smoke-", dir=_MOUNTABLE_ROOT)
     try:
         yield Path(tmp)
     finally:

@@ -57,12 +57,18 @@ class ProjectGenerator:
         current_image = config.metadata.docker_image
 
         new_image = self._replace_version_tag(current_image, target_version)
-        new_fresh = Path(tempfile.mkdtemp(prefix="nskit_new_"))
+
+        # Staged next to the project rather than in $TMPDIR. Docker Desktop
+        # only shares selected host paths; mounting an unshared path silently
+        # produces an empty directory, so both regenerated states come back
+        # empty and the update does nothing.
+        staging_root = current_project_path.parent
+        new_fresh = Path(tempfile.mkdtemp(prefix=".nskit_new_", dir=staging_root))
 
         old_fresh: Path | None = None
         if diff_mode == DiffMode.THREE_WAY:
             current_version = self._extract_version_tag(current_image)
-            old_fresh = Path(tempfile.mkdtemp(prefix="nskit_old_"))
+            old_fresh = Path(tempfile.mkdtemp(prefix=".nskit_old_", dir=staging_root))
             self.generate_version(
                 recipe_name,
                 current_version,
