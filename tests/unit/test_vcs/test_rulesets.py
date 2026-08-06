@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 
-from nskit.vcs.providers.rulesets import (
+from nskit.vcs.providers.github.rulesets import (
     ActorType,
     BypassActor,
     BypassMode,

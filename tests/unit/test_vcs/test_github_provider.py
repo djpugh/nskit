@@ -9,9 +9,9 @@ from unittest.mock import MagicMock, patch
 from fastcore.net import HTTP404NotFoundError
 from pydantic import ValidationError
 
-from nskit.vcs.providers import github as github_module
 from nskit.vcs.providers.github import GithubRepoClient, GithubSettings
-from nskit.vcs.providers.rulesets import Enforcement, Ruleset
+from nskit.vcs.providers.github import provider as github_module
+from nskit.vcs.providers.github.rulesets import Enforcement, Ruleset
 
 
 def _not_found() -> HTTP404NotFoundError:

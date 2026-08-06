@@ -25,7 +25,7 @@ from nskit._logging import logger_factory
 from nskit.common.configuration import BaseConfiguration, SettingsConfigDict
 from nskit.common.ghapi_compat import paged, sync_ghapi
 from nskit.vcs.providers.abstract import RepoClient, VCSProviderSettings
-from nskit.vcs.providers.rulesets import Ruleset
+from nskit.vcs.providers.github.rulesets import Ruleset
 
 logger = logger_factory.get(__name__)
 
@@ -306,7 +306,7 @@ class GithubRepoClient(RepoClient):
 
     # -- Rulesets ----------------------------------------------------------
     # Rulesets are GitHub's successor to classic branch protection. See
-    # nskit.vcs.providers.rulesets for the composable rule models.
+    # nskit.vcs.providers.github.rulesets for the composable rule models.
     def create_ruleset(self, repo_name: str, ruleset: "Ruleset") -> Optional[int]:
         """Create ``ruleset`` on the repo and return its server-assigned ID.
 
@@ -326,7 +326,7 @@ class GithubRepoClient(RepoClient):
         Returns an empty list when the repo has none. Each result carries its
         ``id`` so it can be updated or deleted.
         """
-        from nskit.vcs.providers.rulesets import Ruleset
+        from nskit.vcs.providers.github.rulesets import Ruleset
 
         try:
             response = self._github.repos.get_repo_rulesets(self._config.organisation, repo_name)
