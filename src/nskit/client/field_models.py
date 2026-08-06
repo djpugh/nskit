@@ -95,6 +95,11 @@ class FieldSpec(BaseModel):
         env_var: Environment variable name for default resolution.
         template: Jinja2 template expression for derived defaults.
         conditional_rules: Rules controlling field visibility.
+        hidden: Whether the field should be omitted from interactive prompting.
+            Use for values a recipe pins or derives itself (e.g. a field
+            annotated ``Literal[True]``, or one resolved from ``env_var`` /
+            ``template``). The field is still reported so callers can see the
+            full contract; it simply must not be asked for.
     """
 
     name: str
@@ -109,6 +114,7 @@ class FieldSpec(BaseModel):
     env_var: str | None = None
     template: str | None = None
     conditional_rules: list[ConditionalRule] = Field(default_factory=list)
+    hidden: bool = False
 
 
 class InputFieldsResponse(BaseModel):
