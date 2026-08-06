@@ -18,6 +18,7 @@ from nskit._logging import logger_factory
 from nskit.client.backends.base import RecipeBackend
 from nskit.client.models import RecipeInfo
 from nskit.client.validation import validate_image_url, validate_recipe_name, validate_version
+from nskit.common.ghapi_compat import sync_ghapi
 from nskit.constants import RECIPE_ENTRYPOINT
 
 logger = logger_factory.get_logger(__name__)
@@ -83,7 +84,7 @@ class GitHubBackend(RecipeBackend):
             Authenticated ``GhApi`` instance.
         """
         if self._github is None:
-            self._github = GhApi(token=self._get_token())
+            self._github = sync_ghapi(token=self._get_token())
         return self._github
 
     def _get_repo_name(self, recipe_name: str) -> str:

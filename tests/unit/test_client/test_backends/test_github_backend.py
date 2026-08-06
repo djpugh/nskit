@@ -12,8 +12,8 @@ from nskit.client.models import RecipeInfo
 
 @pytest.fixture
 def mock_ghapi():
-    """Mock GhApi client."""
-    with patch("nskit.client.backends.github.GhApi") as mock:
+    """Mock ghapi client."""
+    with patch("nskit.client.backends.github.sync_ghapi") as mock:
         yield mock
 
 
