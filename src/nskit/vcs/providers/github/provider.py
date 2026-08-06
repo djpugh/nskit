@@ -138,7 +138,7 @@ class GithubSettings(VCSProviderSettings):
             return value
         # Try the local gh CLI before prompting: on a developer machine it is
         # usually already authenticated, which avoids an interactive detour.
-        if info.data.get("use_gh_cli", True):
+        if info.data.get("use_gh_cli", False):
             value = gh_cli_token()
             if value:
                 logger.info("Using GitHub token from the gh CLI")
