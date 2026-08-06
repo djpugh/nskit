@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -27,7 +27,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -5217,19 +5217,19 @@ structured <code>{depends_on, operator, value}</code> form or the <code>"op:valu
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/nskit/mixer/components/license_file.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-126">126</a></span>
-<span class="normal"><a href="#__codelineno-0-127">127</a></span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-127">127</a></span>
 <span class="normal"><a href="#__codelineno-0-128">128</a></span>
 <span class="normal"><a href="#__codelineno-0-129">129</a></span>
 <span class="normal"><a href="#__codelineno-0-130">130</a></span>
 <span class="normal"><a href="#__codelineno-0-131">131</a></span>
-<span class="normal"><a href="#__codelineno-0-132">132</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-126" name="__codelineno-0-126"></a><span class="k">class</span><span class="w"> </span><span class="nc">LicenseFile</span><span class="p">(</span><span class="n">File</span><span class="p">):</span>
-<a id="__codelineno-0-127" name="__codelineno-0-127"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;License File created by downloading from Github.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-128" name="__codelineno-0-128"></a>
-<a id="__codelineno-0-129" name="__codelineno-0-129"></a>    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">TemplateStr</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-<a id="__codelineno-0-130" name="__codelineno-0-130"></a>        <span class="n">get_license_filename</span><span class="p">,</span> <span class="n">validate_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The name of the license file&quot;</span>
-<a id="__codelineno-0-131" name="__codelineno-0-131"></a>    <span class="p">)</span>
-<a id="__codelineno-0-132" name="__codelineno-0-132"></a>    <span class="n">content</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Resource</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">get_license_content</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The file content&quot;</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-132">132</a></span>
+<span class="normal"><a href="#__codelineno-0-133">133</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-127" name="__codelineno-0-127"></a><span class="k">class</span><span class="w"> </span><span class="nc">LicenseFile</span><span class="p">(</span><span class="n">File</span><span class="p">):</span>
+<a id="__codelineno-0-128" name="__codelineno-0-128"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;License File created by downloading from Github.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-129" name="__codelineno-0-129"></a>
+<a id="__codelineno-0-130" name="__codelineno-0-130"></a>    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">TemplateStr</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+<a id="__codelineno-0-131" name="__codelineno-0-131"></a>        <span class="n">get_license_filename</span><span class="p">,</span> <span class="n">validate_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The name of the license file&quot;</span>
+<a id="__codelineno-0-132" name="__codelineno-0-132"></a>    <span class="p">)</span>
+<a id="__codelineno-0-133" name="__codelineno-0-133"></a>    <span class="n">content</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Resource</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">get_license_content</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;The file content&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -5283,8 +5283,7 @@ structured <code>{depends_on, operator, value}</code> form or the <code>"op:valu
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/nskit/mixer/components/license_file.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-21">21</a></span>
-<span class="normal"><a href="#__codelineno-0-22">22</a></span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-22">22</a></span>
 <span class="normal"><a href="#__codelineno-0-23">23</a></span>
 <span class="normal"><a href="#__codelineno-0-24">24</a></span>
 <span class="normal"><a href="#__codelineno-0-25">25</a></span>
@@ -5320,44 +5319,45 @@ structured <code>{depends_on, operator, value}</code> form or the <code>"op:valu
 <span class="normal"><a href="#__codelineno-0-55">55</a></span>
 <span class="normal"><a href="#__codelineno-0-56">56</a></span>
 <span class="normal"><a href="#__codelineno-0-57">57</a></span>
-<span class="normal"><a href="#__codelineno-0-58">58</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="k">class</span><span class="w"> </span><span class="nc">LicenseOptionsEnum</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;License Options for the license file.</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23"></a>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    Built from Github API licenses.get_all_commonly_used.</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a>    <span class="n">AGPL_3_0</span> <span class="o">=</span> <span class="s2">&quot;agpl-3.0&quot;</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a>    <span class="n">Apache_2_0</span> <span class="o">=</span> <span class="s2">&quot;apache-2.0&quot;</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a>    <span class="n">BSD_2_Clause</span> <span class="o">=</span> <span class="s2">&quot;bsd-2-clause&quot;</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a>    <span class="n">BSD_3_Clause</span> <span class="o">=</span> <span class="s2">&quot;bsd-3-clause&quot;</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31"></a>    <span class="n">BSL_1_0</span> <span class="o">=</span> <span class="s2">&quot;bsl-1.0&quot;</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32"></a>    <span class="n">CC0_1_0</span> <span class="o">=</span> <span class="s2">&quot;cc0-1.0&quot;</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a>    <span class="n">EPL_2_0</span> <span class="o">=</span> <span class="s2">&quot;epl-2.0&quot;</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="n">GPL_2_0</span> <span class="o">=</span> <span class="s2">&quot;gpl-2.0&quot;</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="n">GPL_3_0</span> <span class="o">=</span> <span class="s2">&quot;gpl-3.0&quot;</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a>    <span class="n">LGPL_2_1</span> <span class="o">=</span> <span class="s2">&quot;lgpl-2.1&quot;</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="n">MIT</span> <span class="o">=</span> <span class="s2">&quot;mit&quot;</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a>    <span class="n">MPL_2_0</span> <span class="o">=</span> <span class="s2">&quot;mpl-2.0&quot;</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="n">Unlicense</span> <span class="o">=</span> <span class="s2">&quot;unlicense&quot;</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="nd">@classmethod</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if `value` is in `cls`.</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">        BACKPORT FROM PYTHON 3.12</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">        `value` is in `cls` if:</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">        1) `value` is a member of `cls`, or</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">        2) `value` is the value of one of the `cls`&#39;s members.</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">major</span> <span class="o">&lt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a>                <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a>            <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>                <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a>            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a>                <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unhashable_values_</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a>        <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span>
+<span class="normal"><a href="#__codelineno-0-58">58</a></span>
+<span class="normal"><a href="#__codelineno-0-59">59</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="k">class</span><span class="w"> </span><span class="nc">LicenseOptionsEnum</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;License Options for the license file.</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24"></a>
+<a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">    Built from Github API licenses.get_all_commonly_used.</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a>    <span class="n">AGPL_3_0</span> <span class="o">=</span> <span class="s2">&quot;agpl-3.0&quot;</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a>    <span class="n">Apache_2_0</span> <span class="o">=</span> <span class="s2">&quot;apache-2.0&quot;</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a>    <span class="n">BSD_2_Clause</span> <span class="o">=</span> <span class="s2">&quot;bsd-2-clause&quot;</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31"></a>    <span class="n">BSD_3_Clause</span> <span class="o">=</span> <span class="s2">&quot;bsd-3-clause&quot;</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32"></a>    <span class="n">BSL_1_0</span> <span class="o">=</span> <span class="s2">&quot;bsl-1.0&quot;</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a>    <span class="n">CC0_1_0</span> <span class="o">=</span> <span class="s2">&quot;cc0-1.0&quot;</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="n">EPL_2_0</span> <span class="o">=</span> <span class="s2">&quot;epl-2.0&quot;</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="n">GPL_2_0</span> <span class="o">=</span> <span class="s2">&quot;gpl-2.0&quot;</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a>    <span class="n">GPL_3_0</span> <span class="o">=</span> <span class="s2">&quot;gpl-3.0&quot;</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="n">LGPL_2_1</span> <span class="o">=</span> <span class="s2">&quot;lgpl-2.1&quot;</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a>    <span class="n">MIT</span> <span class="o">=</span> <span class="s2">&quot;mit&quot;</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="n">MPL_2_0</span> <span class="o">=</span> <span class="s2">&quot;mpl-2.0&quot;</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="n">Unlicense</span> <span class="o">=</span> <span class="s2">&quot;unlicense&quot;</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="nd">@classmethod</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if `value` is in `cls`.</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">        BACKPORT FROM PYTHON 3.12</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">        `value` is in `cls` if:</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">        1) `value` is a member of `cls`, or</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">        2) `value` is the value of one of the `cls`&#39;s members.</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">major</span> <span class="o">&lt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a>            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a>                <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a>                <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a>            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a>                <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unhashable_values_</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a>        <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -5398,8 +5398,7 @@ structured <code>{depends_on, operator, value}</code> form or the <code>"op:valu
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/nskit/mixer/components/license_file.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-41">41</a></span>
-<span class="normal"><a href="#__codelineno-0-42">42</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-42">42</a></span>
 <span class="normal"><a href="#__codelineno-0-43">43</a></span>
 <span class="normal"><a href="#__codelineno-0-44">44</a></span>
 <span class="normal"><a href="#__codelineno-0-45">45</a></span>
@@ -5415,24 +5414,25 @@ structured <code>{depends_on, operator, value}</code> form or the <code>"op:valu
 <span class="normal"><a href="#__codelineno-0-55">55</a></span>
 <span class="normal"><a href="#__codelineno-0-56">56</a></span>
 <span class="normal"><a href="#__codelineno-0-57">57</a></span>
-<span class="normal"><a href="#__codelineno-0-58">58</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="nd">@classmethod</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return True if `value` is in `cls`.</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    BACKPORT FROM PYTHON 3.12</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">    `value` is in `cls` if:</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">    1) `value` is a member of `cls`, or</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">    2) `value` is the value of one of the `cls`&#39;s members.</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">major</span> <span class="o">&lt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>            <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a>        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a>            <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unhashable_values_</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a>    <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span>
+<span class="normal"><a href="#__codelineno-0-58">58</a></span>
+<span class="normal"><a href="#__codelineno-0-59">59</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="nd">@classmethod</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return True if `value` is in `cls`.</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">    BACKPORT FROM PYTHON 3.12</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">    `value` is in `cls` if:</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">    1) `value` is a member of `cls`, or</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    2) `value` is the value of one of the `cls`&#39;s members.</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">major</span> <span class="o">&lt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a>            <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_value2member_map_</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a>        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a>            <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_unhashable_values_</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">cls</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -6378,7 +6378,7 @@ recipes (e.g. <code>PyRecipe</code>) extend <code>post_hooks</code> with their o
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.prefetch", "navigation.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.path", "navigation.indexes", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
