@@ -266,8 +266,11 @@ jobs:
           python-version: "3.14"
       - name: compile requirements.txt
         run: |
-          python -m pip install --upgrade pip pip-tools
-          pip-compile -o requirements.txt
+          # uv replaces pip-compile here: pip-tools reaches into pip internals
+          # (pip._internal.utils.compat.stdlib_pkgs), which pip 26.2 removed, so
+          # `pip install --upgrade pip` and `pip-compile` cannot both succeed.
+          python -m pip install --upgrade pip uv
+          uv pip compile pyproject.toml -o requirements.txt
           cat requirements.txt
       - name: Run FOSSA scan and upload build data
         uses: fossa-contrib/fossa-action@v4
