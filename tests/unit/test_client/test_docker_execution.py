@@ -91,25 +91,92 @@ class TestDockerExecution:
         assert any(f"{output_dir.absolute()}:/app/output" in call_args[i + 1] for i in v_index)
 
     def test_docker_mode_passes_parameters(self, mock_backend, tmp_path):
-        """Test that Docker mode passes parameters via JSON file."""
+        """Docker mode writes parameters to a YAML file and mounts it as input.
+
+        Asserts on the mount and contents rather than the tempfile API, so the
+        staging location is an implementation detail.
+        """
+        import yaml
+
         client = RecipeClient(mock_backend, engine=DockerEngine())
         params = {"name": "test-project", "version": "1.0", "author": "Test"}
+        staged: dict[str, object] = {}
 
-        with patch("subprocess.run") as mock_run, patch("tempfile.NamedTemporaryFile") as mock_temp:
-            mock_file = MagicMock()
-            mock_file.name = "/tmp/test.json"
-            mock_temp.return_value.__enter__.return_value = mock_file
-            mock_run.return_value = Mock(returncode=0, stdout="", stderr="")
+        def capture(cmd, *args, **kwargs):
+            if isinstance(cmd, list) and "run" in cmd:
+                mount = next((a for a in cmd if a.endswith(":/app/input.yml:ro")), None)
+                if mount:
+                    host_path = Path(mount.split(":/app/input.yml:ro")[0])
+                    staged["path"] = host_path
+                    staged["contents"] = yaml.safe_load(host_path.read_text())
+                    # Simulate recipe output so the engine reports success.
+                    output_dir = tmp_path / "output"
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    (output_dir / "generated.txt").write_text("x")
+            return Mock(returncode=0, stdout="", stderr="")
 
-            client.initialize_recipe(
+        with patch("subprocess.run", side_effect=capture):
+            result = client.initialize_recipe(
                 recipe="test-recipe",
                 version="v1.0.0",
                 parameters=params,
                 output_dir=tmp_path / "output",
             )
 
-        # Verify JSON was written
-        assert mock_file.write.called or mock_temp.called
+        assert result.success, result.errors
+        assert staged["contents"] == params
+        # Staging dir cleaned up after the run.
+        assert not staged["path"].exists()
+
+    def test_input_not_staged_inside_output_directory(self, mock_backend, tmp_path):
+        """The input file must not land inside the generated project.
+
+        Recipe post-hooks (git init) run against the output directory, and
+        parameters may contain secrets.
+        """
+        client = RecipeClient(mock_backend, engine=DockerEngine())
+        output_dir = tmp_path / "output"
+        seen: list[Path] = []
+
+        def capture(cmd, *args, **kwargs):
+            if isinstance(cmd, list) and "run" in cmd:
+                mount = next((a for a in cmd if a.endswith(":/app/input.yml:ro")), None)
+                if mount:
+                    seen.append(Path(mount.split(":/app/input.yml:ro")[0]))
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                    (output_dir / "generated.txt").write_text("x")
+            return Mock(returncode=0, stdout="", stderr="")
+
+        with patch("subprocess.run", side_effect=capture):
+            result = client.initialize_recipe(
+                recipe="test-recipe",
+                version="v1.0.0",
+                parameters={"name": "test"},
+                output_dir=output_dir,
+            )
+
+        assert result.success, result.errors
+        assert output_dir not in seen[0].parents
+
+    def test_no_files_produced_is_reported_as_error(self, mock_backend, tmp_path):
+        """A clean exit producing nothing must fail, not silently succeed.
+
+        Docker creates an empty directory at the mount target when the host path
+        is unshared, so the recipe runs inside the container but the host sees
+        nothing.
+        """
+        client = RecipeClient(mock_backend, engine=DockerEngine())
+
+        with patch("subprocess.run", return_value=Mock(returncode=0, stdout="", stderr="")):
+            result = client.initialize_recipe(
+                recipe="test-recipe",
+                version="v1.0.0",
+                parameters={"name": "test"},
+                output_dir=tmp_path / "output",
+            )
+
+        assert not result.success
+        assert any("produced no files" in e for e in result.errors)
 
     def test_local_mode_uses_installed_package(self, mock_backend, tmp_path):
         """Test that local mode uses installed package."""
