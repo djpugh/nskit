@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess  # nosec B404
 import tempfile
 from pathlib import Path
@@ -75,16 +76,24 @@ class DockerEngine(RecipeEngine):
                     timeout=self.timeouts.pull,
                 )
 
-            # Write parameters as YAML (matches CLI --input-yaml-path)
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
-                pyyaml.safe_dump(parameters, f, default_flow_style=False)
-                input_file = Path(f.name)
-            # Ensure readable by non-root container user
+            # Write parameters as YAML (matches CLI --input-yaml-path).
+            #
+            # Staged next to the output directory rather than in the system temp
+            # directory: Docker Desktop only shares selected host paths, and
+            # $TMPDIR (/var/folders/... on macOS) is usually not one of them.
+            # Mounting a file Docker cannot see silently creates an empty
+            # *directory* at the mount target, so the container dies with
+            # "IsADirectoryError: /app/input.yml".
+            #
+            # Not placed *inside* output_dir: recipe post-hooks (git init) run
+            # against that directory, and parameters may contain secrets.
+            output_dir.mkdir(parents=True, exist_ok=True)
+            staging_dir = Path(tempfile.mkdtemp(prefix=".nskit-input-", dir=output_dir.parent))
+            input_file = staging_dir / "input.yml"
+            input_file.write_text(pyyaml.safe_dump(parameters, default_flow_style=False), encoding="utf-8")
             input_file.chmod(0o644)
 
             try:
-                output_dir.mkdir(parents=True, exist_ok=True)
-
                 cmd = [
                     "docker",
                     "run",
@@ -122,6 +131,21 @@ class DockerEngine(RecipeEngine):
                 # Collect created files
                 files_created = [str(p.relative_to(output_dir)) for p in output_dir.rglob("*") if p.is_file()]
 
+                if not files_created:
+                    errors.append(
+                        f"Recipe ran but produced no files in {output_dir}. If using Docker Desktop, "
+                        "check this path is under a directory shared with Docker "
+                        "(Settings > Resources > File sharing)."
+                    )
+                    return RecipeResult(
+                        success=False,
+                        project_path=output_dir,
+                        recipe_name=recipe,
+                        recipe_version=version,
+                        errors=errors,
+                        warnings=warnings,
+                    )
+
                 return RecipeResult(
                     success=True,
                     project_path=output_dir,
@@ -131,7 +155,7 @@ class DockerEngine(RecipeEngine):
                     warnings=warnings,
                 )
             finally:
-                input_file.unlink(missing_ok=True)
+                shutil.rmtree(staging_dir, ignore_errors=True)
 
         except subprocess.CalledProcessError as e:
             detail = e.stderr.strip() if e.stderr else str(e)
