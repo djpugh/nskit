@@ -250,14 +250,16 @@ class TestGhCliToken(unittest.TestCase):
         validation fails rather than quietly finding one.
         """
         with patch.object(github_module, "gh_cli_token") as token:
-            with self.assertRaises(ValidationError):
-                GithubSettings(organisation="acme", use_gh_cli=False)
+            with patch.dict("os.environ", {}, clear=True):
+                with self.assertRaises(ValidationError):
+                    GithubSettings(organisation="acme", use_gh_cli=False)
             token.assert_not_called()
 
     def test_used_when_opted_in(self) -> None:
         """With use_gh_cli set, a gh token satisfies settings validation."""
         with patch.object(github_module, "gh_cli_token", return_value="gho_from_cli") as token:
-            settings = GithubSettings(organisation="acme", use_gh_cli=True)
+            with patch.dict("os.environ", {}, clear=True):
+                settings = GithubSettings(organisation="acme", use_gh_cli=True)
             token.assert_called_once()
             self.assertEqual(settings.token.get_secret_value(), "gho_from_cli")
 
