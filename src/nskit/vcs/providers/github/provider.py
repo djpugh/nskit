@@ -1,5 +1,7 @@
 """Github provider using ghapi."""
 
+from __future__ import annotations
+
 import base64
 import subprocess  # nosec: B404
 from enum import Enum
@@ -65,6 +67,8 @@ class GithubRepoSettings(BaseConfiguration):
     allow_rebase_merge: Optional[bool] = None
     delete_branch_on_merge: Optional[bool] = None
     auto_init: bool = False
+    topics: Optional[list[str]] = None
+    custom_properties: Optional[dict[str, str]] = None
     branch_protection: GithubBranchProtectionSettings = Field(default_factory=GithubBranchProtectionSettings)
 
 
@@ -127,7 +131,7 @@ class GithubSettings(VCSProviderSettings):
     repo: GithubRepoSettings = Field(default_factory=GithubRepoSettings)
 
     @property
-    def repo_client(self) -> "GithubRepoClient":
+    def repo_client(self) -> GithubRepoClient:
         """Get the instantiated repo client."""
         return GithubRepoClient(self)
 
@@ -239,6 +243,7 @@ class GithubRepoClient(RepoClient):
 
         Uses the configured ``GithubRepoSettings`` as defaults, overridden by any
         explicit ``settings``. Only non-``None`` values are sent to the API.
+        Also applies topics and custom properties if configured.
         """
         defaults = self._config.repo.model_dump(
             include={
@@ -255,10 +260,42 @@ class GithubRepoClient(RepoClient):
         )
         defaults.update(settings or {})
         kwargs = {k: v for k, v in defaults.items() if v is not None}
-        if not kwargs:
-            return
-        self._github.repos.update(self._config.organisation, repo_name, **kwargs)
-        logger.info(f"Configured repository {repo_name}")
+        if kwargs:
+            self._github.repos.update(self._config.organisation, repo_name, **kwargs)
+            logger.info(f"Configured repository {repo_name}")
+
+        # Apply topics if configured.
+        topics = self._config.repo.topics
+        if topics:
+            self.set_topics(repo_name, topics)
+
+        # Apply custom properties if configured.
+        custom_properties = self._config.repo.custom_properties
+        if custom_properties:
+            self.set_custom_properties(repo_name, custom_properties)
+
+    def set_topics(self, repo_name: str, topics: list[str]) -> None:
+        """Replace all topics on a repository."""
+        self._github.repos.replace_all_topics(self._config.organisation, repo_name, names=topics)
+        logger.info(f"Set topics on {repo_name}: {topics}")
+
+    def set_custom_properties(self, repo_name: str, properties: dict[str, str]) -> None:
+        """Set custom properties on a repository.
+
+        Custom properties are org-defined key-value metadata. Uses the
+        org-level endpoint to set values on the specified repo.
+        """
+        org = self._config.organisation
+        payload = {
+            "repository_names": [repo_name],
+            "properties": [{"property_name": k, "value": v} for k, v in properties.items()],
+        }
+        self._github(
+            f"/orgs/{org}/properties/values",
+            "PATCH",
+            data=payload,
+        )
+        logger.info(f"Set custom properties on {repo_name}: {list(properties.keys())}")
 
     def set_branch_protection(
         self,
@@ -307,7 +344,7 @@ class GithubRepoClient(RepoClient):
     # -- Rulesets ----------------------------------------------------------
     # Rulesets are GitHub's successor to classic branch protection. See
     # nskit.vcs.providers.github.rulesets for the composable rule models.
-    def create_ruleset(self, repo_name: str, ruleset: "Ruleset") -> Optional[int]:
+    def create_ruleset(self, repo_name: str, ruleset: Ruleset) -> Optional[int]:
         """Create ``ruleset`` on the repo and return its server-assigned ID.
 
         Note the ordering implication when populating a brand-new repo: apply
@@ -320,7 +357,7 @@ class GithubRepoClient(RepoClient):
         logger.info(f"Created ruleset '{ruleset.name}' on {repo_name}")
         return ruleset_id
 
-    def list_rulesets(self, repo_name: str) -> "list[Ruleset]":
+    def list_rulesets(self, repo_name: str) -> list[Ruleset]:
         """List the repo's rulesets, parsed into :class:`Ruleset` models.
 
         Returns an empty list when the repo has none. Each result carries its
@@ -467,7 +504,7 @@ class GithubRepoClient(RepoClient):
         return True
 
     # -- Releases ----------------------------------------------------------
-    def list_releases(self, repo_name: str, include_prereleases: bool = False) -> "list[dict[str, Any]]":
+    def list_releases(self, repo_name: str, include_prereleases: bool = False) -> list[dict[str, Any]]:
         """List the repo's releases, newest first.
 
         Drafts are always excluded; prereleases only when asked for.
@@ -496,12 +533,12 @@ class GithubRepoClient(RepoClient):
         except HTTP404NotFoundError:
             return None
 
-    def get_available_versions(self, repo_name: str, include_prereleases: bool = False) -> "list[str]":
+    def get_available_versions(self, repo_name: str, include_prereleases: bool = False) -> list[str]:
         """Return release tag names, newest first."""
         return [r["tag_name"] for r in self.list_releases(repo_name, include_prereleases) if r.get("tag_name")]
 
     # -- Search ------------------------------------------------------------
-    def search_repositories(self, query: str) -> "list[dict[str, Any]]":
+    def search_repositories(self, query: str) -> list[dict[str, Any]]:
         """Search repositories with a GitHub search query.
 
         The query is passed through as given (e.g. ``"org:acme topic:recipe"``).

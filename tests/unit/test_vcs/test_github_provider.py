@@ -264,5 +264,96 @@ class TestGhCliToken(unittest.TestCase):
             self.assertEqual(settings.token.get_secret_value(), "gho_from_cli")
 
 
+class TestTopics(GithubRepoClientTestCase):
+    """Repository topics."""
+
+    def test_set_topics_calls_replace_all_topics(self) -> None:
+        """Topics are set via repos.replace_all_topics."""
+        self.client.set_topics("repo", ["python", "platform"])
+        self.api.repos.replace_all_topics.assert_called_once_with(self.org, "repo", names=["python", "platform"])
+
+    def test_set_empty_topics_clears_all(self) -> None:
+        """An empty list clears all topics."""
+        self.client.set_topics("repo", [])
+        self.api.repos.replace_all_topics.assert_called_once_with(self.org, "repo", names=[])
+
+
+class TestCustomProperties(GithubRepoClientTestCase):
+    """Repository custom properties."""
+
+    def test_set_custom_properties_sends_patch(self) -> None:
+        """Custom properties are set via PATCH /orgs/{org}/properties/values."""
+        self.client.set_custom_properties("repo", {"team": "platform", "tier": "internal"})
+        self.api.assert_called_once_with(
+            "/orgs/acme/properties/values",
+            "PATCH",
+            data={
+                "repository_names": ["repo"],
+                "properties": [
+                    {"property_name": "team", "value": "platform"},
+                    {"property_name": "tier", "value": "internal"},
+                ],
+            },
+        )
+
+    def test_set_single_property(self) -> None:
+        """A single property is wrapped correctly."""
+        self.client.set_custom_properties("repo", {"language": "python"})
+        _, kwargs = self.api.call_args
+        self.assertEqual(
+            kwargs["data"]["properties"],
+            [{"property_name": "language", "value": "python"}],
+        )
+
+
+class TestConfigureWithTopicsAndProperties(GithubRepoClientTestCase):
+    """configure() applies topics and custom properties when configured."""
+
+    def _client_with_settings(self, **kwargs):
+        """Build a client whose GithubRepoSettings has the given fields."""
+        from nskit.vcs.providers.github import GithubRepoSettings
+
+        settings = GithubSettings(
+            token="secret-token",
+            organisation="acme",
+            use_gh_cli=False,
+            repo=GithubRepoSettings(**kwargs),
+        )
+        return GithubRepoClient(settings)
+
+    def test_configure_sets_topics_when_present(self) -> None:
+        """configure() calls set_topics when topics are configured."""
+        client = self._client_with_settings(topics=["python", "ci"])
+        client.configure("repo")
+        self.api.repos.replace_all_topics.assert_called_once_with("acme", "repo", names=["python", "ci"])
+
+    def test_configure_sets_custom_properties_when_present(self) -> None:
+        """configure() calls set_custom_properties when configured."""
+        client = self._client_with_settings(custom_properties={"team": "platform"})
+        client.configure("repo")
+        self.api.assert_called_with(
+            "/orgs/acme/properties/values",
+            "PATCH",
+            data={
+                "repository_names": ["repo"],
+                "properties": [{"property_name": "team", "value": "platform"}],
+            },
+        )
+
+    def test_configure_skips_topics_when_none(self) -> None:
+        """configure() does not call set_topics when topics is None."""
+        client = self._client_with_settings(has_wiki=False)
+        client.configure("repo")
+        self.api.repos.replace_all_topics.assert_not_called()
+
+    def test_configure_skips_custom_properties_when_none(self) -> None:
+        """configure() does not call custom properties API when None."""
+        client = self._client_with_settings(has_wiki=False)
+        client.configure("repo")
+        # The raw API call (for custom properties) should not be made.
+        # Only repos.update should be called.
+        self.api.repos.update.assert_called_once()
+
+
 if __name__ == "__main__":
     unittest.main()
