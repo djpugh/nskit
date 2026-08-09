@@ -211,5 +211,266 @@ class TestPinnedFieldEndToEnd(unittest.TestCase):
         self.assertIn("repo.owner", prompted)
 
 
+# ---------------------------------------------------------------------------
+# Provider end-to-end tests
+# ---------------------------------------------------------------------------
+
+# Simulates a platform recipe that uses providers — no Docker mocks, real
+# FieldParser + InteractiveHandler running the full chain.
+
+
+class _ProviderRecipe(BaseModel):
+    """A recipe-like model using options_provider and default_provider.
+
+    Not a real Recipe subclass (avoids needing contents/hooks) — just proves
+    the field contract round-trips with providers.
+    """
+
+    from pydantic import Field
+
+    name: str = "provider-test"
+    domain: str = Field(
+        "",
+        json_schema_extra={
+            "options_provider": "test_domains",
+            "display_name": "Domain",
+        },
+    )
+    account_id: str = Field(
+        "",
+        json_schema_extra={
+            "default_provider": "test_account_lookup",
+            "prompt_text": "Account ID",
+        },
+    )
+    region: str = Field(
+        "eu-west-1",
+        json_schema_extra={
+            "options_provider": "test_regions",
+            "default_provider": "test_default_region",
+        },
+    )
+
+
+# Provider implementations (would live in a CLI plugin in production)
+_DOMAIN_ACCOUNTS = {
+    "analytics": "111111111111",
+    "genomics": "222222222222",
+    "platform": "333333333333",
+}
+
+
+def _test_domains_provider():
+    return list(_DOMAIN_ACCOUNTS.keys())
+
+
+def _test_account_lookup(collected_values):
+    domain = collected_values.get("domain")
+    return _DOMAIN_ACCOUNTS.get(domain)
+
+
+def _test_regions_provider():
+    return ["eu-west-1", "us-east-1", "ap-southeast-1"]
+
+
+def _test_default_region(collected_values):
+    # Platform domain always uses eu-west-1, others get us-east-1
+    domain = collected_values.get("domain", "")
+    return "eu-west-1" if domain == "platform" else "us-east-1"
+
+
+def _collect_with_providers(
+    recipe_class,
+    user_choices: dict[str, str],
+    options_providers: dict,
+    default_providers: dict,
+):
+    """Run the full chain with providers: parse → collect → nested dict.
+
+    ``user_choices`` maps field name to the value the user would select/type.
+    Fields not in ``user_choices`` accept the resolved default.
+    """
+    parser = FieldParser()
+    fields = parser.from_recipe_model(recipe_class)
+
+    handler = InteractiveHandler(
+        options_providers=options_providers,
+        default_providers=default_providers,
+    )
+
+    def fake_prompt(field, default):
+        if field.name in user_choices:
+            return user_choices[field.name]
+        return default
+
+    with patch.object(handler, "_prompt_field", side_effect=fake_prompt):
+        collected = handler.collect_field_values(fields)
+
+    assert collected is not None, "collection was cancelled"
+    return parser.create_nested_dict(collected)
+
+
+class TestProviderFieldContractEndToEnd(unittest.TestCase):
+    """Full end-to-end tests for field providers through the contract chain.
+
+    No mocking of FieldParser or InteractiveHandler internals — only the
+    prompt method (simulating user input). Providers run as real callables.
+    """
+
+    def test_options_provider_populates_and_user_selects(self) -> None:
+        """Domain field gets options from provider; user picks one."""
+        result = _collect_with_providers(
+            _ProviderRecipe,
+            user_choices={"domain": "genomics"},
+            options_providers={
+                "test_domains": _test_domains_provider,
+                "test_regions": _test_regions_provider,
+            },
+            default_providers={
+                "test_account_lookup": _test_account_lookup,
+                "test_default_region": _test_default_region,
+            },
+        )
+        self.assertEqual(result["domain"], "genomics")
+
+    def test_default_provider_resolves_from_earlier_field(self) -> None:
+        """Account ID auto-resolves from the selected domain."""
+        result = _collect_with_providers(
+            _ProviderRecipe,
+            user_choices={"domain": "analytics"},
+            options_providers={
+                "test_domains": _test_domains_provider,
+                "test_regions": _test_regions_provider,
+            },
+            default_providers={
+                "test_account_lookup": _test_account_lookup,
+                "test_default_region": _test_default_region,
+            },
+        )
+        self.assertEqual(result["account_id"], "111111111111")
+
+    def test_default_provider_uses_domain_context(self) -> None:
+        """Region default varies based on selected domain."""
+        # Platform domain → eu-west-1
+        result = _collect_with_providers(
+            _ProviderRecipe,
+            user_choices={"domain": "platform"},
+            options_providers={
+                "test_domains": _test_domains_provider,
+                "test_regions": _test_regions_provider,
+            },
+            default_providers={
+                "test_account_lookup": _test_account_lookup,
+                "test_default_region": _test_default_region,
+            },
+        )
+        self.assertEqual(result["region"], "eu-west-1")
+
+        # Non-platform domain → us-east-1
+        result = _collect_with_providers(
+            _ProviderRecipe,
+            user_choices={"domain": "genomics"},
+            options_providers={
+                "test_domains": _test_domains_provider,
+                "test_regions": _test_regions_provider,
+            },
+            default_providers={
+                "test_account_lookup": _test_account_lookup,
+                "test_default_region": _test_default_region,
+            },
+        )
+        self.assertEqual(result["region"], "us-east-1")
+
+    def test_user_can_override_provider_default(self) -> None:
+        """User-supplied value wins even when provider resolves a default."""
+        result = _collect_with_providers(
+            _ProviderRecipe,
+            user_choices={"domain": "genomics", "account_id": "999999999999"},
+            options_providers={
+                "test_domains": _test_domains_provider,
+                "test_regions": _test_regions_provider,
+            },
+            default_providers={
+                "test_account_lookup": _test_account_lookup,
+                "test_default_region": _test_default_region,
+            },
+        )
+        self.assertEqual(result["account_id"], "999999999999")
+
+    def test_constructed_model_accepts_provider_resolved_values(self) -> None:
+        """Values resolved by providers pass pydantic validation on the model."""
+        result = _collect_with_providers(
+            _ProviderRecipe,
+            user_choices={"domain": "platform"},
+            options_providers={
+                "test_domains": _test_domains_provider,
+                "test_regions": _test_regions_provider,
+            },
+            default_providers={
+                "test_account_lookup": _test_account_lookup,
+                "test_default_region": _test_default_region,
+            },
+        )
+        # This is the key assertion: pydantic accepts the resolved values
+        recipe = _ProviderRecipe(**result)
+        self.assertEqual(recipe.domain, "platform")
+        self.assertEqual(recipe.account_id, "333333333333")
+        self.assertEqual(recipe.region, "eu-west-1")
+
+    def test_json_round_trip_preserves_provider_contract(self) -> None:
+        """Fields survive JSON serialisation and providers still resolve.
+
+        Simulates the Docker path without needing a real container.
+        """
+        import json
+
+        parser = FieldParser()
+
+        # Introspect → serialise (what a container would emit)
+        fields_response = parser.from_recipe_model(_ProviderRecipe)
+        json_str = json.dumps({"fields": [f.model_dump() for f in fields_response.fields]})
+
+        # Parse back (what the host does)
+        parsed = parser.parse_fields_output(json_str)
+
+        # Resolve with providers
+        handler = InteractiveHandler(
+            options_providers={
+                "test_domains": _test_domains_provider,
+                "test_regions": _test_regions_provider,
+            },
+            default_providers={
+                "test_account_lookup": _test_account_lookup,
+                "test_default_region": _test_default_region,
+            },
+        )
+
+        def fake_prompt(field, default):
+            choices = {"domain": "analytics"}
+            return choices.get(field.name, default)
+
+        with patch.object(handler, "_prompt_field", side_effect=fake_prompt):
+            collected = handler.collect_field_values(parsed)
+
+        nested = parser.create_nested_dict(collected)
+        recipe = _ProviderRecipe(**nested)
+        self.assertEqual(recipe.domain, "analytics")
+        self.assertEqual(recipe.account_id, "111111111111")
+        self.assertEqual(recipe.region, "us-east-1")
+
+    def test_missing_provider_degrades_gracefully(self) -> None:
+        """Unregistered providers don't crash — fields get static defaults."""
+        result = _collect_with_providers(
+            _ProviderRecipe,
+            user_choices={"domain": "typed-manually", "account_id": "typed-id"},
+            options_providers={},  # No providers registered
+            default_providers={},
+        )
+        # Values come from user input / static defaults
+        self.assertEqual(result["domain"], "typed-manually")
+        self.assertEqual(result["account_id"], "typed-id")
+        self.assertEqual(result["region"], "eu-west-1")  # static default
+
+
 if __name__ == "__main__":
     unittest.main()

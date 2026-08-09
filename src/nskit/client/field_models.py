@@ -92,6 +92,15 @@ class FieldSpec(BaseModel):
         description: Description of the field's purpose.
         help_text: Additional help text shown alongside the prompt.
         options: Available choices for enum-type fields.
+        options_provider: Named provider for dynamically resolved options.
+            The ``InteractiveHandler`` looks up this name in its
+            ``options_providers`` registry and calls the corresponding
+            callable at prompt time to populate ``options``.
+        default_provider: Named provider for dynamically resolved defaults.
+            The ``InteractiveHandler`` looks up this name in its
+            ``default_providers`` registry and calls the corresponding
+            callable at prompt time (after ``env_var`` and ``template``
+            resolution) to produce a default value.
         env_var: Environment variable name for default resolution.
         template: Jinja2 template expression for derived defaults.
         conditional_rules: Rules controlling field visibility.
@@ -111,6 +120,8 @@ class FieldSpec(BaseModel):
     description: str | None = None
     help_text: str | None = None
     options: list[str] | None = None
+    options_provider: str | None = None
+    default_provider: str | None = None
     env_var: str | None = None
     template: str | None = None
     conditional_rules: list[ConditionalRule] = Field(default_factory=list)

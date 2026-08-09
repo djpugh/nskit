@@ -235,5 +235,294 @@ class TestCollectFieldValues(unittest.TestCase):
         self.assertIsNone(result)
 
 
+class TestOptionsProvider(unittest.TestCase):
+    """Tests for InteractiveHandler options_provider resolution."""
+
+    def test_options_provider_populates_options(self) -> None:
+        """A registered options_provider callable populates field.options at prompt time."""
+        handler = InteractiveHandler(
+            options_providers={"domains": lambda field, default: ["alpha", "beta"]},
+        )
+        field = FieldSpec(name="domain", options_provider="domains")
+        handler._prompt_choice_field = MagicMock(return_value="alpha")
+        handler._prompt_field(field, None)
+        self.assertEqual(field.options, ["alpha", "beta"])
+        handler._prompt_choice_field.assert_called_once_with(field, None)
+
+    def test_options_provider_promotes_type_to_enum(self) -> None:
+        """Field type is promoted to ENUM when options are resolved dynamically."""
+        handler = InteractiveHandler(
+            options_providers={"regions": lambda field, default: ["eu-west-1", "us-east-1"]},
+        )
+        field = FieldSpec(name="region", type=FieldType.STR, options_provider="regions")
+        handler._prompt_choice_field = MagicMock(return_value="eu-west-1")
+        handler._prompt_field(field, None)
+        self.assertEqual(field.type, FieldType.ENUM)
+
+    def test_options_provider_unregistered_name_is_ignored(self) -> None:
+        """An unregistered provider name does not crash; field stays as-is."""
+        handler = InteractiveHandler(options_providers={})
+        field = FieldSpec(name="x", options_provider="missing")
+        handler._prompt_str_field = MagicMock(return_value="typed")
+        result = handler._prompt_field(field, None)
+        self.assertEqual(result, "typed")
+        self.assertIsNone(field.options)
+
+    def test_options_provider_no_arg_fallback(self) -> None:
+        """Provider that does not accept args is called with no args."""
+
+        def no_arg_provider():
+            return ["one", "two"]
+
+        handler = InteractiveHandler(options_providers={"noarg": no_arg_provider})
+        field = FieldSpec(name="x", options_provider="noarg")
+        handler._prompt_choice_field = MagicMock(return_value="one")
+        handler._prompt_field(field, None)
+        self.assertEqual(field.options, ["one", "two"])
+
+    def test_options_provider_exception_is_swallowed(self) -> None:
+        """Provider that raises does not crash the handler."""
+
+        def bad_provider():
+            raise RuntimeError("boom")
+
+        handler = InteractiveHandler(options_providers={"bad": bad_provider})
+        field = FieldSpec(name="x", options_provider="bad")
+        handler._prompt_str_field = MagicMock(return_value="fallback")
+        result = handler._prompt_field(field, "fallback")
+        self.assertEqual(result, "fallback")
+        self.assertIsNone(field.options)
+
+    def test_options_provider_receives_field_and_default(self) -> None:
+        """Provider receiving (field, default) gets the correct arguments."""
+        received = {}
+
+        def capturing_provider(field, default):
+            received["field_name"] = field.name
+            received["default"] = default
+            return ["opt1"]
+
+        handler = InteractiveHandler(options_providers={"cap": capturing_provider})
+        field = FieldSpec(name="my_field", options_provider="cap")
+        handler._prompt_choice_field = MagicMock(return_value="opt1")
+        handler._prompt_field(field, "my_default")
+        self.assertEqual(received["field_name"], "my_field")
+        self.assertEqual(received["default"], "my_default")
+
+    def test_options_provider_empty_list_does_not_promote(self) -> None:
+        """An empty options list from provider does not promote the field type."""
+        handler = InteractiveHandler(
+            options_providers={"empty": lambda field, default: []},
+        )
+        field = FieldSpec(name="x", type=FieldType.STR, options_provider="empty")
+        handler._prompt_str_field = MagicMock(return_value="typed")
+        handler._prompt_field(field, None)
+        self.assertEqual(field.type, FieldType.STR)
+
+
+class TestDefaultProvider(unittest.TestCase):
+    """Tests for InteractiveHandler default_provider resolution."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.handler = InteractiveHandler(
+            default_providers={"account_id": lambda collected: "123456789012"},
+        )
+
+    def test_default_provider_returns_value(self) -> None:
+        """default_provider value is used when env_var and template are absent."""
+        field = FieldSpec(name="account", default_provider="account_id")
+        result = self.handler._resolve_default(field, {})
+        self.assertEqual(result, "123456789012")
+
+    def test_default_provider_receives_collected_values(self) -> None:
+        """Provider callable receives previously collected values."""
+        received = {}
+
+        def provider(collected):
+            received.update(collected)
+            return "resolved"
+
+        handler = InteractiveHandler(default_providers={"ctx": provider})
+        field = FieldSpec(name="x", default_provider="ctx")
+        handler._resolve_default(field, {"domain": "alpha", "region": "eu-west-1"})
+        self.assertEqual(received, {"domain": "alpha", "region": "eu-west-1"})
+
+    def test_default_provider_none_result_falls_through(self) -> None:
+        """Provider returning None falls through to static default."""
+        handler = InteractiveHandler(
+            default_providers={"nope": lambda collected: None},
+        )
+        field = FieldSpec(name="x", default="static", default_provider="nope")
+        result = handler._resolve_default(field, {})
+        self.assertEqual(result, "static")
+
+    def test_default_provider_exception_falls_through(self) -> None:
+        """Provider that raises falls through to static default."""
+        handler = InteractiveHandler(
+            default_providers={"boom": lambda collected: 1 / 0},
+        )
+        field = FieldSpec(name="x", default="safe", default_provider="boom")
+        result = handler._resolve_default(field, {})
+        self.assertEqual(result, "safe")
+
+    def test_default_provider_unregistered_name_falls_through(self) -> None:
+        """An unregistered provider name falls through to static default."""
+        handler = InteractiveHandler(default_providers={})
+        field = FieldSpec(name="x", default="static", default_provider="missing")
+        result = handler._resolve_default(field, {})
+        self.assertEqual(result, "static")
+
+    def test_default_provider_used_for_hidden_field(self) -> None:
+        """A hidden field still resolves via default_provider."""
+        handler = InteractiveHandler(
+            default_providers={"auto": lambda collected: "auto_val"},
+        )
+        fields = InputFieldsResponse(fields=[FieldSpec(name="x", hidden=True, default_provider="auto")])
+        with patch.object(handler, "_prompt_field") as prompt:
+            collected = handler.collect_field_values(fields)
+        prompt.assert_not_called()
+        self.assertEqual(collected, {"x": "auto_val"})
+
+
+class TestProviderIntegration(unittest.TestCase):
+    """Integration tests for the full collect_field_values flow with providers.
+
+    These test the real end-to-end behaviour: field ordering, dispatch to the
+    correct prompt method, cross-field dependency via collected values, and
+    edge-case return values.
+    """
+
+    def test_options_provider_routes_to_choice_prompt(self) -> None:
+        """A field with options_provider dispatches to _prompt_choice_field in full flow."""
+        handler = InteractiveHandler(
+            options_providers={"colours": lambda field, default: ["red", "green", "blue"]},
+        )
+        fields = InputFieldsResponse(fields=[FieldSpec(name="colour", options_provider="colours")])
+        with (
+            patch.object(handler, "_prompt_choice_field", return_value="green") as choice,
+            patch.object(handler, "_prompt_str_field") as str_prompt,
+        ):
+            result = handler.collect_field_values(fields)
+        choice.assert_called_once()
+        str_prompt.assert_not_called()
+        self.assertEqual(result, {"colour": "green"})
+
+    def test_default_provider_sees_earlier_field_values(self) -> None:
+        """default_provider for field B receives field A's collected value."""
+        received_values = {}
+
+        def account_provider(collected):
+            received_values.update(collected)
+            return f"account-for-{collected.get('domain', 'unknown')}"
+
+        handler = InteractiveHandler(
+            options_providers={"domains": lambda: ["analytics", "genomics"]},
+            default_providers={"resolve_account": account_provider},
+        )
+        fields = InputFieldsResponse(
+            fields=[
+                FieldSpec(name="domain", options_provider="domains"),
+                FieldSpec(name="account_id", default_provider="resolve_account"),
+            ]
+        )
+        # Simulate user picking "genomics" for domain, accepting default for account_id
+        with (
+            patch.object(handler, "_prompt_choice_field", return_value="genomics"),
+            patch.object(handler, "_prompt_str_field", side_effect=lambda f, d: d),
+        ):
+            result = handler.collect_field_values(fields)
+
+        self.assertEqual(result["domain"], "genomics")
+        self.assertEqual(result["account_id"], "account-for-genomics")
+        self.assertIn("domain", received_values)
+        self.assertEqual(received_values["domain"], "genomics")
+
+    def test_full_flow_with_multiple_dependent_providers(self) -> None:
+        """Multiple fields chaining: options → default → default."""
+        handler = InteractiveHandler(
+            options_providers={
+                "regions": lambda: ["eu-west-1", "us-east-1"],
+            },
+            default_providers={
+                "region_vpc": lambda cv: f"vpc-{cv.get('region', 'none')}",
+                "region_subnet": lambda cv: f"{cv.get('vpc', 'none')}-subnet-a",
+            },
+        )
+        fields = InputFieldsResponse(
+            fields=[
+                FieldSpec(name="region", options_provider="regions"),
+                FieldSpec(name="vpc", default_provider="region_vpc"),
+                FieldSpec(name="subnet", default_provider="region_subnet"),
+            ]
+        )
+        # User picks region, accepts all defaults
+        with (
+            patch.object(handler, "_prompt_choice_field", return_value="eu-west-1"),
+            patch.object(handler, "_prompt_str_field", side_effect=lambda f, d: d),
+        ):
+            result = handler.collect_field_values(fields)
+
+        self.assertEqual(result["region"], "eu-west-1")
+        self.assertEqual(result["vpc"], "vpc-eu-west-1")
+        self.assertEqual(result["subnet"], "vpc-eu-west-1-subnet-a")
+
+    def test_default_provider_falsy_zero_is_kept(self) -> None:
+        """Provider returning 0 is kept (not treated as missing)."""
+        handler = InteractiveHandler(
+            default_providers={"zero": lambda cv: 0},
+        )
+        field = FieldSpec(name="x", default="fallback", default_provider="zero")
+        result = handler._resolve_default(field, {})
+        self.assertEqual(result, 0)
+
+    def test_default_provider_falsy_false_is_kept(self) -> None:
+        """Provider returning False is kept (not treated as missing)."""
+        handler = InteractiveHandler(
+            default_providers={"no": lambda cv: False},
+        )
+        field = FieldSpec(name="x", default="fallback", default_provider="no")
+        result = handler._resolve_default(field, {})
+        self.assertIs(result, False)
+
+    def test_default_provider_empty_string_is_kept(self) -> None:
+        """Provider returning empty string is kept (not treated as missing)."""
+        handler = InteractiveHandler(
+            default_providers={"blank": lambda cv: ""},
+        )
+        field = FieldSpec(name="x", default="fallback", default_provider="blank")
+        result = handler._resolve_default(field, {})
+        self.assertEqual(result, "")
+
+    def test_default_provider_with_hidden_dependent_chain(self) -> None:
+        """Hidden field resolved by provider feeds into next hidden field's provider."""
+        handler = InteractiveHandler(
+            default_providers={
+                "step1": lambda cv: "intermediate",
+                "step2": lambda cv: f"{cv.get('a', '?')}-final",
+            },
+        )
+        fields = InputFieldsResponse(
+            fields=[
+                FieldSpec(name="a", hidden=True, default_provider="step1"),
+                FieldSpec(name="b", hidden=True, default_provider="step2"),
+            ]
+        )
+        result = handler.collect_field_values(fields)
+        self.assertEqual(result, {"a": "intermediate", "b": "intermediate-final"})
+
+    def test_options_provider_failure_still_collects_value(self) -> None:
+        """When options_provider fails, field falls back to str prompt and still collects."""
+
+        def failing_provider():
+            raise ConnectionError("API unavailable")
+
+        handler = InteractiveHandler(options_providers={"broken": failing_provider})
+        fields = InputFieldsResponse(fields=[FieldSpec(name="x", options_provider="broken")])
+        with patch.object(handler, "_prompt_str_field", return_value="manually-typed"):
+            result = handler.collect_field_values(fields)
+        self.assertEqual(result, {"x": "manually-typed"})
+
+
 if __name__ == "__main__":
     unittest.main()

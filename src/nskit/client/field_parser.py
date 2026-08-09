@@ -241,6 +241,8 @@ class FieldParser:
             env_var=extra.get("env_var"),
             template=extra.get("template"),
             options=options,
+            options_provider=extra.get("options_provider"),
+            default_provider=extra.get("default_provider"),
             conditional_rules=conditional_rules,
             # A single-valued Literal is pinned by the model, so there is
             # nothing to ask; treat it as hidden unless declared otherwise.
