@@ -26,6 +26,8 @@ def RecipeField(
     display_name: Optional[str] = None,
     help_text: Optional[str] = None,
     options: Optional[list[str]] = None,
+    options_provider: Optional[str] = None,
+    default_provider: Optional[str] = None,
     conditional_rules: Optional[list[dict]] = None,
     description: Optional[str] = None,
     **kwargs: Any,
@@ -44,6 +46,15 @@ def RecipeField(
         display_name: Human-readable field name for UI prompting.
         help_text: Additional help text shown alongside the prompt.
         options: Available choices for enum-type fields.
+        options_provider: Named provider for dynamically resolved options.
+            The ``InteractiveHandler`` looks up this name in its
+            ``options_providers`` registry and calls the corresponding
+            callable at prompt time to populate ``options``.
+        default_provider: Named provider for dynamically resolved defaults.
+            The ``InteractiveHandler`` looks up this name in its
+            ``default_providers`` registry and calls the corresponding
+            callable at prompt time (after ``env_var`` and ``template``
+            resolution) to produce a default value.
         conditional_rules: Rules controlling field visibility. Each may use the
             structured ``{depends_on, operator, value}`` form or the ``"op:value"``
             ``condition`` shorthand.
@@ -66,6 +77,10 @@ def RecipeField(
         extra["help_text"] = help_text
     if options is not None:
         extra["options"] = options
+    if options_provider is not None:
+        extra["options_provider"] = options_provider
+    if default_provider is not None:
+        extra["default_provider"] = default_provider
     if conditional_rules is not None:
         extra["conditional_rules"] = conditional_rules
     return Field(

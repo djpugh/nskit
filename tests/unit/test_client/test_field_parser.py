@@ -310,6 +310,98 @@ class TestFieldParserFromRecipeModel(unittest.TestCase):
         self.assertEqual(spec.options, ["red"])
 
 
+class TestFieldParserProviderJsonRoundTrip(unittest.TestCase):
+    """Tests that provider names survive JSON serialisation (the Docker path).
+
+    When a recipe runs in Docker, the container returns FieldSpec as JSON.
+    The host parses it via parse_fields_output. Provider names must survive
+    this round-trip.
+    """
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.parser = FieldParser()
+
+    def test_options_provider_survives_json_round_trip(self) -> None:
+        """options_provider serialises to JSON and deserialises back."""
+        spec = FieldSpec(
+            name="domain",
+            type=FieldType.STR,
+            options_provider="org_domains",
+            default="fallback",
+        )
+        json_str = json.dumps({"fields": [spec.model_dump()]})
+        parsed = self.parser.parse_fields_output(json_str)
+        self.assertEqual(parsed.fields[0].options_provider, "org_domains")
+
+    def test_default_provider_survives_json_round_trip(self) -> None:
+        """default_provider serialises to JSON and deserialises back."""
+        spec = FieldSpec(
+            name="account_id",
+            type=FieldType.STR,
+            default_provider="resolve_account",
+        )
+        json_str = json.dumps({"fields": [spec.model_dump()]})
+        parsed = self.parser.parse_fields_output(json_str)
+        self.assertEqual(parsed.fields[0].default_provider, "resolve_account")
+
+    def test_both_providers_survive_round_trip(self) -> None:
+        """A field can have both providers and they both survive serialisation."""
+        spec = FieldSpec(
+            name="x",
+            type=FieldType.STR,
+            options_provider="opts",
+            default_provider="dflt",
+        )
+        json_str = json.dumps({"fields": [spec.model_dump()]})
+        parsed = self.parser.parse_fields_output(json_str)
+        self.assertEqual(parsed.fields[0].options_provider, "opts")
+        self.assertEqual(parsed.fields[0].default_provider, "dflt")
+
+    def test_full_docker_simulation(self) -> None:
+        """Simulate full Docker path: recipe model -> JSON -> parse -> handler resolves.
+
+        This is the real integration test: a recipe class is introspected by
+        FieldParser, the resulting FieldSpecs are serialised to JSON (as a Docker
+        container would emit), parsed back by the host, then fed to an
+        InteractiveHandler with registered providers.
+        """
+        from unittest.mock import patch
+
+        from pydantic import BaseModel, Field
+
+        from nskit.client.interactive import InteractiveHandler
+
+        # 1. Define a recipe-like model
+        class FakeRecipe(BaseModel):
+            name: str = "test-project"
+            region: str = Field("", json_schema_extra={"options_provider": "regions"})
+            vpc_id: str = Field("", json_schema_extra={"default_provider": "vpc_for_region"})
+
+        # 2. Recipe side: introspect to FieldSpecs
+        fields_response = self.parser.from_recipe_model(FakeRecipe)
+
+        # 3. Simulate Docker serialisation round-trip
+        json_str = json.dumps({"fields": [f.model_dump() for f in fields_response.fields]})
+        parsed = self.parser.parse_fields_output(json_str)
+
+        # 4. Host side: handler with providers resolves everything
+        handler = InteractiveHandler(
+            options_providers={"regions": lambda: ["eu-west-1", "us-east-1"]},
+            default_providers={"vpc_for_region": lambda cv: f"vpc-{cv.get('region', '?')}"},
+        )
+
+        with (
+            patch.object(handler, "_prompt_choice_field", return_value="eu-west-1"),
+            patch.object(handler, "_prompt_str_field", side_effect=lambda f, d: d),
+        ):
+            result = handler.collect_field_values(parsed)
+
+        self.assertEqual(result["name"], "test-project")
+        self.assertEqual(result["region"], "eu-west-1")
+        self.assertEqual(result["vpc_id"], "vpc-eu-west-1")
+
+
 class TestFieldParserResolveFieldType(unittest.TestCase):
     """Tests for FieldParser._resolve_field_type."""
 
@@ -379,6 +471,100 @@ class TestFieldParserResolveFieldType(unittest.TestCase):
         self.assertIsNone(self.parser._nested_model(list[Inner]))
         self.assertIsNone(self.parser._nested_model(dict[str, Inner]))
         self.assertIsNone(self.parser._nested_model(str))
+
+
+class TestFieldParserProviderExtraction(unittest.TestCase):
+    """Tests for FieldParser extracting options_provider and default_provider."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.parser = FieldParser()
+
+    def test_options_provider_extracted_from_json_schema_extra(self) -> None:
+        """options_provider declared via json_schema_extra appears in FieldSpec."""
+        from pydantic import BaseModel, Field
+
+        class WithOptionsProvider(BaseModel):
+            domain: str = Field(
+                "default",
+                json_schema_extra={"options_provider": "org_domains"},
+            )
+
+        spec = next(f for f in self.parser.from_recipe_model(WithOptionsProvider).fields)
+        self.assertEqual(spec.options_provider, "org_domains")
+
+    def test_default_provider_extracted_from_json_schema_extra(self) -> None:
+        """default_provider declared via json_schema_extra appears in FieldSpec."""
+        from pydantic import BaseModel, Field
+
+        class WithDefaultProvider(BaseModel):
+            account_id: str = Field(
+                "",
+                json_schema_extra={"default_provider": "lookup_account"},
+            )
+
+        spec = next(f for f in self.parser.from_recipe_model(WithDefaultProvider).fields)
+        self.assertEqual(spec.default_provider, "lookup_account")
+
+    def test_both_providers_on_same_field(self) -> None:
+        """A field can declare both options_provider and default_provider."""
+        from pydantic import BaseModel, Field
+
+        class WithBoth(BaseModel):
+            thing: str = Field(
+                "",
+                json_schema_extra={
+                    "options_provider": "list_things",
+                    "default_provider": "best_thing",
+                },
+            )
+
+        spec = next(f for f in self.parser.from_recipe_model(WithBoth).fields)
+        self.assertEqual(spec.options_provider, "list_things")
+        self.assertEqual(spec.default_provider, "best_thing")
+
+    def test_no_provider_fields_are_none(self) -> None:
+        """Fields without providers have None for both provider attributes."""
+        from pydantic import BaseModel
+
+        class Plain(BaseModel):
+            name: str = "x"
+
+        spec = next(f for f in self.parser.from_recipe_model(Plain).fields)
+        self.assertIsNone(spec.options_provider)
+        self.assertIsNone(spec.default_provider)
+
+    def test_providers_survive_json_round_trip(self) -> None:
+        """Provider names serialise to JSON and deserialise back correctly."""
+        from pydantic import BaseModel, Field
+
+        class WithProvider(BaseModel):
+            domain: str = Field(
+                "default",
+                json_schema_extra={"options_provider": "org_domains"},
+            )
+
+        original = self.parser.from_recipe_model(WithProvider)
+        json_str = original.model_dump_json()
+        restored = self.parser.parse_fields_output(json_str)
+        self.assertEqual(restored.fields[0].options_provider, "org_domains")
+
+    def test_recipe_field_helper_passes_providers(self) -> None:
+        """RecipeField() convenience function passes providers through."""
+        from pydantic import BaseModel
+
+        from nskit.mixer.components.recipe import RecipeField
+
+        class WithRecipeField(BaseModel):
+            domain: str = RecipeField(
+                "default",
+                options_provider="org_domains",
+                default_provider="best_domain",
+            )
+
+        spec = next(f for f in self.parser.from_recipe_model(WithRecipeField).fields)
+        self.assertEqual(spec.options_provider, "org_domains")
+        self.assertEqual(spec.default_provider, "best_domain")
 
 
 if __name__ == "__main__":

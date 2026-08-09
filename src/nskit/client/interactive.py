@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from nskit._logging import logger_factory
 from nskit.client.derived_evaluator import DerivedFieldEvaluator
@@ -26,6 +26,13 @@ class InteractiveHandler:
         field_parser: Parser for field specifications.
         env_resolver: Resolver for environment variable defaults.
         derived_evaluator: Evaluator for template-based defaults.
+        options_providers: Registry mapping provider names to callables that
+            return ``list[str]``. Looked up when a field declares an
+            ``options_provider`` and has no static ``options``.
+        default_providers: Registry mapping provider names to callables that
+            return a default value. Looked up when a field declares a
+            ``default_provider`` and no higher-priority default (env_var,
+            template) resolved.
     """
 
     def __init__(
@@ -33,10 +40,14 @@ class InteractiveHandler:
         field_parser: FieldParser | None = None,
         env_resolver: EnvVarResolver | None = None,
         derived_evaluator: DerivedFieldEvaluator | None = None,
+        options_providers: dict[str, Callable[..., list[str]]] | None = None,
+        default_providers: dict[str, Callable[..., Any]] | None = None,
     ) -> None:
         self.field_parser = field_parser or FieldParser()
         self.env_resolver = env_resolver or EnvVarResolver()
         self.derived_evaluator = derived_evaluator or DerivedFieldEvaluator()
+        self.options_providers = options_providers or {}
+        self.default_providers = default_providers or {}
 
     def select_recipe(self, recipes: list[RecipeInfo]) -> RecipeInfo | None:
         """Present recipe selection to the user.
@@ -132,7 +143,7 @@ class InteractiveHandler:
         return True
 
     def _resolve_default(self, field: FieldSpec, collected_values: dict[str, Any]) -> Any:
-        """Resolve field default: env_var → template → static default.
+        """Resolve field default: env_var → template → default_provider → static default.
 
         Args:
             field: Field specification.
@@ -156,7 +167,23 @@ class InteractiveHandler:
             except Exception:  # nosec B110
                 logger.debug("Failed to evaluate template for field default", exc_info=True)
 
-        # 3. Fall back to static default
+        # 3. Try default_provider callable
+        if field.default_provider:
+            provider = self.default_providers.get(field.default_provider)
+            if provider is not None:
+                try:
+                    result = provider(collected_values)
+                    if result is not None:
+                        return result
+                except Exception:  # nosec B110
+                    logger.debug(
+                        "Failed to resolve default_provider %r for field %r",
+                        field.default_provider,
+                        field.name,
+                        exc_info=True,
+                    )
+
+        # 4. Fall back to static default
         return field.default
 
     def _should_show_field(self, field: FieldSpec, collected_values: dict[str, Any]) -> bool:
@@ -207,6 +234,9 @@ class InteractiveHandler:
     def _prompt_field(self, field: FieldSpec, default: Any) -> Any:
         """Dispatch to the appropriate prompt method for the field type.
 
+        Resolves ``options_provider`` before dispatching so that dynamically
+        provided options are available to the choice prompt.
+
         Args:
             field: Field specification.
             default: Resolved default value.
@@ -214,6 +244,35 @@ class InteractiveHandler:
         Returns:
             User-provided value.
         """
+        # Resolve dynamic options if a provider is declared and no static
+        # options are already set.
+        if field.options_provider and not field.options:
+            provider = self.options_providers.get(field.options_provider)
+            if provider is not None:
+                try:
+                    field.options = provider(field, default)
+                except TypeError:
+                    # Provider may not accept arguments — fall back to no-arg call.
+                    try:
+                        field.options = provider()
+                    except Exception:  # nosec B110
+                        logger.debug(
+                            "Failed to resolve options_provider %r for field %r",
+                            field.options_provider,
+                            field.name,
+                            exc_info=True,
+                        )
+                except Exception:  # nosec B110
+                    logger.debug(
+                        "Failed to resolve options_provider %r for field %r",
+                        field.options_provider,
+                        field.name,
+                        exc_info=True,
+                    )
+            # Promote field type to ENUM if options were resolved.
+            if field.options and field.type not in (FieldType.ENUM,):
+                field.type = FieldType.ENUM
+
         dispatch = {
             FieldType.BOOL: self._prompt_bool_field,
             FieldType.INT: self._prompt_int_field,
