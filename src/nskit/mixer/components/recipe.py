@@ -145,11 +145,11 @@ class Recipe(Folder):
         for hook in self.pre_hooks:
             recipe_path, context = hook(recipe_path, context, recipe=self)
         content = self.write(recipe_path.parent, context, override_path=recipe_path.name)
-        recipe_path = list(content.keys())[0]
+        recipe_path = next(iter(content.keys()))
         for hook in self.post_hooks:
             recipe_path, context = hook(recipe_path, context, recipe=self)
         self._write_batch(Path(recipe_path))
-        return {Path(recipe_path): list(content.values())[0]}
+        return {Path(recipe_path): next(iter(content.values()))}
 
     def _write_batch(self, folder_path: Path):
         """Write out the parameters used.
