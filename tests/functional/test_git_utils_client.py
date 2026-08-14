@@ -8,6 +8,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
+import pytest
+
 from nskit.client.utils.git import GitUtils
 
 
@@ -37,7 +39,6 @@ class TestGitUtilsMergeFile(unittest.TestCase):
         merged, has_conflicts = utils.merge_file(base, user, template)
 
         self.assertTrue(has_conflicts)
-        # Conflict markers should be present
         self.assertIn("<<<<<<<", merged)
         self.assertIn(">>>>>>>", merged)
 
@@ -73,62 +74,21 @@ class TestGitUtilsMergeFile(unittest.TestCase):
         self.assertIn("MY_TEMPLATE", merged)
 
 
+@pytest.mark.usefixtures("git_repo")
 class TestGitUtilsHasUncommittedChanges(unittest.TestCase):
     """Tests for GitUtils.has_uncommitted_changes."""
 
     def test_clean_repo(self) -> None:
         """A freshly committed repo has no uncommitted changes."""
-        with TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            subprocess.run(["git", "init"], cwd=tmp, capture_output=True)
-            subprocess.run(
-                ["git", "config", "user.email", "test@test.com"],
-                cwd=tmp,
-                capture_output=True,
-            )
-            subprocess.run(
-                ["git", "config", "user.name", "Test"],
-                cwd=tmp,
-                capture_output=True,
-            )
-            (tmp_path / "file.txt").write_text("content")
-            subprocess.run(["git", "add", "."], cwd=tmp, capture_output=True)
-            subprocess.run(
-                ["git", "commit", "-m", "init"],
-                cwd=tmp,
-                capture_output=True,
-            )
-
-            utils = GitUtils(tmp_path)
-            self.assertFalse(utils.has_uncommitted_changes())
+        utils = GitUtils(self.git_repo)
+        self.assertFalse(utils.has_uncommitted_changes())
 
     def test_dirty_repo(self) -> None:
         """Uncommitted changes are detected."""
-        with TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            subprocess.run(["git", "init"], cwd=tmp, capture_output=True)
-            subprocess.run(
-                ["git", "config", "user.email", "test@test.com"],
-                cwd=tmp,
-                capture_output=True,
-            )
-            subprocess.run(
-                ["git", "config", "user.name", "Test"],
-                cwd=tmp,
-                capture_output=True,
-            )
-            (tmp_path / "file.txt").write_text("content")
-            subprocess.run(["git", "add", "."], cwd=tmp, capture_output=True)
-            subprocess.run(
-                ["git", "commit", "-m", "init"],
-                cwd=tmp,
-                capture_output=True,
-            )
-            # Create uncommitted change
-            (tmp_path / "file.txt").write_text("changed")
+        (self.git_repo / "README.md").write_text("changed")
 
-            utils = GitUtils(tmp_path)
-            self.assertTrue(utils.has_uncommitted_changes())
+        utils = GitUtils(self.git_repo)
+        self.assertTrue(utils.has_uncommitted_changes())
 
     def test_non_git_directory(self) -> None:
         """Non-git directory returns False."""
@@ -137,15 +97,14 @@ class TestGitUtilsHasUncommittedChanges(unittest.TestCase):
             self.assertFalse(utils.has_uncommitted_changes())
 
 
+@pytest.mark.usefixtures("git_repo")
 class TestGitUtilsIsGitRepository(unittest.TestCase):
     """Tests for GitUtils.is_git_repository."""
 
     def test_git_repo(self) -> None:
         """Returns True for a git repository."""
-        with TemporaryDirectory() as tmp:
-            subprocess.run(["git", "init"], cwd=tmp, capture_output=True)
-            utils = GitUtils(Path(tmp))
-            self.assertTrue(utils.is_git_repository())
+        utils = GitUtils(self.git_repo)
+        self.assertTrue(utils.is_git_repository())
 
     def test_non_git_directory(self) -> None:
         """Returns False for a non-git directory."""
@@ -154,35 +113,32 @@ class TestGitUtilsIsGitRepository(unittest.TestCase):
             self.assertFalse(utils.is_git_repository())
 
 
+@pytest.mark.usefixtures("temp_dir")
 class TestGitUtilsDiffFiles(unittest.TestCase):
     """Tests for GitUtils.diff_files."""
 
     def test_diff_identical_files(self) -> None:
         """Identical files produce empty diff."""
-        with TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            f1 = tmp_path / "a.txt"
-            f2 = tmp_path / "b.txt"
-            f1.write_text("same content")
-            f2.write_text("same content")
+        f1 = self.temp_dir / "a.txt"
+        f2 = self.temp_dir / "b.txt"
+        f1.write_text("same content")
+        f2.write_text("same content")
 
-            utils = GitUtils()
-            diff = utils.diff_files(f1, f2)
-            self.assertEqual(diff.strip(), "")
+        utils = GitUtils()
+        diff = utils.diff_files(f1, f2)
+        self.assertEqual(diff.strip(), "")
 
     def test_diff_different_files(self) -> None:
         """Different files produce non-empty diff."""
-        with TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            f1 = tmp_path / "a.txt"
-            f2 = tmp_path / "b.txt"
-            f1.write_text("old content")
-            f2.write_text("new content")
+        f1 = self.temp_dir / "a.txt"
+        f2 = self.temp_dir / "b.txt"
+        f1.write_text("old content")
+        f2.write_text("new content")
 
-            utils = GitUtils()
-            diff = utils.diff_files(f1, f2)
-            self.assertIn("old content", diff)
-            self.assertIn("new content", diff)
+        utils = GitUtils()
+        diff = utils.diff_files(f1, f2)
+        self.assertIn("old content", diff)
+        self.assertIn("new content", diff)
 
 
 if __name__ == "__main__":

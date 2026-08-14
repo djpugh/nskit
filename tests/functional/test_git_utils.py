@@ -1,72 +1,41 @@
 """Tests for GitUtils uncovered functions."""
 
-from pathlib import Path
+import unittest
 
 import pytest
 
 from nskit.client.utils.git import GitUtils
 
 
-class TestGitUtilsAdditional:
+@pytest.mark.usefixtures("git_repo")
+class TestGitUtilsAdditional(unittest.TestCase):
     """Test uncovered GitUtils functions."""
 
-    def test_get_current_commit(self, tmp_path):
+    def test_get_current_commit(self):
         """Test getting current commit hash."""
-        import subprocess
-
-        # Initialize git repo
-        subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
-        subprocess.run(["git", "config", "user.email", "test@test.com"], cwd=tmp_path, capture_output=True)
-        subprocess.run(["git", "config", "user.name", "Test"], cwd=tmp_path, capture_output=True)
-
-        # Create and commit a file
-        (tmp_path / "test.txt").write_text("test")
-        subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-        subprocess.run(["git", "commit", "-m", "Initial"], cwd=tmp_path, capture_output=True)
-
-        git_utils = GitUtils(tmp_path)
+        git_utils = GitUtils(self.git_repo)
         commit = git_utils.get_current_commit()
 
-        assert commit is not None
-        assert len(commit) == 40  # SHA-1 hash
+        self.assertIsNotNone(commit)
+        self.assertEqual(len(commit), 40)  # SHA-1 hash
 
-    def test_has_uncommitted_changes_clean(self, tmp_path):
+    def test_has_uncommitted_changes_clean(self):
         """Test checking for uncommitted changes in clean repo."""
-        import subprocess
-
-        # Initialize git repo
-        subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
-        subprocess.run(["git", "config", "user.email", "test@test.com"], cwd=tmp_path, capture_output=True)
-        subprocess.run(["git", "config", "user.name", "Test"], cwd=tmp_path, capture_output=True)
-
-        # Create and commit a file
-        (tmp_path / "test.txt").write_text("test")
-        subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-        subprocess.run(["git", "commit", "-m", "Initial"], cwd=tmp_path, capture_output=True)
-
-        git_utils = GitUtils(tmp_path)
+        git_utils = GitUtils(self.git_repo)
         has_changes = git_utils.has_uncommitted_changes()
 
-        assert not has_changes
+        self.assertFalse(has_changes)
 
-    def test_has_uncommitted_changes_dirty(self, tmp_path):
+    def test_has_uncommitted_changes_dirty(self):
         """Test checking for uncommitted changes in dirty repo."""
-        import subprocess
+        # Modify existing file
+        (self.git_repo / "README.md").write_text("modified")
 
-        # Initialize git repo
-        subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
-        subprocess.run(["git", "config", "user.email", "test@test.com"], cwd=tmp_path, capture_output=True)
-        subprocess.run(["git", "config", "user.name", "Test"], cwd=tmp_path, capture_output=True)
-
-        # Create and commit a file
-        (tmp_path / "test.txt").write_text("test")
-        subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-        subprocess.run(["git", "commit", "-m", "Initial"], cwd=tmp_path, capture_output=True)
-
-        # Modify file
-        (tmp_path / "test.txt").write_text("modified")
-
-        git_utils = GitUtils(tmp_path)
+        git_utils = GitUtils(self.git_repo)
         has_changes = git_utils.has_uncommitted_changes()
 
-        assert has_changes
+        self.assertTrue(has_changes)
+
+
+if __name__ == "__main__":
+    unittest.main()

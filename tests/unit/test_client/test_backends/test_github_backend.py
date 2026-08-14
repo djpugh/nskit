@@ -1,53 +1,52 @@
 """Tests for GitHub backend with mocked API."""
 
 import subprocess
+import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, Mock, patch
-
-import pytest
 
 from nskit.client.backends import GitHubBackend
 from nskit.client.models import RecipeInfo
 
 
-@pytest.fixture
-def mock_ghapi():
-    """Mock ghapi client."""
-    with patch("nskit.client.backends.github.sync_ghapi") as mock:
-        yield mock
-
-
-@pytest.fixture
-def mock_subprocess():
-    """Mock subprocess for gh CLI."""
-    with patch("nskit.client.backends.github.subprocess") as mock:
-        mock.run.return_value = Mock(stdout="test_token\n")
-        yield mock
-
-
-class TestGitHubBackend:
+class TestGitHubBackend(unittest.TestCase):
     """Test GitHubBackend with mocked GitHub API."""
 
-    def test_initialization(self, mock_subprocess):
+    def setUp(self):
+        """Set up patchers for ghapi and subprocess."""
+        self.ghapi_patcher = patch("nskit.client.backends.github.sync_ghapi")
+        self.subprocess_patcher = patch("nskit.client.backends.github.subprocess")
+
+        self.mock_ghapi = self.ghapi_patcher.start()
+        self.mock_subprocess = self.subprocess_patcher.start()
+        self.mock_subprocess.run.return_value = Mock(stdout="test_token\n")
+
+    def tearDown(self):
+        """Stop patchers."""
+        self.ghapi_patcher.stop()
+        self.subprocess_patcher.stop()
+
+    def test_initialization(self):
         """Test backend initialization."""
         backend = GitHubBackend(org="testorg", token="test_token")
 
-        assert backend.org == "testorg"
-        assert backend._token.get_secret_value() == "test_token"
+        self.assertEqual(backend.org, "testorg")
+        self.assertEqual(backend._token.get_secret_value(), "test_token")
 
-    def test_get_token_from_gh_cli(self, mock_subprocess):
+    def test_get_token_from_gh_cli(self):
         """Test getting token from gh CLI."""
         backend = GitHubBackend(org="testorg")
         token = backend._get_token()
 
-        assert token == "test_token"
-        mock_subprocess.run.assert_called_once()
+        self.assertEqual(token, "test_token")
+        self.mock_subprocess.run.assert_called_once()
 
-    def test_list_recipes(self, mock_ghapi, mock_subprocess):
+    def test_list_recipes(self):
         """Test listing recipes from GitHub."""
         # Mock GitHub API responses
         mock_client = MagicMock()
-        mock_ghapi.return_value = mock_client
+        self.mock_ghapi.return_value = mock_client
 
         # Mock repos
         mock_repo1 = Mock()
@@ -75,15 +74,15 @@ class TestGitHubBackend:
         backend = GitHubBackend(org="testorg", token="test_token")
         recipes = backend.list_recipes()
 
-        assert len(recipes) == 2
-        assert recipes[0].name == "recipe-python"
-        assert recipes[0].description == "Python recipe"
-        assert len(recipes[0].versions) == 2
+        self.assertEqual(len(recipes), 2)
+        self.assertEqual(recipes[0].name, "recipe-python")
+        self.assertEqual(recipes[0].description, "Python recipe")
+        self.assertEqual(len(recipes[0].versions), 2)
 
-    def test_get_recipe_versions(self, mock_ghapi, mock_subprocess):
+    def test_get_recipe_versions(self):
         """Test getting recipe versions."""
         mock_client = MagicMock()
-        mock_ghapi.return_value = mock_client
+        self.mock_ghapi.return_value = mock_client
 
         # Mock releases
         mock_release1 = Mock()
@@ -103,45 +102,48 @@ class TestGitHubBackend:
         backend = GitHubBackend(org="testorg", token="test_token")
         versions = backend.get_recipe_versions("python_package")
 
-        assert len(versions) == 2
-        assert "v1.0.0" in versions
-        assert "v2.0.0" in versions
-        assert "v3.0.0" not in versions  # Draft excluded
+        self.assertEqual(len(versions), 2)
+        self.assertIn("v1.0.0", versions)
+        self.assertIn("v2.0.0", versions)
+        self.assertNotIn("v3.0.0", versions)  # Draft excluded
 
-    def test_fetch_recipe(self, mock_ghapi, mock_subprocess, tmp_path):
+    def test_fetch_recipe(self):
         """Test fetching recipe from GitHub."""
         mock_client = MagicMock()
-        mock_ghapi.return_value = mock_client
+        self.mock_ghapi.return_value = mock_client
 
         # Mock release
         mock_release = Mock()
         mock_release.tag_name = "v1.0.0"
         mock_client.repos.get_release_by_tag.return_value = mock_release
 
-        with patch("nskit.client.backends.github.subprocess") as mock_sub:
-            mock_sub.run.return_value = Mock(returncode=0)
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
 
-            with patch("nskit.client.backends.github.zipfile.ZipFile") as mock_zip:
-                mock_zip_instance = MagicMock()
-                mock_zip.return_value.__enter__.return_value = mock_zip_instance
+            with patch("nskit.client.backends.github.subprocess") as mock_sub:
+                mock_sub.run.return_value = Mock(returncode=0)
 
-                backend = GitHubBackend(org="testorg", token="test_token")
-                result = backend.fetch_recipe("python_package", "v1.0.0", tmp_path)
+                with patch("nskit.client.backends.github.zipfile.ZipFile") as mock_zip:
+                    mock_zip_instance = MagicMock()
+                    mock_zip.return_value.__enter__.return_value = mock_zip_instance
 
-                assert result is not None
-                mock_client.repos.get_release_by_tag.assert_called_once()
+                    backend = GitHubBackend(org="testorg", token="test_token")
+                    result = backend.fetch_recipe("python_package", "v1.0.0", tmp_path)
 
-    def test_repo_pattern_substitution(self, mock_subprocess):
+                    self.assertIsNotNone(result)
+                    mock_client.repos.get_release_by_tag.assert_called_once()
+
+    def test_repo_pattern_substitution(self):
         """Test repository pattern substitution."""
         backend = GitHubBackend(org="testorg", repo_pattern="recipe-{recipe_name}", token="test_token")
 
         repo_name = backend._get_repo_name("python_package")
-        assert repo_name == "recipe-python_package"
+        self.assertEqual(repo_name, "recipe-python_package")
 
-    def test_list_recipes_handles_api_errors(self, mock_ghapi, mock_subprocess):
+    def test_list_recipes_handles_api_errors(self):
         """Test list_recipes handles API errors gracefully."""
         mock_client = MagicMock()
-        mock_ghapi.return_value = mock_client
+        self.mock_ghapi.return_value = mock_client
 
         mock_repo = Mock()
         mock_repo.name = "recipe-python"
@@ -154,12 +156,13 @@ class TestGitHubBackend:
         recipes = backend.list_recipes()
 
         # Should handle error gracefully and return repo without versions
-        assert len(recipes) == 1
-        assert recipes[0].name == "recipe-python"
+        self.assertEqual(len(recipes), 1)
+        self.assertEqual(recipes[0].name, "recipe-python")
 
     def test_get_token_not_logged_in(self):
         """Test error when gh CLI not authenticated."""
-        import subprocess
+        # Stop the default subprocess patcher for this test
+        self.subprocess_patcher.stop()
 
         with patch("nskit.client.backends.github.subprocess") as mock_sub:
             mock_sub.CalledProcessError = subprocess.CalledProcessError
@@ -167,15 +170,28 @@ class TestGitHubBackend:
 
             backend = GitHubBackend(org="testorg")
 
-            with pytest.raises(RuntimeError, match="gh auth login"):
+            with self.assertRaisesRegex(RuntimeError, "gh auth login"):
                 backend._get_token()
 
-    def test_get_token_gh_not_installed(self, mock_ghapi):
+        # Restart the patcher for tearDown
+        self.mock_subprocess = self.subprocess_patcher.start()
+
+    def test_get_token_gh_not_installed(self):
         """Test error when gh CLI not installed."""
+        # Stop the default subprocess patcher for this test
+        self.subprocess_patcher.stop()
+
         with patch("nskit.client.backends.github.subprocess.run") as mock_run:
             mock_run.side_effect = FileNotFoundError()
 
             backend = GitHubBackend(org="testorg")
 
-            with pytest.raises(RuntimeError, match="install it"):
+            with self.assertRaisesRegex(RuntimeError, "install it"):
                 backend._get_token()
+
+        # Restart the patcher for tearDown
+        self.mock_subprocess = self.subprocess_patcher.start()
+
+
+if __name__ == "__main__":
+    unittest.main()
