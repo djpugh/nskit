@@ -164,6 +164,10 @@ class FieldParser:
 
             nested = self._nested_model(field_info.annotation)
             if recurse_nested and nested is not None:
+                # If the parent field is marked hidden, skip the entire subtree.
+                extra = field_info.json_schema_extra or {}
+                if extra.get("hidden"):
+                    continue
                 fields.extend(
                     self._extract(
                         nested,

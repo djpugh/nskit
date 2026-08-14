@@ -229,3 +229,46 @@ class TestCommitAndMaybePush:
         _commit_and_maybe_push(project, "proj", "", False, mock_vcs, console)
 
         mock_vcs.create.assert_not_called()
+
+
+class TestListJsonFlag:
+    """``list --json`` outputs a machine-readable JSON array."""
+
+    def test_list_json_exits_zero(self, runner):
+        app = create_cli(recipe_entrypoint="nskit.recipes")
+        result = runner.invoke(app, ["list", "--json"])
+        assert result.exit_code == 0, result.output
+
+    def test_list_json_outputs_valid_json(self, runner):
+        import json
+
+        app = create_cli(recipe_entrypoint="nskit.recipes")
+        result = runner.invoke(app, ["list", "--json"])
+        data = json.loads(result.output)
+        assert isinstance(data, list)
+
+    def test_list_json_contains_registered_recipes(self, runner):
+        import json
+
+        app = create_cli(recipe_entrypoint="nskit.recipes")
+        result = runner.invoke(app, ["list", "--json"])
+        data = json.loads(result.output)
+        assert "python_package" in data
+
+    def test_list_json_is_sorted(self, runner):
+        import json
+
+        app = create_cli(recipe_entrypoint="nskit.recipes")
+        result = runner.invoke(app, ["list", "--json"])
+        data = json.loads(result.output)
+        assert data == sorted(data)
+
+    def test_list_without_json_shows_table(self, runner):
+        """Without --json, output is a rich table (not JSON)."""
+        import json
+
+        app = create_cli(recipe_entrypoint="nskit.recipes")
+        result = runner.invoke(app, ["list"])
+        assert result.exit_code == 0
+        with pytest.raises(json.JSONDecodeError):
+            json.loads(result.output)
