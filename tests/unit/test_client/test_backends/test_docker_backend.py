@@ -1,14 +1,13 @@
 """Tests for Docker backend."""
 
 import subprocess
+import unittest
 from unittest.mock import Mock, patch
-
-import pytest
 
 from nskit.client.backends import DockerBackend
 
 
-class TestDockerBackend:
+class TestDockerBackend(unittest.TestCase):
     """Test DockerBackend."""
 
     def test_initialization_success(self):
@@ -18,8 +17,8 @@ class TestDockerBackend:
 
             backend = DockerBackend(registry_url="ghcr.io", image_prefix="org/project")
 
-            assert backend.registry_url == "ghcr.io"
-            assert backend.image_prefix == "org/project"
+            self.assertEqual(backend.registry_url, "ghcr.io")
+            self.assertEqual(backend.image_prefix, "org/project")
             mock_run.assert_called_once()
 
     def test_docker_not_installed(self):
@@ -27,7 +26,7 @@ class TestDockerBackend:
         with patch("nskit.client.backends.docker.subprocess.run") as mock_run:
             mock_run.side_effect = FileNotFoundError()
 
-            with pytest.raises(RuntimeError, match="install Docker"):
+            with self.assertRaisesRegex(RuntimeError, "install Docker"):
                 DockerBackend()
 
     def test_docker_not_running(self):
@@ -35,7 +34,7 @@ class TestDockerBackend:
         with patch("nskit.client.backends.docker.subprocess.run") as mock_run:
             mock_run.side_effect = subprocess.CalledProcessError(1, "docker")
 
-            with pytest.raises(RuntimeError, match="not running"):
+            with self.assertRaisesRegex(RuntimeError, "not running"):
                 DockerBackend()
 
     def test_docker_not_responding(self):
@@ -43,7 +42,7 @@ class TestDockerBackend:
         with patch("nskit.client.backends.docker.subprocess.run") as mock_run:
             mock_run.side_effect = subprocess.TimeoutExpired("docker", 5)
 
-            with pytest.raises(RuntimeError, match="not responding"):
+            with self.assertRaisesRegex(RuntimeError, "not responding"):
                 DockerBackend()
 
     def test_build_image_url_with_prefix(self):
@@ -52,7 +51,7 @@ class TestDockerBackend:
             backend = DockerBackend(registry_url="ghcr.io", image_prefix="myorg/myproject")
 
             url = backend._build_image_url("python_package", "v1.0.0")
-            assert url == "ghcr.io/myorg/myproject/python_package:v1.0.0"
+            self.assertEqual(url, "ghcr.io/myorg/myproject/python_package:v1.0.0")
 
     def test_build_image_url_without_prefix(self):
         """Test building image URL without prefix."""
@@ -60,4 +59,8 @@ class TestDockerBackend:
             backend = DockerBackend(registry_url="ghcr.io")
 
             url = backend._build_image_url("python_package", "v1.0.0")
-            assert url == "ghcr.io/python_package:v1.0.0"
+            self.assertEqual(url, "ghcr.io/python_package:v1.0.0")
+
+
+if __name__ == "__main__":
+    unittest.main()

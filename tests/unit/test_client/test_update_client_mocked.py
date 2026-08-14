@@ -2,92 +2,98 @@
 
 from __future__ import annotations
 
+import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
-
-import pytest
 
 from nskit.client.exceptions import GitStatusError
 from nskit.client.update import UpdateClient
 
 
-@pytest.fixture
-def mock_backend():
-    """Mock backend for testing."""
-    backend = Mock()
-    backend.entrypoint = "test.recipes"
-    backend.get_recipe_versions.return_value = ["v1.0.0", "v1.1.0", "v2.0.0"]
-    backend.fetch_recipe.return_value = Path("/tmp/recipe")
-    return backend
-
-
-@pytest.fixture
-def mock_project(tmp_path):
-    """Create mock project with recipe config."""
-    project_path = tmp_path / "project"
-    project_path.mkdir()
-
-    recipe_dir = project_path / ".recipe"
-    recipe_dir.mkdir()
-
-    config_file = recipe_dir / "config.yml"
-    config_file.write_text("metadata:\n  recipe_name: python_package\n  docker_image: test/python_package:v1.0.0\n")
-
-    return project_path
-
-
-class TestUpdateClient:
+class TestUpdateClient(unittest.TestCase):
     """Test UpdateClient functionality."""
 
-    def test_check_update_available_no_config(self, mock_backend, tmp_path):
-        """Test checking for updates with no recipe config."""
-        client = UpdateClient(mock_backend)
-        latest = client.check_update_available(tmp_path)
-        assert latest is None
+    def setUp(self):
+        """Set up mock backend and mock project."""
+        self.mock_backend = Mock()
+        self.mock_backend.entrypoint = "test.recipes"
+        self.mock_backend.get_recipe_versions.return_value = ["v1.0.0", "v1.1.0", "v2.0.0"]
+        self.mock_backend.fetch_recipe.return_value = Path("/tmp/recipe")
 
-    def test_check_update_available_no_update(self, mock_backend, mock_project):
+        self._tmp_dir = TemporaryDirectory()
+        tmp_path = Path(self._tmp_dir.name)
+
+        self.mock_project = tmp_path / "project"
+        self.mock_project.mkdir()
+
+        recipe_dir = self.mock_project / ".recipe"
+        recipe_dir.mkdir()
+
+        config_file = recipe_dir / "config.yml"
+        config_file.write_text("metadata:\n  recipe_name: python_package\n  docker_image: test/python_package:v1.0.0\n")
+
+    def tearDown(self):
+        """Clean up temporary directory."""
+        self._tmp_dir.cleanup()
+
+    def test_check_update_available_no_config(self):
+        """Test checking for updates with no recipe config."""
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            client = UpdateClient(self.mock_backend)
+            latest = client.check_update_available(tmp_path)
+            self.assertIsNone(latest)
+
+    def test_check_update_available_no_update(self):
         """Test checking for updates when already on latest."""
-        mock_backend.get_recipe_versions.return_value = ["v1.0.0"]
-        client = UpdateClient(mock_backend)
-        latest = client.check_update_available(mock_project)
-        assert latest is None
+        self.mock_backend.get_recipe_versions.return_value = ["v1.0.0"]
+        client = UpdateClient(self.mock_backend)
+        latest = client.check_update_available(self.mock_project)
+        self.assertIsNone(latest)
 
     @patch("nskit.client.update.GitUtils")
-    def test_update_project_not_git_repo(self, mock_git_cls, mock_backend, tmp_path):
+    def test_update_project_not_git_repo(self, mock_git_cls):
         """Test update raises GitStatusError if not a git repository."""
         mock_git_cls.return_value.is_git_repository.return_value = False
 
-        client = UpdateClient(mock_backend)
-        with pytest.raises(GitStatusError, match="not a git repository"):
-            client.update_project(project_path=tmp_path, target_version="v2.0.0")
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            client = UpdateClient(self.mock_backend)
+            with self.assertRaisesRegex(GitStatusError, "not a git repository"):
+                client.update_project(project_path=tmp_path, target_version="v2.0.0")
 
     @patch("nskit.client.update.GitUtils")
-    def test_update_project_uncommitted_changes(self, mock_git_cls, mock_backend, mock_project):
+    def test_update_project_uncommitted_changes(self, mock_git_cls):
         """Test update raises GitStatusError with uncommitted changes."""
         mock_git_cls.return_value.is_git_repository.return_value = True
         mock_git_cls.return_value.has_uncommitted_changes.return_value = True
 
-        client = UpdateClient(mock_backend)
-        with pytest.raises(GitStatusError, match="uncommitted changes"):
-            client.update_project(project_path=mock_project, target_version="v2.0.0")
+        client = UpdateClient(self.mock_backend)
+        with self.assertRaisesRegex(GitStatusError, "uncommitted changes"):
+            client.update_project(project_path=self.mock_project, target_version="v2.0.0")
 
     @patch("nskit.client.update.GitUtils")
-    def test_update_project_dry_run_no_file_changes(self, mock_git_cls, mock_backend, mock_project):
+    def test_update_project_dry_run_no_file_changes(self, mock_git_cls):
         """Test dry run doesn't modify files."""
         mock_git_cls.return_value.is_git_repository.return_value = True
         mock_git_cls.return_value.has_uncommitted_changes.return_value = False
 
-        test_file = mock_project / "test.py"
+        test_file = self.mock_project / "test.py"
         test_file.write_text("original content")
 
-        client = UpdateClient(mock_backend)
+        client = UpdateClient(self.mock_backend)
         try:
             client.update_project(
-                project_path=mock_project,
+                project_path=self.mock_project,
                 target_version="v2.0.0",
                 dry_run=True,
             )
         except Exception:
             pass
 
-        assert test_file.read_text() == "original content"
+        self.assertEqual(test_file.read_text(), "original content")
+
+
+if __name__ == "__main__":
+    unittest.main()

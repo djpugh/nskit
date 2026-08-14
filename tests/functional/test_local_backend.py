@@ -1,113 +1,149 @@
 """Tests for LocalBackend."""
 
+import unittest
 from pathlib import Path
-
-import pytest
+from tempfile import TemporaryDirectory
 
 from nskit.client.backends import LocalBackend
 
 
-@pytest.fixture
-def recipes_dir(tmp_path):
-    """Create a recipes directory with test data."""
-    # recipe_a with 2 versions
-    (tmp_path / "recipe_a" / "v1.0.0").mkdir(parents=True)
-    (tmp_path / "recipe_a" / "v1.0.0" / "README.md").write_text("# Recipe A v1")
-    (tmp_path / "recipe_a" / "v1.0.0" / "config.txt").write_text("key=value")
-    (tmp_path / "recipe_a" / "v2.0.0").mkdir(parents=True)
-    (tmp_path / "recipe_a" / "v2.0.0" / "README.md").write_text("# Recipe A v2")
-
-    # recipe_b with 1 version
-    (tmp_path / "recipe_b" / "v1.0.0").mkdir(parents=True)
-    (tmp_path / "recipe_b" / "v1.0.0" / "main.py").write_text("print('hello')")
-
-    # hidden dir (should be ignored)
-    (tmp_path / ".hidden").mkdir()
-
-    return tmp_path
-
-
-class TestLocalBackend:
+class TestLocalBackend(unittest.TestCase):
     """Test LocalBackend."""
 
-    def test_entrypoint(self, recipes_dir):
+    def _create_recipes_dir(self, tmp_path):
+        """Create a recipes directory with test data."""
+        # recipe_a with 2 versions
+        (tmp_path / "recipe_a" / "v1.0.0").mkdir(parents=True)
+        (tmp_path / "recipe_a" / "v1.0.0" / "README.md").write_text("# Recipe A v1")
+        (tmp_path / "recipe_a" / "v1.0.0" / "config.txt").write_text("key=value")
+        (tmp_path / "recipe_a" / "v2.0.0").mkdir(parents=True)
+        (tmp_path / "recipe_a" / "v2.0.0" / "README.md").write_text("# Recipe A v2")
+
+        # recipe_b with 1 version
+        (tmp_path / "recipe_b" / "v1.0.0").mkdir(parents=True)
+        (tmp_path / "recipe_b" / "v1.0.0" / "main.py").write_text("print('hello')")
+
+        # hidden dir (should be ignored)
+        (tmp_path / ".hidden").mkdir()
+
+        return tmp_path
+
+    def test_entrypoint(self):
         """Test entrypoint property."""
-        backend = LocalBackend(recipes_dir=recipes_dir, entrypoint="custom.recipes")
-        assert backend.entrypoint == "custom.recipes"
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            recipes_dir = self._create_recipes_dir(tmp_path)
+            backend = LocalBackend(recipes_dir=recipes_dir, entrypoint="custom.recipes")
+            self.assertEqual(backend.entrypoint, "custom.recipes")
 
-    def test_entrypoint_default(self, recipes_dir):
+    def test_entrypoint_default(self):
         """Test default entrypoint."""
-        backend = LocalBackend(recipes_dir=recipes_dir)
-        assert backend.entrypoint == "nskit.recipes"
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            recipes_dir = self._create_recipes_dir(tmp_path)
+            backend = LocalBackend(recipes_dir=recipes_dir)
+            self.assertEqual(backend.entrypoint, "nskit.recipes")
 
-    def test_list_recipes(self, recipes_dir):
+    def test_list_recipes(self):
         """Test listing recipes from directory."""
-        backend = LocalBackend(recipes_dir=recipes_dir)
-        recipes = backend.list_recipes()
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            recipes_dir = self._create_recipes_dir(tmp_path)
+            backend = LocalBackend(recipes_dir=recipes_dir)
+            recipes = backend.list_recipes()
 
-        names = {r.name for r in recipes}
-        assert names == {"recipe_a", "recipe_b"}
-        assert ".hidden" not in names
+            names = {r.name for r in recipes}
+            self.assertEqual(names, {"recipe_a", "recipe_b"})
+            self.assertNotIn(".hidden", names)
 
-    def test_list_recipes_versions(self, recipes_dir):
+    def test_list_recipes_versions(self):
         """Test that listed recipes include correct versions."""
-        backend = LocalBackend(recipes_dir=recipes_dir)
-        recipes = backend.list_recipes()
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            recipes_dir = self._create_recipes_dir(tmp_path)
+            backend = LocalBackend(recipes_dir=recipes_dir)
+            recipes = backend.list_recipes()
 
-        recipe_a = next(r for r in recipes if r.name == "recipe_a")
-        assert recipe_a.versions == ["v1.0.0", "v2.0.0"]
+            recipe_a = next(r for r in recipes if r.name == "recipe_a")
+            self.assertEqual(recipe_a.versions, ["v1.0.0", "v2.0.0"])
 
-        recipe_b = next(r for r in recipes if r.name == "recipe_b")
-        assert recipe_b.versions == ["v1.0.0"]
+            recipe_b = next(r for r in recipes if r.name == "recipe_b")
+            self.assertEqual(recipe_b.versions, ["v1.0.0"])
 
-    def test_list_recipes_empty_dir(self, tmp_path):
+    def test_list_recipes_empty_dir(self):
         """Test listing recipes from empty directory."""
-        backend = LocalBackend(recipes_dir=tmp_path)
-        assert backend.list_recipes() == []
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            backend = LocalBackend(recipes_dir=tmp_path)
+            self.assertEqual(backend.list_recipes(), [])
 
-    def test_list_recipes_nonexistent_dir(self, tmp_path):
+    def test_list_recipes_nonexistent_dir(self):
         """Test listing recipes from nonexistent directory."""
-        backend = LocalBackend(recipes_dir=tmp_path / "nonexistent")
-        assert backend.list_recipes() == []
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            backend = LocalBackend(recipes_dir=tmp_path / "nonexistent")
+            self.assertEqual(backend.list_recipes(), [])
 
-    def test_get_recipe_versions(self, recipes_dir):
+    def test_get_recipe_versions(self):
         """Test getting versions for a recipe."""
-        backend = LocalBackend(recipes_dir=recipes_dir)
-        versions = backend.get_recipe_versions("recipe_a")
-        assert versions == ["v1.0.0", "v2.0.0"]
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            recipes_dir = self._create_recipes_dir(tmp_path)
+            backend = LocalBackend(recipes_dir=recipes_dir)
+            versions = backend.get_recipe_versions("recipe_a")
+            self.assertEqual(versions, ["v1.0.0", "v2.0.0"])
 
-    def test_get_recipe_versions_single(self, recipes_dir):
+    def test_get_recipe_versions_single(self):
         """Test getting versions for recipe with one version."""
-        backend = LocalBackend(recipes_dir=recipes_dir)
-        versions = backend.get_recipe_versions("recipe_b")
-        assert versions == ["v1.0.0"]
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            recipes_dir = self._create_recipes_dir(tmp_path)
+            backend = LocalBackend(recipes_dir=recipes_dir)
+            versions = backend.get_recipe_versions("recipe_b")
+            self.assertEqual(versions, ["v1.0.0"])
 
-    def test_get_recipe_versions_nonexistent(self, recipes_dir):
+    def test_get_recipe_versions_nonexistent(self):
         """Test getting versions for nonexistent recipe."""
-        backend = LocalBackend(recipes_dir=recipes_dir)
-        assert backend.get_recipe_versions("nonexistent") == []
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            recipes_dir = self._create_recipes_dir(tmp_path)
+            backend = LocalBackend(recipes_dir=recipes_dir)
+            self.assertEqual(backend.get_recipe_versions("nonexistent"), [])
 
-    def test_fetch_recipe(self, recipes_dir, tmp_path):
+    def test_fetch_recipe(self):
         """Test fetching recipe copies files."""
-        backend = LocalBackend(recipes_dir=recipes_dir)
-        dest = tmp_path / "dest"
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            recipes_dir = self._create_recipes_dir(tmp_path)
+            backend = LocalBackend(recipes_dir=recipes_dir)
+            dest = tmp_path / "dest"
 
-        result = backend.fetch_recipe("recipe_a", "v1.0.0", dest)
+            result = backend.fetch_recipe("recipe_a", "v1.0.0", dest)
 
-        assert result == dest / "recipe_a"
-        assert (result / "README.md").read_text() == "# Recipe A v1"
-        assert (result / "config.txt").read_text() == "key=value"
+            self.assertEqual(result, dest / "recipe_a")
+            self.assertEqual((result / "README.md").read_text(), "# Recipe A v1")
+            self.assertEqual((result / "config.txt").read_text(), "key=value")
 
-    def test_fetch_recipe_nonexistent_version(self, recipes_dir, tmp_path):
+    def test_fetch_recipe_nonexistent_version(self):
         """Test fetching nonexistent version raises error."""
-        backend = LocalBackend(recipes_dir=recipes_dir)
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            recipes_dir = self._create_recipes_dir(tmp_path)
+            backend = LocalBackend(recipes_dir=recipes_dir)
 
-        with pytest.raises(FileNotFoundError):
-            backend.fetch_recipe("recipe_a", "v9.9.9", tmp_path / "dest")
+            with self.assertRaises(FileNotFoundError):
+                backend.fetch_recipe("recipe_a", "v9.9.9", tmp_path / "dest")
 
-    def test_fetch_recipe_nonexistent_recipe(self, recipes_dir, tmp_path):
+    def test_fetch_recipe_nonexistent_recipe(self):
         """Test fetching nonexistent recipe raises error."""
-        backend = LocalBackend(recipes_dir=recipes_dir)
+        with TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            recipes_dir = self._create_recipes_dir(tmp_path)
+            backend = LocalBackend(recipes_dir=recipes_dir)
 
-        with pytest.raises(FileNotFoundError):
-            backend.fetch_recipe("nonexistent", "v1.0.0", tmp_path / "dest")
+            with self.assertRaises(FileNotFoundError):
+                backend.fetch_recipe("nonexistent", "v1.0.0", tmp_path / "dest")
+
+
+if __name__ == "__main__":
+    unittest.main()
