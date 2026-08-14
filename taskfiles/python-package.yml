@@ -39,7 +39,6 @@ tasks:
     desc: Run security checks (bandit).
     cmds:
       - uv run bandit -r src/
-
   test:unit:
     desc: Run the unit tests.
     cmds:

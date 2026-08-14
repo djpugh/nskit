@@ -10,8 +10,8 @@ ON_CI = any([os.environ.get('ON_CI', '0') == '1'])
 STRICT_TYPES = False
 
 
-def install_dependencies(session, tags=['--all-extras']):
-    session.run("uv", "sync", f"--python={session.virtualenv.location}", *tags)
+def install_dependencies(session, tags=['--all-extras', '--group', 'test']):
+    session.run("uv", "sync", "--active", *tags)
 
 
 #github logs
@@ -24,10 +24,8 @@ def tests(session: nox.Session) -> None:
     python_version_display = session.python.replace(".", "-")
     # GitHub Actions logs grouping
     print(f"::group::Running tests for Python {python_version_display}")
-    session.run("uv", "sync", f"--python={session.virtualenv.location}", "--all-extras")
+    session.run("uv", "sync", "--active", "--all-extras", "--group", "test")
     session.run(
-        "uv",
-        "run",
         "coverage",
         "run",
         "--source",
@@ -50,7 +48,7 @@ def test(session):
         test_folder = [f'tests/{u}' for u in session.posargs]
     else:
         test_folder = ['tests']
-    install_dependencies()
+    install_dependencies(session)
     session.install('.[dev,dev-test]')
     for folder in test_folder:
         args = []
