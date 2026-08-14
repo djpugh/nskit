@@ -12,6 +12,7 @@ nav:
       - 'Building a Recipe': guides/building-a-recipe.md
       - 'Working with Namespaces': guides/namespaces.md
       - 'Platform Integration': guides/platform-integration.md
+      - 'Hooks': guides/hooks.md
       - 'Field Providers': guides/field-providers.md
   - 'Architecture':
       - architecture/index.md
