@@ -468,6 +468,8 @@
       
         
       
+        
+      
     
     
     
@@ -638,6 +640,34 @@
     
   
     Platform Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hooks
   
 
     
@@ -7642,13 +7672,13 @@ base path (or current directory if not provided).</p>
 <a id="__codelineno-0-143" name="__codelineno-0-143"></a>    <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_context</span><span class="p">)</span>
 <a id="__codelineno-0-144" name="__codelineno-0-144"></a>    <span class="n">recipe_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">override_path</span><span class="o">=</span><span class="n">override_path</span><span class="p">)</span>
 <a id="__codelineno-0-145" name="__codelineno-0-145"></a>    <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_hooks</span><span class="p">:</span>
-<a id="__codelineno-0-146" name="__codelineno-0-146"></a>        <span class="n">recipe_path</span><span class="p">,</span> <span class="n">context</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="n">recipe_path</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+<a id="__codelineno-0-146" name="__codelineno-0-146"></a>        <span class="n">recipe_path</span><span class="p">,</span> <span class="n">context</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="n">recipe_path</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">recipe</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 <a id="__codelineno-0-147" name="__codelineno-0-147"></a>    <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">recipe_path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">override_path</span><span class="o">=</span><span class="n">recipe_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-148" name="__codelineno-0-148"></a>    <span class="n">recipe_path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-0-148" name="__codelineno-0-148"></a>    <span class="n">recipe_path</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 <a id="__codelineno-0-149" name="__codelineno-0-149"></a>    <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_hooks</span><span class="p">:</span>
-<a id="__codelineno-0-150" name="__codelineno-0-150"></a>        <span class="n">recipe_path</span><span class="p">,</span> <span class="n">context</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="n">recipe_path</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+<a id="__codelineno-0-150" name="__codelineno-0-150"></a>        <span class="n">recipe_path</span><span class="p">,</span> <span class="n">context</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="n">recipe_path</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">recipe</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 <a id="__codelineno-0-151" name="__codelineno-0-151"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_write_batch</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">recipe_path</span><span class="p">))</span>
-<a id="__codelineno-0-152" name="__codelineno-0-152"></a>    <span class="k">return</span> <span class="p">{</span><span class="n">Path</span><span class="p">(</span><span class="n">recipe_path</span><span class="p">):</span> <span class="nb">list</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]}</span>
+<a id="__codelineno-0-152" name="__codelineno-0-152"></a>    <span class="k">return</span> <span class="p">{</span><span class="n">Path</span><span class="p">(</span><span class="n">recipe_path</span><span class="p">):</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">values</span><span class="p">()))}</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
