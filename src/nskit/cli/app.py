@@ -150,8 +150,12 @@ def create_cli(
         backend = None
 
     @app.command(name="list", help="List available recipes.")
-    def list_recipes():
+    def list_recipes(
+        json_output: Annotated[bool, typer.Option("--json", help="Output as JSON array of recipe names.")] = False,
+    ):
         """List available recipes from backend or installed entry points."""
+        import json as json_mod
+
         if client:
             recipes = client.list_recipes()
         else:
@@ -160,6 +164,10 @@ def create_cli(
 
             names = get_extension_names(recipe_entrypoint)
             recipes = [RecipeInfo(name=n, versions=["local"]) for n in names]
+
+        if json_output:
+            print(json_mod.dumps(sorted(r.name for r in recipes)))
+            return
 
         if not recipes:
             rich_print("[yellow]No recipes found[/yellow]")
