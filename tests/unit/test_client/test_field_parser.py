@@ -567,5 +567,119 @@ class TestFieldParserProviderExtraction(unittest.TestCase):
         self.assertEqual(spec.default_provider, "best_domain")
 
 
+class TestDefaultProviderPropagation(unittest.TestCase):
+    """A default_provider declared on a nested parent reaches its leaves.
+
+    When one provider resolves a whole nested block at once (e.g.
+    ``paebbl_domain_accounts`` -> a dict of account ids), it is declared once on
+    the parent field rather than repeated on every leaf. ``FieldParser._extract``
+    pushes it down so each emitted leaf carries the provider name; the resolver
+    then calls it once per leaf and extracts that leaf's key.
+    """
+
+    def setUp(self) -> None:
+        """Build a model with a provider declared on a nested parent."""
+        from pydantic import BaseModel, Field
+
+        self.parser = FieldParser()
+
+        class DomainAccounts(BaseModel):
+            dev_account_id: str = ""
+            acc_account_id: str = ""
+            prod_account_id: str = ""
+
+        class Model(BaseModel):
+            name: str = "svc"
+            # provider declared ONCE, on the nested parent field
+            domain_accounts: DomainAccounts = Field(
+                default_factory=DomainAccounts,
+                json_schema_extra={"default_provider": "paebbl_domain_accounts"},
+            )
+
+        self.Model = Model
+        self.DomainAccounts = DomainAccounts
+
+    def _specs(self) -> dict:
+        return {f.name: f for f in self.parser.from_recipe_model(self.Model).fields}
+
+    def test_parent_provider_propagates_to_every_leaf(self) -> None:
+        """Each nested leaf inherits the parent's default_provider."""
+        specs = self._specs()
+        for leaf in ("dev_account_id", "acc_account_id", "prod_account_id"):
+            self.assertEqual(
+                specs[f"domain_accounts.{leaf}"].default_provider,
+                "paebbl_domain_accounts",
+                msg=f"leaf {leaf!r} did not inherit the parent provider",
+            )
+
+    def test_leaf_provider_overrides_inherited_one(self) -> None:
+        """A leaf that declares its own default_provider keeps it, not the parent's."""
+        from pydantic import BaseModel, Field
+
+        class Accounts(BaseModel):
+            dev_account_id: str = ""
+            # this leaf declares its own provider
+            special: str = Field("", json_schema_extra={"default_provider": "own_provider"})
+
+        class Model(BaseModel):
+            accounts: Accounts = Field(
+                default_factory=Accounts,
+                json_schema_extra={"default_provider": "parent_provider"},
+            )
+
+        specs = {f.name: f for f in self.parser.from_recipe_model(Model).fields}
+        self.assertEqual(specs["accounts.dev_account_id"].default_provider, "parent_provider")
+        self.assertEqual(specs["accounts.special"].default_provider, "own_provider")
+
+    def test_propagation_flows_through_multiple_nesting_levels(self) -> None:
+        """A provider on a grandparent reaches leaves two levels down."""
+        from pydantic import BaseModel, Field
+
+        class Inner(BaseModel):
+            leaf: str = ""
+
+        class Middle(BaseModel):
+            inner: Inner = Field(default_factory=Inner)
+
+        class Model(BaseModel):
+            middle: Middle = Field(
+                default_factory=Middle,
+                json_schema_extra={"default_provider": "gp"},
+            )
+
+        specs = {f.name: f for f in self.parser.from_recipe_model(Model).fields}
+        self.assertEqual(specs["middle.inner.leaf"].default_provider, "gp")
+
+    def test_no_parent_provider_leaves_are_unset(self) -> None:
+        """Without a parent provider, leaves carry no default_provider."""
+        from pydantic import BaseModel, Field
+
+        class Inner(BaseModel):
+            leaf: str = ""
+
+        class Model(BaseModel):
+            inner: Inner = Field(default_factory=Inner)
+
+        specs = {f.name: f for f in self.parser.from_recipe_model(Model).fields}
+        self.assertIsNone(specs["inner.leaf"].default_provider)
+
+    def test_end_to_end_nested_block_resolves_per_leaf(self) -> None:
+        """Full flow: parent-declared provider resolves each leaf to its own id."""
+        from nskit.client.interactive import InteractiveHandler
+
+        accounts = {
+            "dev_account_id": "111111111111",
+            "acc_account_id": "222222222222",
+            "prod_account_id": "333333333333",
+        }
+        specs = self._specs()
+        handler = InteractiveHandler(
+            default_providers={"paebbl_domain_accounts": lambda collected: dict(accounts)},
+        )
+        for leaf, expected in accounts.items():
+            resolved = handler._resolve_default(specs[f"domain_accounts.{leaf}"], {})
+            self.assertEqual(resolved, expected)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -472,5 +472,156 @@ class TestProviderFieldContractEndToEnd(unittest.TestCase):
         self.assertEqual(result["region"], "eu-west-1")  # static default
 
 
+# --------------------------------------------------------------------------- #
+# Nested-block default_provider propagation
+#
+# The real platform case: a nested model (a domain's dev/acc/prod account ids)
+# is resolved by ONE provider that returns a dict. The provider is declared
+# once on the nested parent field and propagated to every leaf by
+# ``FieldParser._extract``; the resolver then calls it once per leaf and hands
+# each leaf its own key. This exercises both halves of that feature through the
+# whole chain, including the Docker JSON round trip and pydantic construction.
+# --------------------------------------------------------------------------- #
+
+
+class _DomainAccounts(BaseModel):
+    """A domain's dev/acc/prod AWS account ids (a nested block)."""
+
+    dev_account_id: str = ""
+    acc_account_id: str = ""
+    prod_account_id: str = ""
+
+
+class _AccountsRecipe(BaseModel):
+    """A recipe-like model that declares one provider on a nested parent."""
+
+    from pydantic import Field
+
+    name: str = "accounts-test"
+    domain: str = Field(
+        "",
+        json_schema_extra={"options_provider": "test_domains"},
+    )
+    # provider declared ONCE, on the nested parent — propagated to every leaf
+    domain_accounts: _DomainAccounts = Field(
+        default_factory=_DomainAccounts,
+        json_schema_extra={"default_provider": "paebbl_domain_accounts"},
+    )
+
+
+# Per-domain account blocks the single provider resolves.
+_DOMAIN_ACCOUNT_BLOCKS = {
+    "analytics": {
+        "dev_account_id": "100000000001",
+        "acc_account_id": "100000000002",
+        "prod_account_id": "100000000003",
+    },
+    "platform": {
+        "dev_account_id": "300000000001",
+        "acc_account_id": "300000000002",
+        "prod_account_id": "300000000003",
+    },
+}
+
+
+def _paebbl_domain_accounts(collected_values):
+    """Return the whole account block for the selected domain as a dict."""
+    domain = collected_values.get("domain", "")
+    block = _DOMAIN_ACCOUNT_BLOCKS.get(domain)
+    return dict(block) if block else None
+
+
+class TestNestedProviderPropagationEndToEnd(unittest.TestCase):
+    """One provider on a nested parent resolves every leaf, through the chain.
+
+    No mocking of FieldParser/InteractiveHandler internals — only the prompt
+    method. The provider runs as a real callable returning a dict.
+    """
+
+    _PROVIDERS = {"paebbl_domain_accounts": _paebbl_domain_accounts}
+    _OPTIONS = {"test_domains": lambda: list(_DOMAIN_ACCOUNT_BLOCKS.keys())}
+
+    def test_each_leaf_resolves_to_its_own_account_id(self) -> None:
+        """Selecting a domain fills all three account leaves from one provider call."""
+        result = _collect_with_providers(
+            _AccountsRecipe,
+            user_choices={"domain": "analytics"},
+            options_providers=self._OPTIONS,
+            default_providers=self._PROVIDERS,
+        )
+        self.assertEqual(result["domain_accounts"], _DOMAIN_ACCOUNT_BLOCKS["analytics"])
+
+    def test_user_override_of_a_single_leaf_wins(self) -> None:
+        """A user-typed leaf overrides the propagated provider value for that leaf only."""
+        result = _collect_with_providers(
+            _AccountsRecipe,
+            user_choices={"domain": "platform", "domain_accounts.dev_account_id": "999999999999"},
+            options_providers=self._OPTIONS,
+            default_providers=self._PROVIDERS,
+        )
+        self.assertEqual(result["domain_accounts"]["dev_account_id"], "999999999999")
+        # the other two leaves still come from the provider
+        self.assertEqual(result["domain_accounts"]["acc_account_id"], "300000000002")
+        self.assertEqual(result["domain_accounts"]["prod_account_id"], "300000000003")
+
+    def test_constructed_model_accepts_propagated_values(self) -> None:
+        """The resolved nested block passes pydantic validation on the model."""
+        result = _collect_with_providers(
+            _AccountsRecipe,
+            user_choices={"domain": "platform"},
+            options_providers=self._OPTIONS,
+            default_providers=self._PROVIDERS,
+        )
+        recipe = _AccountsRecipe(**result)
+        self.assertEqual(recipe.domain_accounts.dev_account_id, "300000000001")
+        self.assertEqual(recipe.domain_accounts.prod_account_id, "300000000003")
+
+    def test_json_round_trip_preserves_propagated_provider(self) -> None:
+        """Propagation survives the Docker JSON round trip and still resolves per-leaf."""
+        import json
+
+        parser = FieldParser()
+        fields_response = parser.from_recipe_model(_AccountsRecipe)
+
+        # Every account leaf carries the propagated provider name after introspection.
+        by_name = {f.name: f for f in fields_response.fields}
+        for leaf in ("dev_account_id", "acc_account_id", "prod_account_id"):
+            self.assertEqual(
+                by_name[f"domain_accounts.{leaf}"].default_provider,
+                "paebbl_domain_accounts",
+            )
+
+        # Serialise (container) → parse back (host).
+        json_str = json.dumps({"fields": [f.model_dump() for f in fields_response.fields]})
+        parsed = parser.parse_fields_output(json_str)
+
+        handler = InteractiveHandler(
+            options_providers=self._OPTIONS,
+            default_providers=self._PROVIDERS,
+        )
+
+        def fake_prompt(field, default):
+            return {"domain": "analytics"}.get(field.name, default)
+
+        with patch.object(handler, "_prompt_field", side_effect=fake_prompt):
+            collected = handler.collect_field_values(parsed)
+
+        nested = parser.create_nested_dict(collected)
+        recipe = _AccountsRecipe(**nested)
+        self.assertEqual(recipe.domain_accounts.dev_account_id, "100000000001")
+        self.assertEqual(recipe.domain_accounts.acc_account_id, "100000000002")
+        self.assertEqual(recipe.domain_accounts.prod_account_id, "100000000003")
+
+    def test_unknown_domain_leaves_static_defaults(self) -> None:
+        """When the provider returns None (unknown domain), leaves keep static defaults."""
+        result = _collect_with_providers(
+            _AccountsRecipe,
+            user_choices={"domain": "nonexistent"},
+            options_providers=self._OPTIONS,
+            default_providers=self._PROVIDERS,
+        )
+        self.assertEqual(result["domain_accounts"]["dev_account_id"], "")
+
+
 if __name__ == "__main__":
     unittest.main()
