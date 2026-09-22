@@ -174,7 +174,12 @@ class InteractiveHandler:
                 try:
                     result = provider(collected_values)
                     if result is not None:
-                        return result
+                        value = self._extract_provider_value(field, result)
+                        # ``value`` may be None when the provider returned a dict
+                        # that has no entry for this leaf; fall through to the
+                        # static default rather than resolving to None.
+                        if value is not None:
+                            return value
                 except Exception:  # nosec B110
                     logger.debug(
                         "Failed to resolve default_provider %r for field %r",
@@ -185,6 +190,36 @@ class InteractiveHandler:
 
         # 4. Fall back to static default
         return field.default
+
+    @staticmethod
+    def _extract_provider_value(field: FieldSpec, result: Any) -> Any:
+        """Extract this field's value from a ``default_provider`` result.
+
+        A single provider (e.g. ``paebbl_domain_accounts``) may resolve a whole
+        nested block at once and return a ``dict`` keyed by leaf name, so that a
+        provider declared on a parent model and propagated to its leaves (see
+        ``FieldParser._extract``) is called once and shared. When the result is
+        a dict, return the entry matching this leaf's key -- the segment of the
+        dotted field name after the final ``.`` (``domain_accounts.dev_account_id``
+        -> ``dev_account_id``); a plain top-level name is its own leaf key.
+        A non-dict result is a scalar default and is returned unchanged.
+
+        Returns ``None`` when the dict has no entry for this leaf, so resolution
+        falls through to the field's static default rather than injecting the
+        wrong sibling's value.
+        """
+        if not isinstance(result, dict):
+            return result
+        leaf_key = field.name.rsplit(".", 1)[-1]
+        value = result.get(leaf_key)
+        if value is None:
+            logger.debug(
+                "default_provider %r returned a dict without key %r (keys: %s)",
+                field.default_provider,
+                leaf_key,
+                list(result.keys()),
+            )
+        return value
 
     def _should_show_field(self, field: FieldSpec, collected_values: dict[str, Any]) -> bool:
         """Evaluate conditional rules to determine field visibility."""

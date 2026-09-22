@@ -154,8 +154,14 @@ class FieldParser:
         prefix: str,
         skip: set[str],
         recurse_nested: bool,
+        parent_default_provider: str | None = None,
     ) -> list[FieldSpec]:
-        """Recursively build ``FieldSpec``s for ``model_class``."""
+        """Recursively build ``FieldSpec``s for ``model_class``.
+
+        When a nested-model field declares a ``default_provider``, that provider
+        name is propagated to all leaf children so the consumer can call it once
+        and extract the relevant key from the returned dict.
+        """
         fields: list[FieldSpec] = []
         for name, field_info in model_class.model_fields.items():
             if name in skip or name.startswith("_"):
@@ -168,6 +174,7 @@ class FieldParser:
                 extra = field_info.json_schema_extra or {}
                 if extra.get("hidden"):
                     continue
+                child_provider = extra.get("default_provider") or parent_default_provider
                 fields.extend(
                     self._extract(
                         nested,
@@ -175,11 +182,16 @@ class FieldParser:
                         # ``skip`` only applies to top-level names.
                         skip=set(),
                         recurse_nested=recurse_nested,
+                        parent_default_provider=child_provider,
                     )
                 )
                 continue
 
-            fields.append(self._field_info_to_spec(full_name, field_info))
+            spec = self._field_info_to_spec(full_name, field_info)
+            # Inherit parent's default_provider when leaf doesn't declare its own.
+            if not spec.default_provider and parent_default_provider:
+                spec.default_provider = parent_default_provider
+            fields.append(spec)
         return fields
 
     @staticmethod

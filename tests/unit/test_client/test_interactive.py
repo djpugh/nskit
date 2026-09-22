@@ -385,6 +385,62 @@ class TestDefaultProvider(unittest.TestCase):
         self.assertEqual(collected, {"x": "auto_val"})
 
 
+class TestDefaultProviderDictResult(unittest.TestCase):
+    """A default_provider that resolves a nested block by returning a dict.
+
+    A single provider (e.g. ``paebbl_domain_accounts``) is declared on a nested
+    parent model and propagated to every leaf by ``FieldParser._extract``. Each
+    leaf then calls that one provider, which returns the whole block as a dict;
+    the resolver must hand each leaf only its own entry, keyed by the segment of
+    the dotted field name after the final ``.``.
+    """
+
+    ACCOUNTS = {
+        "dev_account_id": "111111111111",
+        "acc_account_id": "222222222222",
+        "prod_account_id": "333333333333",
+    }
+
+    def setUp(self) -> None:
+        """Register a provider returning the full nested block as a dict."""
+        self.handler = InteractiveHandler(
+            default_providers={"accounts": lambda collected: dict(self.ACCOUNTS)},
+        )
+
+    def test_each_leaf_gets_its_own_value_not_the_dict(self) -> None:
+        """Every propagated leaf resolves to its own scalar, never the raw dict."""
+        for leaf, expected in self.ACCOUNTS.items():
+            field = FieldSpec(name=f"domain_accounts.{leaf}", default_provider="accounts")
+            result = self.handler._resolve_default(field, {})
+            self.assertEqual(result, expected)
+            self.assertNotIsInstance(result, dict)
+
+    def test_missing_leaf_key_falls_through_to_static_default(self) -> None:
+        """A leaf with no matching dict key uses its static default, not a sibling's value."""
+        field = FieldSpec(
+            name="domain_accounts.shared_account_id",
+            default="000000000000",
+            default_provider="accounts",
+        )
+        result = self.handler._resolve_default(field, {})
+        # dict has no ``shared_account_id`` -> extraction yields None -> static default wins.
+        self.assertEqual(result, "000000000000")
+
+    def test_top_level_field_uses_whole_name_as_leaf_key(self) -> None:
+        """An un-nested field name is its own leaf key against the dict."""
+        handler = InteractiveHandler(
+            default_providers={"one": lambda collected: {"account": "999999999999"}},
+        )
+        field = FieldSpec(name="account", default_provider="one")
+        self.assertEqual(handler._resolve_default(field, {}), "999999999999")
+
+    def test_scalar_result_is_returned_unchanged(self) -> None:
+        """A provider returning a scalar (not a dict) is passed straight through."""
+        handler = InteractiveHandler(default_providers={"s": lambda collected: "plain"})
+        field = FieldSpec(name="domain_accounts.dev_account_id", default_provider="s")
+        self.assertEqual(handler._resolve_default(field, {}), "plain")
+
+
 class TestProviderIntegration(unittest.TestCase):
     """Integration tests for the full collect_field_values flow with providers.
 
