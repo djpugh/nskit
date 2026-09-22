@@ -1709,27 +1709,27 @@
 <h3 id="templates-support-inheritance">Templates Support Inheritance<a class="headerlink" href="#templates-support-inheritance" title="Permanent link">&para;</a></h3>
 <p>Jinja2 template inheritance lets specialised recipes extend base templates without duplicating them:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c">{# api/pyproject.toml.jinja — extends the base #}</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">&quot;nskit.recipes.python.ingredients.tools:pyproject.toml.jinja&quot;</span> <span class="cp">%}</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cp">{%</span> <span class="k">extends</span> <span class="s2">"nskit.recipes.python.ingredients.tools:pyproject.toml.jinja"</span> <span class="cp">%}</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="cp">{%</span> <span class="k">block</span> <span class="nv">Dependencies</span> <span class="cp">%}</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="x">    </span><span class="cp">{{</span> <span class="nb">super</span><span class="o">()</span> <span class="cp">}}</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="x">    &quot;fastapi&quot;,</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="x">    &quot;uvicorn&quot;,</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="x">    "fastapi",</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="x">    "uvicorn",</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="cp">{%</span> <span class="k">endblock</span> <span class="nv">Dependencies</span> <span class="cp">%}</span>
 </code></pre></div>
 <p>The base <code>pyproject.toml.jinja</code> defines the full structure with extension blocks. The API version only overrides the dependencies block, inheriting everything else.</p>
 <h3 id="recipes-extend-recipes">Recipes Extend Recipes<a class="headerlink" href="#recipes-extend-recipes" title="Permanent link">&para;</a></h3>
 <p>Python class inheritance works naturally:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">PyRecipe</span><span class="p">(</span><span class="n">CodeRecipe</span><span class="p">):</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Base for all Python recipes — adds repo metadata, naming conventions.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="sd">"""Base for all Python recipes — adds repo metadata, naming conventions."""</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">repo</span><span class="p">:</span> <span class="n">PyRepoMetadata</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">PackageRecipe</span><span class="p">(</span><span class="n">PyRecipe</span><span class="p">):</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds package-specific ingredients.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="sd">"""Adds package-specific ingredients."""</span>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">contents</span> <span class="o">=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="k">class</span><span class="w"> </span><span class="nc">APIRecipe</span><span class="p">(</span><span class="n">PyRecipe</span><span class="p">):</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds API-specific ingredients on top of the same base.&quot;&quot;&quot;</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="sd">"""Adds API-specific ingredients on top of the same base."""</span>
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">contents</span> <span class="o">=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 <h3 id="ingredients-can-be-modified">Ingredients Can Be Modified<a class="headerlink" href="#ingredients-can-be-modified" title="Permanent link">&para;</a></h3>
@@ -1738,9 +1738,9 @@
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">src_dir</span> <span class="o">=</span> <span class="n">ingredients</span><span class="o">.</span><span class="n">src_dir</span><span class="o">.</span><span class="n">model_copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Add API-specific files to it</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">src_dir</span><span class="p">[</span><span class="s1">&#39;src_path&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">contents</span> <span class="o">+=</span> <span class="p">[</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">File</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;app.py&#39;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="s1">&#39;my_recipe:app.py.jinja&#39;</span><span class="p">),</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">File</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;server.py&#39;</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="s1">&#39;my_recipe:server.py.jinja&#39;</span><span class="p">),</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">src_dir</span><span class="p">[</span><span class="s1">'src_path'</span><span class="p">]</span><span class="o">.</span><span class="n">contents</span> <span class="o">+=</span> <span class="p">[</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">File</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'app.py'</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="s1">'my_recipe:app.py.jinja'</span><span class="p">),</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">File</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'server.py'</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="s1">'my_recipe:server.py.jinja'</span><span class="p">),</span>
 <a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">]</span>
 </code></pre></div>
 <p>This lets you build on shared structure without modifying the original.</p>
