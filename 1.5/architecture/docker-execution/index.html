@@ -1887,13 +1887,13 @@
 <p>The image tag is the version. One recipe per image — registries deduplicate shared base layers.</p>
 <p>The <code>recipe</code> recipe generates a Dockerfile that sets these labels automatically:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">ARG</span><span class="w"> </span><span class="nv">RECIPE_NAME</span><span class="o">=</span>nskit
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">LABEL</span><span class="w"> </span>nskit.recipe<span class="o">=</span><span class="s2">&quot;true&quot;</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">LABEL</span><span class="w"> </span>nskit.recipe.name<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">RECIPE_NAME</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">LABEL</span><span class="w"> </span>nskit.recipe<span class="o">=</span><span class="s2">"true"</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">LABEL</span><span class="w"> </span>nskit.recipe.name<span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">RECIPE_NAME</span><span class="si">}</span><span class="s2">"</span>
 </code></pre></div>
 <p>Build with <code>--build-arg RECIPE_NAME=python_package</code>, or add the labels to your own Dockerfile.</p>
 <h3 id="git-safe-directory">Git Safe Directory<a class="headerlink" href="#git-safe-directory" title="Permanent link">&para;</a></h3>
 <p>Recipe post-hooks (e.g. <code>git init</code>, <code>pre-commit install</code>) run inside the container against a Docker volume mount. Since git 2.35.2, git rejects operations in directories owned by a different user — and the mounted output directory will typically have different ownership metadata from the container's root user. To avoid this, recipe Dockerfiles must include:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">RUN</span><span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>--add<span class="w"> </span>safe.directory<span class="w"> </span><span class="s1">&#39;*&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">RUN</span><span class="w"> </span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>--add<span class="w"> </span>safe.directory<span class="w"> </span><span class="s1">'*'</span>
 </code></pre></div>
 <p>The generated <code>recipe</code> Dockerfile includes this automatically. If you write a custom Dockerfile, add this line after installing git.</p>
 <p>The <code>nskit.recipe.name</code> label is the <strong>source of truth</strong> for the recipe name across all backends:</p>

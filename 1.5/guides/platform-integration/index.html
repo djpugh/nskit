@@ -1707,22 +1707,22 @@
 </code></pre></div>
 <p>Or configure programmatically:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">backend</span> <span class="o">=</span> <span class="n">GitHubBackend</span><span class="p">(</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">org</span><span class="o">=</span><span class="s1">&#39;myorg&#39;</span><span class="p">,</span>                              <span class="c1"># GitHub org</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">repo_pattern</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{recipe_name}</span><span class="s1">&#39;</span><span class="p">,</span>             <span class="c1"># Repo name pattern</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">entrypoint</span><span class="o">=</span><span class="s1">&#39;mycompany.recipes&#39;</span><span class="p">,</span>           <span class="c1"># Entry point group</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">org</span><span class="o">=</span><span class="s1">'myorg'</span><span class="p">,</span>                              <span class="c1"># GitHub org</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">repo_pattern</span><span class="o">=</span><span class="s1">'</span><span class="si">{recipe_name}</span><span class="s1">'</span><span class="p">,</span>             <span class="c1"># Repo name pattern</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">entrypoint</span><span class="o">=</span><span class="s1">'mycompany.recipes'</span><span class="p">,</span>           <span class="c1"># Entry point group</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">)</span>
 </code></pre></div></p>
 <p>The backend also controls what <code>nskit list</code> shows — with a <code>GitHubBackend</code>, it lists repos and their release tags. With a <code>DockerBackend</code>, it lists images and tags. With <code>DockerLocalBackend</code>, it lists locally pulled images. Without a backend, it falls back to locally installed entry points.</p>
 <p>All Docker-based backends read the <code>nskit.recipe.name</code> label from images to determine the canonical recipe name. The label is read from the registry manifest at list time (no pull needed) and from the pulled image at init time.</p>
 <h3 id="2-entry-point-group-required-for-local-mode">2. Entry Point Group (Required for Local Mode)<a class="headerlink" href="#2-entry-point-group-required-for-local-mode" title="Permanent link">&para;</a></h3>
 <p>The entry point group name determines which recipes are discoverable when running locally (without Docker). It must match between your recipe packages and the CLI configuration:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># In recipe package&#39;s pyproject.toml</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">[project.entry-points.</span><span class="s2">&quot;mycompany.recipes&quot;</span><span class="k">]</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">python_package</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;mycompany.recipes:PackageRecipe&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># In recipe package's pyproject.toml</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">[project.entry-points.</span><span class="s2">"mycompany.recipes"</span><span class="k">]</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">python_package</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"mycompany.recipes:PackageRecipe"</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># In CLI setup</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">app</span> <span class="o">=</span> <span class="n">create_cli</span><span class="p">(</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">recipe_entrypoint</span><span class="o">=</span><span class="s1">&#39;mycompany.recipes&#39;</span><span class="p">,</span>  <span class="c1"># Must match</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">recipe_entrypoint</span><span class="o">=</span><span class="s1">'mycompany.recipes'</span><span class="p">,</span>  <span class="c1"># Must match</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">,</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">)</span>
 </code></pre></div>
@@ -1743,9 +1743,9 @@
 <a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>✓ Created and pushed to https://github.com/myorg/my-project
 </code></pre></div>
 <p>This also works programmatically:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">initialize_recipe</span><span class="p">(</span><span class="n">recipe</span><span class="o">=</span><span class="s1">&#39;python_package&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">initialize_recipe</span><span class="p">(</span><span class="n">recipe</span><span class="o">=</span><span class="s1">'python_package'</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">ok</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">create_repository</span><span class="p">(</span><span class="s1">&#39;my-project&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;My new project&#39;</span><span class="p">)</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">ok</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">create_repository</span><span class="p">(</span><span class="s1">'my-project'</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">'My new project'</span><span class="p">)</span>
 </code></pre></div>
 <p>You can also use the VCS provider directly with namespace validation:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nskit.vcs.repo</span><span class="w"> </span><span class="kn">import</span> <span class="n">Repo</span><span class="p">,</span> <span class="n">NamespaceValidationRepo</span>
@@ -1753,10 +1753,10 @@
 <a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
 <a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Validate the name</span>
 <a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">validator</span> <span class="o">=</span> <span class="n">NamespaceValidator</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="n">ok</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">validator</span><span class="o">.</span><span class="n">validate_name</span><span class="p">(</span><span class="s1">&#39;platform-auth-users&#39;</span><span class="p">)</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="n">ok</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">validator</span><span class="o">.</span><span class="n">validate_name</span><span class="p">(</span><span class="s1">'platform-auth-users'</span><span class="p">)</span>
 <a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
 <a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="c1"># Create the repo</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="n">repo</span> <span class="o">=</span> <span class="n">Repo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;platform-auth-users&#39;</span><span class="p">,</span> <span class="n">local_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;./platform/auth/users&#39;</span><span class="p">))</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="n">repo</span> <span class="o">=</span> <span class="n">Repo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'platform-auth-users'</span><span class="p">,</span> <span class="n">local_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">'./platform/auth/users'</span><span class="p">))</span>
 <a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="n">repo</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
 </code></pre></div>
 <p>See <a href="../namespaces/">Working with Namespaces</a> for namespace configuration.</p>
@@ -1767,8 +1767,8 @@
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nskit.client.backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">GitHubBackend</span>
 <a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
 <a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">app</span> <span class="o">=</span> <span class="n">create_cli</span><span class="p">(</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="n">recipe_entrypoint</span><span class="o">=</span><span class="s1">&#39;mycompany.recipes&#39;</span><span class="p">,</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="n">backend</span><span class="o">=</span><span class="n">GitHubBackend</span><span class="p">(</span><span class="n">org</span><span class="o">=</span><span class="s1">&#39;myorg&#39;</span><span class="p">),</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="n">recipe_entrypoint</span><span class="o">=</span><span class="s1">'mycompany.recipes'</span><span class="p">,</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="n">backend</span><span class="o">=</span><span class="n">GitHubBackend</span><span class="p">(</span><span class="n">org</span><span class="o">=</span><span class="s1">'myorg'</span><span class="p">),</span>
 <a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="p">)</span>
 <a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
 <a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
@@ -1776,10 +1776,10 @@
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># pyproject.toml</span>
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">[project.scripts]</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">myrecipes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;mycompany_cli:main&quot;</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">myrecipes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"mycompany_cli:main"</span>
 <a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
 <a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="k">[project.dependencies]</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="n">nskit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">extras</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;github&quot;</span><span class="p">]}</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="n">nskit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">extras</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"github"</span><span class="p">]}</span>
 </code></pre></div>
 <p>Users install your package and get a fully configured CLI:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>pip<span class="w"> </span>install<span class="w"> </span>mycompany-recipes-cli
@@ -1788,7 +1788,7 @@
 <a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>myrecipes<span class="w"> </span>update<span class="w">     </span><span class="c1"># 3-way merge from versioned Docker images</span>
 </code></pre></div>
 <p>The CLI is a <a href="https://typer.tiangolo.com/">Typer</a> app — mount it as a subcommand if you have an existing tool:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">parent_app</span><span class="o">.</span><span class="n">add_typer</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;recipes&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">parent_app</span><span class="o">.</span><span class="n">add_typer</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"recipes"</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="alternative-environment-variables">Alternative: Environment Variables<a class="headerlink" href="#alternative-environment-variables" title="Permanent link">&para;</a></h2>
 <p>If you don't want a custom CLI package, users can configure nskit via environment variables or a config file:</p>
@@ -1797,8 +1797,8 @@
 </code></pre></div>
 <p>Or pass a config file:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">app</span> <span class="o">=</span> <span class="n">create_cli</span><span class="p">(</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="n">recipe_entrypoint</span><span class="o">=</span><span class="s1">&#39;mycompany.recipes&#39;</span><span class="p">,</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;backend-config.yml&#39;</span><span class="p">,</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="n">recipe_entrypoint</span><span class="o">=</span><span class="s1">'mycompany.recipes'</span><span class="p">,</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="n">backend</span><span class="o">=</span><span class="s1">'backend-config.yml'</span><span class="p">,</span>
 <a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># backend-config.yml</span>
@@ -1813,10 +1813,10 @@
 <a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nskit.client.backends</span><span class="w"> </span><span class="kn">import</span> <span class="n">GitHubBackend</span>
 <a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>
 <a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="n">backend</span> <span class="o">=</span> <span class="n">GitHubBackend</span><span class="p">(</span><span class="n">org</span><span class="o">=</span><span class="s1">&#39;myorg&#39;</span><span class="p">)</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="n">backend</span> <span class="o">=</span> <span class="n">GitHubBackend</span><span class="p">(</span><span class="n">org</span><span class="o">=</span><span class="s1">'myorg'</span><span class="p">)</span>
 <a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="n">recipe_client</span> <span class="o">=</span> <span class="n">RecipeClient</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
 <a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>
-<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/recipes&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/recipes"</span><span class="p">)</span>
 <a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="k">def</span><span class="w"> </span><span class="nf">list_recipes</span><span class="p">():</span>
 <a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">recipe_client</span><span class="o">.</span><span class="n">list_recipes</span><span class="p">()]</span>
 </code></pre></div>
@@ -1826,12 +1826,12 @@
 <a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">nskit.client.backends.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecipeBackend</span>
 <a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
 <a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">S3BackendConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;s3&quot;</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"s3"</span>
 <a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>    <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span>
-<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
 <a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>
 <a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="k">class</span><span class="w"> </span><span class="nc">S3Backend</span><span class="p">(</span><span class="n">RecipeBackend</span><span class="p">):</span>
-<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">):</span>
 <a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_bucket</span> <span class="o">=</span> <span class="n">bucket</span>
 <a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_prefix</span> <span class="o">=</span> <span class="n">prefix</span>
 <a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>
@@ -1845,9 +1845,9 @@
 <a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_image_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recipe</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="o">...</span>
 </code></pre></div>
 <p>Register it as an entry point so nskit discovers it automatically:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># In your package&#39;s pyproject.toml</span>
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="k">[project.entry-points.</span><span class="s2">&quot;nskit.backends&quot;</span><span class="k">]</span>
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="n">s3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;my_package.backends:S3BackendConfig, S3Backend&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># In your package's pyproject.toml</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="k">[project.entry-points.</span><span class="s2">"nskit.backends"</span><span class="k">]</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="n">s3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"my_package.backends:S3BackendConfig, S3Backend"</span>
 </code></pre></div>
 <p>Once installed, the backend is available in YAML config files:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">s3</span>
@@ -1863,9 +1863,9 @@
 <a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">update_client</span><span class="o">.</span><span class="n">update_project</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 <a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="k">except</span> <span class="n">GitStatusError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>    <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Git issue: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>    <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Git issue: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="k">except</span> <span class="n">UpdateError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Update failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Update failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </code></pre></div>
 
 
