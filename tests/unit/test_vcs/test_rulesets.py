@@ -37,7 +37,7 @@ class TestRuleRendering(unittest.TestCase):
     def test_enum_parameters_serialise_to_values(self) -> None:
         """Enum parameters render as their API string values."""
         payload = PullRequest(allowed_merge_methods=[MergeMethod.squash]).to_api()
-        self.assertEqual(payload["parameters"]["allowed_merge_methods"], ["SQUASH"])
+        self.assertEqual(payload["parameters"]["allowed_merge_methods"], ["squash"])
 
     def test_unset_values_are_dropped_inside_nested_objects(self) -> None:
         """``None`` is pruned at every depth, not just the top level.

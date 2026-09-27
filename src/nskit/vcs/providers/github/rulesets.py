@@ -95,9 +95,9 @@ class RulesetTarget(str, Enum):
 class MergeMethod(str, Enum):
     """Merge methods for the merge queue and pull-request rules."""
 
-    merge = "MERGE"
-    squash = "SQUASH"
-    rebase = "REBASE"
+    merge = "merge"
+    squash = "squash"
+    rebase = "rebase"
 
 
 class BypassActor(BaseModel):
