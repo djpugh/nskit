@@ -113,7 +113,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - name: Install Task
         uses: go-task/setup-task@v2
         with:
@@ -263,7 +263,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - name: compile requirements.txt
         run: |
           # uv replaces pip-compile here: pip-tools reaches into pip internals
@@ -319,7 +319,7 @@ jobs:
       - name: Set up Python 3.12
         uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - name: Install Task
         uses: go-task/setup-task@v2
         with:
@@ -358,7 +358,7 @@ jobs:
       - name: Set up Python 3.12
         uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - name: Install Task
         uses: go-task/setup-task@v2
         with:
@@ -464,7 +464,7 @@ jobs:
       - name: Set up Python 3.12
         uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - name: Install Task
         uses: go-task/setup-task@v2
         with:
@@ -493,7 +493,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - name: Download build
         uses: actions/download-artifact@v8
         with:
@@ -522,7 +522,7 @@ jobs:
       - name: Set up Python 3.12
         uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - name: Install Task
         uses: go-task/setup-task@v2
         with:
